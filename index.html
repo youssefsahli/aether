@@ -284,9 +284,14 @@
         
         <div class="side-header" style="border-top:1px solid var(--crust); padding-top:20px;">
             <span id="opfs-header">Local (OPFS)</span>
-            <span class="btn icon-only" onclick="FileSys.initOPFS()" title="Refresh OPFS">
-                <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </span>
+            <div style="display:flex; gap:4px">
+                <span class="btn icon-only" onclick="FileSys.createOPFSFile()" title="New File in OPFS">
+                    <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </span>
+                <span class="btn icon-only" onclick="FileSys.initOPFS()" title="Refresh OPFS">
+                    <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </span>
+            </div>
         </div>
         <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
     </aside>
@@ -527,6 +532,34 @@ const FileSys = {
         }
     },
 
+    async createOPFSFile() {
+        if (!Store.state.opfsRoot) { UI.toast("OPFS not available", true); return; }
+        Prompt.open("NEW OPFS FILENAME:", "file.txt", async (name) => {
+            try {
+                const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
+                App.openBuffer(name, "", handle, 'opfs');
+                this.renderOPFS();
+                UI.toast(`Created ${name} in OPFS`);
+            } catch (e) { UI.toast("Failed to create file", true); }
+        });
+    },
+
+    async saveToOPFS(buf) {
+        if (!Store.state.opfsRoot) { UI.toast("OPFS not available", true); return; }
+        try {
+            const handle = await Store.state.opfsRoot.getFileHandle(buf.name, { create: true });
+            const writable = await handle.createWritable();
+            await writable.write(buf.content);
+            await writable.close();
+            buf.handle = handle;
+            buf.kind = 'opfs';
+            Store.markSaved(buf.id);
+            this.renderOPFS();
+            UI.renderTabs();
+            UI.toast(`Saved ${buf.name} to OPFS`);
+        } catch (e) { UI.toast("OPFS Save Failed", true); }
+    },
+
     async openDiskFile() {
         try {
             const [handle] = await window.showOpenFilePicker();
@@ -704,6 +737,7 @@ const Commands = {
         { id: 'openFile', name: 'Open File (Disk)', fn: () => FileSys.openDiskFile() },
         { id: 'openFolder', name: 'Open Folder', fn: () => FileSys.openFolder() },
         { id: 'saveFile', name: 'Save File', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
+        { id: 'saveToOPFS', name: 'Save to OPFS', fn: () => Store.activeBuffer && FileSys.saveToOPFS(Store.activeBuffer) },
         { id: 'togglePreview', name: 'Toggle Preview Pane', fn: () => {
             Store.state.previewMode = !Store.state.previewMode;
             document.body.classList.toggle('preview-active', Store.state.previewMode);
@@ -722,7 +756,7 @@ const Commands = {
         this.list.forEach(cmd => {
             const el = document.createElement('div');
             el.className = 'cmd-item';
-            el.innerHTML = `<span>${cmd.name}</span> <span class="cmd-shortcut">CTRL+${cmd.id.slice(0,1).toUpperCase()}</span>`;
+            el.innerHTML = `<span>${cmd.name}</span> <span class="cmd-shortcut">ACTION</span>`;
             el.onclick = () => { cmd.fn(); this.hidePalette(); };
             list.appendChild(el);
         });
