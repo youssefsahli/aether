@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#11111b">
+    <meta name="theme-color" content="#050508">
     <title>Aether v3 Pro</title>
     
-    <!-- Dependencies: Prism for Highlighting, Marked for Markdown -->
+    <!-- Dependencies -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
@@ -20,32 +20,30 @@
     
     <style>
         :root {
-            /* Refined Catppuccin Mocha Palette */
-            --bg: #1e1e2e; 
-            --mantle: #181825; 
-            --crust: #11111b;
-            --text: #cdd6f4; 
-            --subtext: #a6adc8; 
-            --overlay: #7f849c;
-            --surface: #313244; 
-            --surface-hover: #45475a;
-            --base: #1e1e2e;
-            --blue: #89b4fa; 
-            --lavender: #b4befe; 
-            --red: #f38ba8;
-            --green: #a6e3a1; 
-            --yellow: #f9e2af;
-            --peach: #fab387;
+            /* Deeper, more minimal obsidian palette */
+            --bg: #050508; 
+            --mantle: #0a0a0f; 
+            --crust: #030305;
+            --text: #e0e0e6; 
+            --subtext: #9494a0; 
+            --overlay: #5a5a66;
+            --surface: #14141d; 
+            --surface-hover: #1c1c27;
+            --base: #0a0a0f;
+            --blue: #4cc2ff; 
+            --lavender: #99adff; 
+            --red: #ff5d8f;
+            --green: #4ade80; 
+            --yellow: #facc15;
             
-            --font-code: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-code: 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
+            --font-ui: "Inter", -apple-system, system-ui, sans-serif;
             
-            --header-h: 52px;
-            --footer-h: 28px;
-            --sidebar-w: 240px;
-            --tab-h: 40px;
-            --radius: 8px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --header-h: 44px;
+            --footer-h: 22px;
+            --sidebar-w: 250px;
+            --tab-h: 34px;
+            --radius: 4px;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -57,31 +55,29 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- Icons --- */
-        svg.icon { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        svg.icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
         /* --- Layout --- */
         #app-shell { display: flex; flex: 1; overflow: hidden; }
         
-        /* Sidebar */
         aside {
-            width: var(--sidebar-w); background: var(--mantle); border-right: 1px solid var(--crust);
-            display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: var(--sidebar-w); background: var(--crust); border-right: 1px solid var(--surface);
+            display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.2, 1, 0.2, 1);
             z-index: 10; flex-shrink: 0;
         }
         aside.collapsed { margin-left: calc(var(--sidebar-w) * -1); }
         
         .side-header { 
-            padding: 16px 16px 8px 16px; font-size: 0.7rem; font-weight: 800; 
+            padding: 14px 16px 6px 16px; font-size: 0.65rem; font-weight: 700; 
             color: var(--overlay); text-transform: uppercase; letter-spacing: 1px; 
             display:flex; justify-content: space-between; align-items: center; 
         }
-        .file-tree { flex: 1; overflow-y: auto; padding: 4px 8px; }
+        .file-tree { flex: 1; overflow-y: auto; padding: 4px 10px; }
         .tree-item {
-            padding: 8px 12px; font-size: 0.85rem; color: var(--subtext); cursor: pointer;
-            display: flex; align-items: center; gap: 10px; white-space: nowrap; overflow: hidden; 
-            text-overflow: ellipsis; border-radius: var(--radius); transition: all 0.2s;
-            margin-bottom: 2px;
+            padding: 5px 10px; font-size: 0.8rem; color: var(--subtext); cursor: pointer;
+            display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; 
+            text-overflow: ellipsis; border-radius: var(--radius); transition: 0.1s;
+            margin-bottom: 1px;
         }
         .tree-item:hover { background: var(--surface); color: var(--text); }
         .tree-item.active { background: var(--surface-hover); color: var(--blue); }
@@ -89,181 +85,168 @@
         /* Main Area */
         main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--base); }
 
-        /* Tab Bar */
+        /* Tabs */
         #tabs-scroll { 
             height: var(--tab-h); background: var(--crust); display: flex; 
-            overflow-x: auto; overflow-y: hidden; scrollbar-width: none; 
-            padding: 4px 4px 0 4px; gap: 4px;
+            overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--surface);
+            gap: 1px; padding: 0 4px;
         }
         #tabs-scroll::-webkit-scrollbar { display: none; }
         
         .tab {
-            height: 100%; padding: 0 12px; display: flex; align-items: center; gap: 8px;
-            background: var(--mantle); color: var(--subtext); font-size: 0.8rem;
-            border-radius: var(--radius) var(--radius) 0 0; cursor: pointer; 
-            min-width: 120px; max-width: 220px; transition: all 0.2s;
-            position: relative; border: 1px solid transparent; border-bottom: none;
+            height: 100%; padding: 0 12px; display: flex; align-items: center; gap: 10px;
+            color: var(--overlay); font-size: 0.75rem; cursor: pointer; 
+            transition: 0.2s; min-width: 110px; max-width: 180px; position: relative;
+            border-bottom: 1px solid transparent;
         }
-        .tab:hover { background: var(--surface); color: var(--text); }
-        .tab.active { background: var(--base); color: var(--lavender); border-color: var(--surface); font-weight: 500; }
-        .tab-close { opacity: 0; border-radius: 4px; padding: 2px; display: flex; align-items: center; justify-content: center; }
-        .tab:hover .tab-close { opacity: 0.5; }
+        .tab:hover { color: var(--subtext); background: var(--surface); }
+        .tab.active { background: var(--base); color: var(--blue); border-bottom-color: var(--blue); }
+        
+        .tab-close { opacity: 0; border-radius: 3px; padding: 2px; font-size: 9px; line-height: 1; }
+        .tab:hover .tab-close { opacity: 0.6; }
         .tab-close:hover { background: var(--red); color: var(--crust); opacity: 1 !important; }
-        .unsaved-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); display: none; }
+        .unsaved-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--yellow); display: none; }
         .tab.dirty .unsaved-dot { display: block; }
         .tab.dirty .tab-close { display: none; }
         .tab.dirty:hover .unsaved-dot { display: none; }
         .tab.dirty:hover .tab-close { display: block; }
 
+        /* Breadcrumbs (Studio Logic) */
+        .breadcrumbs {
+            height: 26px; background: var(--base); border-bottom: 1px solid var(--surface);
+            display: flex; align-items: center; padding: 0 16px; gap: 8px;
+            font-size: 10px; color: var(--overlay); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
         /* Editor Wrapper */
         #editor-split { flex: 1; display: flex; overflow: hidden; position: relative; }
-        
-        /* The Code Editor */
         #code-stage { flex: 1; position: relative; overflow: hidden; background: var(--base); }
         
         .code-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             margin: 0; border: none; background: transparent;
             font-family: var(--font-code) !important; 
-            font-size: 15px !important; 
-            line-height: 24px !important;
+            font-size: 14px !important; 
+            line-height: 21px !important;
             white-space: pre !important; 
-            word-wrap: normal !important;
-            overflow-wrap: normal !important;
-            font-variant-ligatures: none;
-            padding: 16px 0 16px 60px !important; 
+            padding: 12px 0 12px 50px !important; 
             box-sizing: border-box;
         }
 
-        #hl-layer { z-index: 1; pointer-events: none; overflow: hidden; }
+        #hl-layer { z-index: 1; pointer-events: none; }
         #hl-layer code, #hl-layer pre { 
             font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
             white-space: pre !important; padding: 0 !important; margin: 0 !important;
-            background: transparent !important; border: none !important; box-shadow: none !important; overflow: visible !important;
+            background: transparent !important; border: none !important; box-shadow: none !important;
         }
 
         #input-layer {
             z-index: 2; color: transparent; caret-color: var(--blue);
             outline: none; resize: none; overflow: auto; 
         }
-        #input-layer::selection { background: rgba(137, 180, 250, 0.25); }
+        #input-layer::selection { background: rgba(76, 194, 255, 0.2); }
 
-        /* Gutter (Line Numbers) */
         #gutter {
-            width: 50px; background: var(--mantle); color: var(--overlay);
-            text-align: right; padding: 16px 12px 16px 0; border-right: 1px solid var(--surface);
+            width: 44px; background: var(--crust); color: var(--overlay);
+            text-align: right; padding: 12px 10px 12px 0; border-right: 1px solid var(--surface);
             z-index: 5; user-select: none; opacity: 0.5;
-            font-family: var(--font-code); font-size: 13px; line-height: 24px;
-            overflow: hidden; box-sizing: border-box; 
+            font-family: var(--font-code); font-size: 11px; line-height: 21px;
+            overflow: hidden; 
         }
+        #gutter .active-line { background: var(--surface); color: var(--blue); opacity: 1; font-weight: 700; border-radius: 2px; }
 
         /* Preview Pane */
         #preview-pane { 
             width: 0; border-left: 1px solid var(--surface); background: #fff; 
             display: flex; flex-direction: column; overflow: hidden;
-            transition: width 0.1s linear;
+            transition: width 0.3s cubic-bezier(0.2, 1, 0.2, 1);
         }
         .preview-active #preview-pane { width: 45%; }
-        iframe { width: 100%; height: 100%; border: none; flex: 1; }
+        iframe { width: 100%; height: 100%; border: none; }
         
         #resizer { 
-            width: 6px; background: transparent; cursor: col-resize; position: absolute; right: -3px; top: 0; bottom: 0; z-index: 25;
+            width: 2px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
             display: none; transition: background 0.2s;
         }
-        #resizer:hover { background: var(--blue); opacity: 0.3; }
-        .preview-active #code-stage #resizer { display: block; right: 0; }
+        #resizer:hover { background: var(--blue); }
+        .preview-active #code-stage #resizer { display: block; }
 
         /* Header & Footer */
         header {
-            height: var(--header-h); background: var(--mantle); border-bottom: 1px solid var(--crust);
-            display: flex; align-items: center; padding: 0 16px; gap: 10px;
+            height: var(--header-h); background: var(--crust); border-bottom: 1px solid var(--surface);
+            display: flex; align-items: center; padding: 0 12px; gap: 6px;
         }
-        .logo { font-weight: 900; color: var(--lavender); letter-spacing: 1.5px; margin-right: 12px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
-        .logo-box { width: 24px; height: 24px; background: var(--lavender); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--crust); font-weight: 900; font-size: 14px; }
+        .logo { font-weight: 900; color: var(--text); letter-spacing: 1px; margin-right: 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
+        .logo span { color: var(--blue); }
         
         footer {
             height: var(--footer-h); background: var(--crust); border-top: 1px solid var(--surface);
             display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-            font-size: 10px; color: var(--overlay); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: 9px; color: var(--overlay); font-weight: 600; text-transform: uppercase;
         }
 
-        /* Utilities */
+        /* Buttons */
         .btn {
-            background: transparent; border: 1px solid transparent; color: var(--subtext);
-            padding: 6px 12px; border-radius: var(--radius); font-size: 13px; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; font-weight: 500; transition: all 0.2s;
+            background: transparent; border: 1px solid transparent; color: var(--overlay);
+            padding: 4px 8px; border-radius: var(--radius); font-size: 11px; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: 0.1s; font-weight: 600;
         }
         .btn:hover { background: var(--surface); color: var(--text); }
-        .btn.primary { background: var(--blue); color: var(--crust); font-weight: 700; }
-        .btn.primary:hover { filter: brightness(1.1); }
-        .btn.icon-only { padding: 8px; }
+        .btn.primary { background: var(--surface); border-color: var(--surface-hover); color: var(--blue); }
+        .btn.icon-only { padding: 6px; }
         
         .spacer { flex: 1; }
 
-        /* Dialogs / Overlays */
+        /* Command Palette */
         .overlay-mask {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
-            display: none; align-items: flex-start; justify-content: center; padding-top: 15vh;
-            backdrop-filter: blur(4px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100;
+            display: none; align-items: flex-start; justify-content: center; padding-top: 10vh;
+            backdrop-filter: blur(10px);
         }
         .dialog {
-            background: var(--mantle); border: 1px solid var(--surface-hover); width: 500px;
-            border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
-            display: flex; flex-direction: column; animation: slideUp 0.2s ease-out;
+            background: var(--mantle); border: 1px solid var(--surface-hover); width: 600px;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column;
         }
-        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .dialog input {
-            background: var(--crust); border: none; color: var(--text); padding: 16px;
-            font-family: inherit; font-size: 15px; width: 100%; border-bottom: 1px solid var(--surface);
+            background: transparent; border: none; color: var(--text); padding: 20px;
+            font-size: 15px; width: 100%; border-bottom: 1px solid var(--surface);
         }
-        .cmd-item { padding: 12px 16px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; border-radius: 6px; margin: 4px 8px; transition: all 0.15s; }
-        .cmd-item:hover, .cmd-item.selected { background: var(--blue); color: var(--crust); }
-        .cmd-shortcut { opacity: 0.6; font-size: 11px; font-weight: 700; }
+        .cmd-item { padding: 10px 20px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .cmd-item:hover, .cmd-item.selected { background: var(--blue); color: var(--bg); }
+        .cmd-hint { font-size: 10px; opacity: 0.7; font-weight: 700; text-transform: uppercase; }
 
         /* Toast */
         #toast {
-            position: fixed; bottom: 44px; right: 20px; background: var(--text); color: var(--crust);
-            padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 700;
-            transform: translateY(100px); transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            z-index: 200; box-shadow: var(--shadow);
+            position: fixed; bottom: 34px; right: 16px; background: var(--blue); color: var(--crust);
+            padding: 8px 16px; border-radius: 4px; font-size: 11px; font-weight: 800;
+            transform: translateY(100px); transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         #toast.visible { transform: translateY(0); }
-        #toast.error { background: var(--red); color: #fff; }
 
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--overlay); border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--surface-hover); border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<!-- Header -->
 <header>
-    <div class="btn icon-only" onclick="App.toggleSidebar()">
+    <button class="btn icon-only" onclick="App.toggleSidebar()">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-    </div>
-    <div class="logo">
-        <div class="logo-box">A</div>
-        AETHER v3
-    </div>
+    </button>
+    <div class="logo">AETHER<span>PRO</span></div>
     
-    <button class="btn" onclick="Commands.trigger('newFile')">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> New
-    </button>
-    <button class="btn" onclick="Commands.trigger('openFile')">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/></svg> Open
-    </button>
-    <button class="btn" onclick="Commands.trigger('saveFile')">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save
-    </button>
+    <button class="btn" onclick="Commands.trigger('newFile')">NEW</button>
+    <button class="btn" onclick="Commands.trigger('openFile')">OPEN</button>
+    <button class="btn" onclick="Commands.trigger('saveFile')">SAVE</button>
     
     <div class="spacer"></div>
     
     <button class="btn primary" onclick="Commands.trigger('togglePreview')">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Preview
+        <svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        PREVIEW
     </button>
     <button class="btn icon-only" onclick="Commands.showPalette()">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
@@ -274,30 +257,33 @@
     <aside id="sidebar">
         <div class="side-header">
             <span>Workspace</span>
-            <span class="btn icon-only" onclick="Commands.trigger('openFolder')" title="Open Folder">
-                <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            </span>
+            <button class="btn icon-only" onclick="Commands.trigger('openFolder')">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </button>
         </div>
-        <div id="file-tree" class="file-tree">
-            <div style="padding: 20px; text-align: center; color: var(--overlay); font-size: 11px;">No Folder Open</div>
-        </div>
+        <div id="file-tree" class="file-tree"></div>
         
-        <div class="side-header" style="border-top:1px solid var(--crust); padding-top:20px;">
+        <div class="side-header" style="border-top:1px solid var(--surface); padding-top:14px;">
             <span id="opfs-header">Local (OPFS)</span>
-            <div style="display:flex; gap:4px">
-                <span class="btn icon-only" onclick="FileSys.createOPFSFile()" title="New File in OPFS">
-                    <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                </span>
-                <span class="btn icon-only" onclick="FileSys.initOPFS()" title="Refresh OPFS">
-                    <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                </span>
+            <div style="display:flex; gap:2px">
+                <button class="btn icon-only" onclick="FileSys.createOPFSFile()" title="New OPFS File">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+                <button class="btn icon-only" onclick="FileSys.initOPFS()" title="Refresh OPFS">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </button>
             </div>
         </div>
-        <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
+        <div id="opfs-tree" class="file-tree" style="max-height: 220px;"></div>
     </aside>
 
     <main>
         <div id="tabs-scroll"></div>
+        <div class="breadcrumbs" id="breadcrumb-bar">
+            <span>root</span>
+            <span>/</span>
+            <span id="bc-filename">--</span>
+        </div>
 
         <div id="editor-split">
             <div id="code-stage">
@@ -314,61 +300,54 @@
     </main>
 </div>
 
-<!-- Footer -->
 <footer>
-    <div style="display:flex; gap:20px;">
+    <div style="display:flex; gap:24px;">
         <span id="stat-file">--</span>
-        <span id="stat-lang">TXT</span>
+        <span id="stat-lang">PLAIN TEXT</span>
     </div>
-    <div style="display:flex; gap:20px;">
+    <div style="display:flex; gap:24px;">
         <span id="stat-pos">LN 1, COL 1</span>
-        <span id="stat-space">TAB: 4 SPACES</span>
+        <span id="stat-space">UTF-8</span>
     </div>
 </footer>
 
-<!-- Command Palette -->
 <div id="palette-mask" class="overlay-mask" onclick="if(event.target===this) Commands.hidePalette()">
     <div class="dialog">
         <input type="text" id="cmd-input" placeholder="Search commands..." autocomplete="off">
-        <div id="cmd-list" style="max-height: 340px; overflow-y: auto; padding-bottom: 8px;"></div>
+        <div id="cmd-list" style="max-height: 320px; overflow-y: auto;"></div>
     </div>
 </div>
 
-<!-- Prompt Dialog -->
 <div id="prompt-mask" class="overlay-mask">
     <div class="dialog">
-        <div style="padding:16px; font-size:11px; font-weight:800; background:var(--crust); color:var(--overlay); text-transform:uppercase;" id="prompt-msg">Input</div>
+        <div style="padding:16px 20px; font-size:10px; font-weight:800; background:var(--crust); color:var(--overlay);" id="prompt-msg">ACTION REQUIRED</div>
         <input type="text" id="prompt-input" autocomplete="off">
-        <div style="display:flex; padding:12px; gap:12px; background: var(--crust)">
-            <button class="btn" onclick="Prompt.close()" style="flex:1; justify-content:center;">Cancel</button>
-            <button class="btn primary" id="prompt-ok" style="flex:1; justify-content:center;">Continue</button>
+        <div style="display:flex; padding:12px; gap:8px; background: var(--crust)">
+            <button class="btn" onclick="Prompt.close()" style="flex:1; justify-content:center;">CANCEL</button>
+            <button class="btn primary" id="prompt-ok" style="flex:1; justify-content:center;">CONTINUE</button>
         </div>
     </div>
 </div>
 
-<!-- Toast -->
 <div id="toast">Operation Successful</div>
 
 <script>
 /**
- * AETHER v3 Pro - Logic Implementation
- * Preservation of exact original functionality within the new UI structure.
+ * AETHER v3 Pro - Obsidian Edition
+ * Studio-grade minimalist logic with persistent OPFS and high-density UI
  */
 
-// --- 1. STATE STORE ---
 const Store = {
     state: {
         buffers: [],
         activeId: null,
         workspace: null,
         opfsRoot: null,
-        previewMode: false,
-        theme: 'dark'
+        previewMode: false
     },
     subs: [],
     
     get activeBuffer() { return this.state.buffers.find(b => b.id === this.state.activeId); },
-    
     subscribe(fn) { this.subs.push(fn); },
     notify(event) { this.subs.forEach(fn => fn(event, this.state)); },
     
@@ -411,30 +390,21 @@ const Store = {
     }
 };
 
-// --- 2. EDITOR ENGINE ---
 const Editor = {
     els: {
         input: document.getElementById('input-layer'),
         hl: document.getElementById('hl-code'),
         hlLayer: document.getElementById('hl-layer'),
-        gutter: document.getElementById('gutter'),
-        frame: document.getElementById('code-stage')
+        gutter: document.getElementById('gutter')
     },
-    scrolling: false,
 
     init() {
         this.els.input.addEventListener('scroll', () => {
-            if (!this.scrolling) {
-                this.scrolling = true;
-                requestAnimationFrame(() => {
-                    const top = this.els.input.scrollTop;
-                    const left = this.els.input.scrollLeft;
-                    this.els.hlLayer.scrollTop = top; 
-                    this.els.hlLayer.scrollLeft = left;
-                    this.els.gutter.scrollTop = top;
-                    this.scrolling = false;
-                });
-            }
+            requestAnimationFrame(() => {
+                this.els.hlLayer.scrollTop = this.els.input.scrollTop;
+                this.els.hlLayer.scrollLeft = this.els.input.scrollLeft;
+                this.els.gutter.scrollTop = this.els.input.scrollTop;
+            });
         }, { passive: true });
 
         this.els.input.addEventListener('input', () => {
@@ -450,10 +420,6 @@ const Editor = {
                 e.preventDefault();
                 document.execCommand('insertText', false, '    ');
             }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                Commands.trigger('saveFile');
-            }
             setTimeout(() => App.updateStats(), 0);
         });
 
@@ -465,7 +431,6 @@ const Editor = {
         this.highlight(content, filename);
         this.updateGutter(content);
         this.els.input.scrollTop = 0;
-        this.els.hlLayer.scrollTop = 0;
         App.updateStats();
         App.debouncePreview(true);
     },
@@ -480,36 +445,34 @@ const Editor = {
         };
         const lang = map[ext] || 'clike';
         this.els.hl.className = `language-${lang}`;
-        const safeCode = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         if (Prism.languages[lang]) {
             this.els.hl.innerHTML = Prism.highlight(code, Prism.languages[lang], lang) + '<br>'; 
         } else {
-            this.els.hl.innerHTML = safeCode + '<br>';
+            this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
         }
     },
 
     updateGutter(text) {
         const lines = text.split('\n').length;
-        if (this.lastLines === lines) return;
-        this.lastLines = lines;
+        const currentLine = this.els.input.value.substring(0, this.els.input.selectionStart).split('\n').length;
         let html = '';
-        for (let i = 1; i <= lines; i++) html += `<div>${i}</div>`;
+        for (let i = 1; i <= lines; i++) {
+            const active = i === currentLine ? 'active-line' : '';
+            html += `<div class="${active}">${i}</div>`;
+        }
         this.els.gutter.innerHTML = html;
     }
 };
 
-// --- 3. FILE SYSTEM ABSTRACT ---
 const FileSys = {
     async initOPFS() {
         try {
-            if (!navigator.storage || !navigator.storage.getDirectory) throw new Error("API Missing");
+            if (!navigator.storage?.getDirectory) throw 1;
             Store.state.opfsRoot = await navigator.storage.getDirectory();
             this.renderOPFS();
-            UI.toast('OPFS Access Granted');
-            document.getElementById('opfs-header').innerText = "OPFS (LOCAL)";
+            UI.toast('OPFS Mounted');
         } catch (e) { 
-            document.getElementById('opfs-header').innerText = "VIRTUAL STORAGE";
-            document.getElementById('opfs-tree').innerHTML = '<div style="padding:10px; font-size:11px; color:var(--overlay); text-align:center">Storage Restricted.<br>Files will not persist.</div>';
+            document.getElementById('opfs-header').innerText = "MEMORY-STORAGE ONLY";
         }
     },
 
@@ -521,11 +484,10 @@ const FileSys = {
             if (handle.kind === 'file') {
                 const el = document.createElement('div');
                 el.className = 'tree-item';
-                el.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ${name}`;
+                el.innerHTML = `📄 ${name}`;
                 el.onclick = async () => {
                     const file = await handle.getFile();
-                    const text = await file.text();
-                    App.openBuffer(name, text, handle, 'opfs');
+                    App.openBuffer(name, await file.text(), handle, 'opfs');
                 };
                 div.appendChild(el);
             }
@@ -533,19 +495,19 @@ const FileSys = {
     },
 
     async createOPFSFile() {
-        if (!Store.state.opfsRoot) { UI.toast("OPFS not available", true); return; }
-        Prompt.open("NEW OPFS FILENAME:", "file.txt", async (name) => {
+        if (!Store.state.opfsRoot) return;
+        Prompt.open("NEW OPFS FILENAME:", "script.js", async (name) => {
             try {
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
                 this.renderOPFS();
-                UI.toast(`Created ${name} in OPFS`);
-            } catch (e) { UI.toast("Failed to create file", true); }
+                UI.toast(`Created ${name}`);
+            } catch (e) { UI.toast('Failed to create file', true); }
         });
     },
 
     async saveToOPFS(buf) {
-        if (!Store.state.opfsRoot) { UI.toast("OPFS not available", true); return; }
+        if (!Store.state.opfsRoot) { UI.toast('OPFS unavailable', true); return; }
         try {
             const handle = await Store.state.opfsRoot.getFileHandle(buf.name, { create: true });
             const writable = await handle.createWritable();
@@ -556,8 +518,8 @@ const FileSys = {
             Store.markSaved(buf.id);
             this.renderOPFS();
             UI.renderTabs();
-            UI.toast(`Saved ${buf.name} to OPFS`);
-        } catch (e) { UI.toast("OPFS Save Failed", true); }
+            UI.toast('Saved to OPFS');
+        } catch (e) { UI.toast('OPFS Write Error', true); }
     },
 
     async openDiskFile() {
@@ -565,15 +527,14 @@ const FileSys = {
             const [handle] = await window.showOpenFilePicker();
             const file = await handle.getFile();
             App.openBuffer(file.name, await file.text(), handle, 'disk');
-        } catch (e) { }
+        } catch (e) {}
     },
-    
+
     async openFolder() {
         try {
             const handle = await window.showDirectoryPicker();
-            Store.state.workspace = handle;
             this.renderWorkspace(handle);
-        } catch(e) { }
+        } catch(e) {}
     },
 
     async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0) {
@@ -581,18 +542,12 @@ const FileSys = {
         for await (const [name, handle] of dirHandle.entries()) {
             const el = document.createElement('div');
             el.className = 'tree-item';
-            el.style.paddingLeft = `${(level * 10) + 12}px`;
-            if (handle.kind === 'directory') {
-                el.innerHTML = `<svg class="icon" style="color:var(--lavender)" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> ${name}`;
-                parentEl.appendChild(el);
-            } else {
-                el.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg> ${name}`;
-                el.onclick = async () => {
-                    const file = await handle.getFile();
-                    App.openBuffer(name, await file.text(), handle, 'disk');
-                };
-                parentEl.appendChild(el);
+            el.style.paddingLeft = `${(level * 6) + 10}px`;
+            el.innerHTML = `${handle.kind === 'directory' ? '📁' : '📄'} ${name}`;
+            if (handle.kind === 'file') {
+                el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
             }
+            parentEl.appendChild(el);
         }
     },
 
@@ -601,39 +556,31 @@ const FileSys = {
             if (!buf.handle) {
                 buf.handle = await window.showSaveFilePicker({ suggestedName: buf.name });
                 buf.name = buf.handle.name;
-                buf.kind = 'disk';
             }
             const writable = await buf.handle.createWritable();
             await writable.write(buf.content);
             await writable.close();
             Store.markSaved(buf.id);
-            UI.renderTabs();
             UI.toast(`Saved ${buf.name}`);
-        } catch (e) {
-            UI.toast('Save Cancelled', true);
-        }
+        } catch (e) { UI.toast('Save Interrupted', true); }
     }
 };
 
-// --- 4. APP GLUE ---
 const App = {
     init() {
         Store.subscribe((event) => {
-            if (event === 'buffer_added' || event === 'buffer_closed' || event === 'buffer_switched') {
+            if (['buffer_added', 'buffer_closed', 'buffer_switched'].includes(event)) {
                 UI.renderTabs();
                 const buf = Store.activeBuffer;
-                if (buf) Editor.load(buf.content, buf.name);
-                else Editor.load('', 'txt');
+                Editor.load(buf?.content || '', buf?.name || 'txt');
+                document.getElementById('bc-filename').innerText = buf?.name || '--';
             }
             if (event === 'buffer_dirty') UI.renderTabs();
         });
 
         const saved = JSON.parse(localStorage.getItem('aether_v3_session') || '[]');
-        if (saved.length) {
-            saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
-        } else {
-            this.openBuffer('welcome.md', '# Aether v3 Pro\n\nA modern, lightweight code editor.\n\n- Press `Ctrl+P` for Command Palette\n- Use `Preview` for Markdown and HTML\n- Save to Disk or OPFS', null, 'memory');
-        }
+        if (saved.length) saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
+        else this.openBuffer('getting_started.md', '# Aether v3 Pro\n\nStudio-grade minimalist editor.\n\n- **Save to OPFS** for persistent browser storage.\n- **Preview** for live HTML/Markdown.\n- **Ctrl+P** for Command Palette.', null, 'memory');
 
         Editor.init();
         FileSys.initOPFS();
@@ -641,23 +588,13 @@ const App = {
 
     openBuffer(name, content, handle, kind) {
         const existing = Store.state.buffers.find(b => b.name === name);
-        if (existing) {
-            Store.setActive(existing.id);
-            return;
-        }
-        const id = 'buf_' + Date.now() + Math.random().toString(16).slice(2);
-        Store.addBuffer({ id, name, content, handle, kind, dirty: false });
+        if (existing) return Store.setActive(existing.id);
+        Store.addBuffer({ id: 'b'+Date.now(), name, content, handle, kind, dirty: false });
     },
 
     closeBuffer(id, e) {
-        if (e) e.stopPropagation();
-        const buf = Store.state.buffers.find(b => b.id === id);
-        if (buf.dirty) {
-            if(confirm(`Save changes to ${buf.name}?`)) FileSys.saveBuffer(buf).then(() => Store.closeBuffer(id));
-            else Store.closeBuffer(id);
-        } else {
-            Store.closeBuffer(id);
-        }
+        e.stopPropagation();
+        Store.closeBuffer(id);
     },
 
     updateStats() {
@@ -668,41 +605,31 @@ const App = {
         document.getElementById('stat-pos').innerText = `LN ${lines}, COL ${cols}`;
         const buf = Store.activeBuffer;
         if(buf) {
-            document.getElementById('stat-file').innerText = buf.name.toUpperCase() + (buf.dirty ? '*' : '');
+            document.getElementById('stat-file').innerText = buf.name.toUpperCase();
             document.getElementById('stat-lang').innerText = buf.name.split('.').pop().toUpperCase();
         }
+        Editor.updateGutter(input.value);
     },
 
     debouncePreview(immediate) {
         if (!Store.state.previewMode) return;
-        if (this.pvTimer) clearTimeout(this.pvTimer);
+        clearTimeout(this.pvTimer);
         const run = () => {
             const buf = Store.activeBuffer;
             if (!buf) return;
-            const frame = document.getElementById('preview-frame');
+            const f = document.getElementById('preview-frame');
             const ext = buf.name.split('.').pop().toLowerCase();
-            if (ext === 'md') {
-                frame.srcdoc = `<style>body{font-family:system-ui;padding:32px;color:#1e1e2e;line-height:1.6;max-width:800px;margin:auto;} pre{background:#f1f1f1;padding:12px;border-radius:6px;overflow:auto;}</style>${marked.parse(buf.content)}`;
-            } else if (ext === 'html') {
-                frame.srcdoc = buf.content;
-            } else {
-                frame.srcdoc = '<div style="font-family:sans-serif;color:#888;padding:40px;text-align:center">No Preview Available</div>';
-            }
+            if (ext === 'md') f.srcdoc = `<style>body{font-family:system-ui,-apple-system,sans-serif;padding:2rem;line-height:1.6;color:#222;background:#fff;} pre{background:#f4f4f7;padding:1rem;border-radius:4px;overflow:auto;} code{font-family:monospace;background:#f4f4f7;padding:2px 4px;border-radius:3px;}</style>${marked.parse(buf.content)}`;
+            else if (ext === 'html') f.srcdoc = buf.content;
+            else f.srcdoc = '<div style="font-family:sans-serif;padding:2rem;color:#888;">No live preview available for this file type.</div>';
         };
         if(immediate) run(); else this.pvTimer = setTimeout(run, 500);
     },
 
-    toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-    },
-
-    saveSession() {
-        const serializable = Store.state.buffers.map(b => ({ name: b.name, content: b.content }));
-        localStorage.setItem('aether_v3_session', JSON.stringify(serializable));
-    }
+    toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); },
+    saveSession() { localStorage.setItem('aether_v3_session', JSON.stringify(Store.state.buffers.map(b => ({name:b.name, content:b.content})))); }
 };
 
-// --- UI UTILS ---
 const UI = {
     renderTabs() {
         const con = document.getElementById('tabs-scroll');
@@ -710,109 +637,85 @@ const UI = {
         Store.state.buffers.forEach(b => {
             const el = document.createElement('div');
             el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
-            el.innerHTML = `
-                <span>${b.name}</span>
-                <span class="unsaved-dot"></span>
-                <span class="tab-close" onclick="App.closeBuffer('${b.id}', event)">✕</span>
-            `;
+            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><span class="tab-close" onclick="App.closeBuffer('${b.id}', event)">✕</span>`;
             el.onclick = () => Store.setActive(b.id);
             con.appendChild(el);
-            if (b.id === Store.state.activeId) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     },
-
-    toast(msg, isError) {
+    toast(msg) {
         const t = document.getElementById('toast');
         t.innerText = msg;
-        t.className = isError ? 'error' : '';
         t.classList.add('visible');
         setTimeout(() => t.classList.remove('visible'), 3000);
     }
 };
 
-// --- COMMANDS ---
 const Commands = {
     list: [
-        { id: 'newFile', name: 'New File', fn: () => Prompt.open('FILENAME:', 'untitled.js', (n) => App.openBuffer(n, '', null, 'memory')) },
-        { id: 'openFile', name: 'Open File (Disk)', fn: () => FileSys.openDiskFile() },
-        { id: 'openFolder', name: 'Open Folder', fn: () => FileSys.openFolder() },
-        { id: 'saveFile', name: 'Save File', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-        { id: 'saveToOPFS', name: 'Save to OPFS', fn: () => Store.activeBuffer && FileSys.saveToOPFS(Store.activeBuffer) },
-        { id: 'togglePreview', name: 'Toggle Preview Pane', fn: () => {
+        { id: 'newFile', name: 'New Memory File', hint: 'TMP', fn: () => Prompt.open("NEW FILENAME:", "script.js", (n) => App.openBuffer(n, "", null, 'memory')) },
+        { id: 'newOPFS', name: 'Create OPFS File', hint: 'PERSISTENT', fn: () => FileSys.createOPFSFile() },
+        { id: 'openFile', name: 'Open From Disk', hint: 'OS', fn: () => FileSys.openDiskFile() },
+        { id: 'saveFile', name: 'Save to Disk', hint: 'DOWNLOAD', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
+        { id: 'saveToOPFS', name: 'Sync to OPFS', hint: 'SAVE', fn: () => Store.activeBuffer && FileSys.saveToOPFS(Store.activeBuffer) },
+        { id: 'togglePreview', name: 'Toggle Live Preview', hint: 'UI', fn: () => {
             Store.state.previewMode = !Store.state.previewMode;
             document.body.classList.toggle('preview-active', Store.state.previewMode);
             App.debouncePreview(true);
         }},
-        { id: 'sidebar', name: 'Toggle Sidebar', fn: () => App.toggleSidebar() }
+        { id: 'toggleSide', name: 'Toggle Sidebar', hint: 'VIEW', fn: () => App.toggleSidebar() }
     ],
-
     trigger(id) { this.list.find(c => c.id === id).fn(); },
-
     showPalette() {
         const mask = document.getElementById('palette-mask');
         const list = document.getElementById('cmd-list');
-        const input = document.getElementById('cmd-input');
         list.innerHTML = '';
         this.list.forEach(cmd => {
             const el = document.createElement('div');
             el.className = 'cmd-item';
-            el.innerHTML = `<span>${cmd.name}</span> <span class="cmd-shortcut">ACTION</span>`;
+            el.innerHTML = `<span>${cmd.name}</span><span class="cmd-hint">${cmd.hint}</span>`;
             el.onclick = () => { cmd.fn(); this.hidePalette(); };
             list.appendChild(el);
         });
         mask.style.display = 'flex';
-        input.value = '';
-        input.focus();
-        input.oninput = () => {
-            const term = input.value.toLowerCase();
-            Array.from(list.children).forEach(el => {
-                el.style.display = el.innerText.toLowerCase().includes(term) ? 'flex' : 'none';
-            });
-        };
-        input.onkeydown = (e) => { if(e.key === 'Escape') this.hidePalette(); };
+        document.getElementById('cmd-input').value = '';
+        document.getElementById('cmd-input').focus();
     },
-
-    hidePalette() { document.getElementById('palette-mask').style.display = 'none'; document.getElementById('input-layer').focus(); }
+    hidePalette() { document.getElementById('palette-mask').style.display = 'none'; }
 };
 
 const Prompt = {
-    cb: null,
-    open(msg, def, callback) {
+    open(msg, def, cb) {
         document.getElementById('prompt-mask').style.display = 'flex';
         document.getElementById('prompt-msg').innerText = msg;
         const inp = document.getElementById('prompt-input');
-        inp.value = def;
-        inp.focus();
-        inp.select();
-        this.cb = callback;
-        document.getElementById('prompt-ok').onclick = () => { if(inp.value) this.cb(inp.value); this.close(); };
+        inp.value = def; inp.focus(); inp.select();
+        document.getElementById('prompt-ok').onclick = () => { if(inp.value) cb(inp.value); this.close(); };
         inp.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('prompt-ok').click(); if(e.key === 'Escape') this.close(); };
     },
-    close() { document.getElementById('prompt-mask').style.display = 'none'; document.getElementById('input-layer').focus(); }
+    close() { document.getElementById('prompt-mask').style.display = 'none'; }
 };
 
 const Resizer = {
-    drag: false,
     init() {
         const r = document.getElementById('resizer');
         const p = document.getElementById('preview-pane');
-        r.addEventListener('mousedown', () => { this.drag = true; document.body.style.cursor = 'col-resize'; });
-        window.addEventListener('mouseup', () => { this.drag = false; document.body.style.cursor = 'default'; });
-        window.addEventListener('mousemove', (e) => {
-            if (!this.drag) return;
-            const pct = (1 - (e.clientX / window.innerWidth)) * 100;
-            p.style.width = Math.max(10, Math.min(90, pct)) + '%';
-        });
+        r.onmousedown = () => {
+            document.onmousemove = e => {
+                const pct = (1 - (e.clientX / window.innerWidth)) * 100;
+                p.style.width = Math.min(90, Math.max(10, pct)) + '%';
+            };
+            document.onmouseup = () => document.onmousemove = null;
+        };
     }
 };
 
-window.onload = () => {
-    App.init();
-    Resizer.init();
+window.onload = () => { 
+    App.init(); 
+    Resizer.init(); 
     window.onkeydown = (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); Commands.showPalette(); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); Commands.trigger('sidebar'); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); Commands.trigger('toggleSide'); }
     };
 };
 </script>
