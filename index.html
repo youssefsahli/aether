@@ -4,46 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#050508">
-    <title>Aether v3 Pro</title>
+    <meta name="theme-color" content="#1e1e2e">
+    <title>Aether v3 - Minimalist</title>
     
     <!-- Dependencies -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prism-theme" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    
+    <!-- Languages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
-            /* Deeper, more minimal obsidian palette */
-            --bg: #050508; 
-            --mantle: #0a0a0f; 
-            --crust: #030305;
-            --text: #e0e0e6; 
-            --subtext: #9494a0; 
-            --overlay: #5a5a66;
-            --surface: #14141d; 
-            --surface-hover: #1c1c27;
-            --base: #0a0a0f;
-            --blue: #4cc2ff; 
-            --lavender: #99adff; 
-            --red: #ff5d8f;
-            --green: #4ade80; 
-            --yellow: #facc15;
+            /* Default: Catppuccin Mocha (Darkest) */
+            --bg: #1e1e2e;
+            --sidebar-bg: #181825;
+            --header-bg: #11111b;
+            --tab-inactive: #11111b;
+            --tab-active: #1e1e2e;
+            --text: #cdd6f4;
+            --text-dim: #9399b2;
+            --accent: #89b4fa;
+            --accent-sec: #b4befe;
+            --border: #313244;
+            --highlight: #313244;
+            --cursor: #f5e0dc;
+            --status-bg: #89b4fa;
+            --status-fg: #1e1e2e;
             
-            --font-code: 'JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', monospace;
-            --font-ui: "Inter", -apple-system, system-ui, sans-serif;
+            /* Strict Monospace Stack */
+            --font-stack: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
             
-            --header-h: 44px;
+            --header-h: 32px;
             --footer-h: 22px;
-            --sidebar-w: 250px;
-            --tab-h: 34px;
-            --radius: 4px;
+            --sidebar-w: 220px;
+            --tab-h: 28px;
+        }
+
+        /* Catppuccin Macchiato */
+        [data-theme="macchiato"] {
+            --bg: #24273a;
+            --sidebar-bg: #1e2030;
+            --header-bg: #181926;
+            --tab-inactive: #181926;
+            --tab-active: #24273a;
+            --text: #cad3f5;
+            --text-dim: #939ab7;
+            --accent: #8aadf4;
+            --accent-sec: #b7bdf8;
+            --border: #363a4f;
+            --highlight: #363a4f;
+            --cursor: #f4dbd6;
+            --status-bg: #8aadf4;
+            --status-fg: #24273a;
+        }
+
+        /* Catppuccin Frappe */
+        [data-theme="frappe"] {
+            --bg: #303446;
+            --sidebar-bg: #292c3c;
+            --header-bg: #232634;
+            --tab-inactive: #232634;
+            --tab-active: #303446;
+            --text: #c6d0f5;
+            --text-dim: #949cbb;
+            --accent: #8caaee;
+            --accent-sec: #babbf1;
+            --border: #414559;
+            --highlight: #414559;
+            --cursor: #f2d5cf;
+            --status-bg: #8caaee;
+            --status-fg: #303446;
+        }
+
+        /* Catppuccin Latte (Light) */
+        [data-theme="latte"] {
+            --bg: #eff1f5;
+            --sidebar-bg: #e6e9ef;
+            --header-bg: #dce0e8;
+            --tab-inactive: #dce0e8;
+            --tab-active: #eff1f5;
+            --text: #4c4f69;
+            --text-dim: #9ca0b0;
+            --accent: #1e66f5;
+            --accent-sec: #7287fd;
+            --border: #bcc0cc;
+            --highlight: #ccd0da;
+            --cursor: #dc8a78;
+            --status-bg: #1e66f5;
+            --status-fg: #eff1f5;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -51,8 +107,8 @@
         body { 
             margin: 0; background: var(--bg); color: var(--text);
             height: 100dvh; width: 100vw; overflow: hidden;
-            font-family: var(--font-ui); display: flex; flex-direction: column;
-            -webkit-font-smoothing: antialiased;
+            font-family: var(--font-stack); display: flex; flex-direction: column;
+            font-size: 13px; letter-spacing: -0.01em;
         }
 
         svg.icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
@@ -61,79 +117,89 @@
         #app-shell { display: flex; flex: 1; overflow: hidden; }
         
         aside {
-            width: var(--sidebar-w); background: var(--crust); border-right: 1px solid var(--surface);
-            display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.2, 1, 0.2, 1);
+            width: var(--sidebar-w); background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; transition: transform 0.1s steps(2, jump-none);
             z-index: 10; flex-shrink: 0;
         }
         aside.collapsed { margin-left: calc(var(--sidebar-w) * -1); }
         
         .side-header { 
-            padding: 14px 16px 6px 16px; font-size: 0.65rem; font-weight: 700; 
-            color: var(--overlay); text-transform: uppercase; letter-spacing: 1px; 
+            padding: 8px 12px; font-weight: 800; font-size: 11px;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;
             display:flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid var(--border);
         }
-        .file-tree { flex: 1; overflow-y: auto; padding: 4px 10px; }
+        .file-tree { flex: 1; overflow-y: auto; padding: 4px 0; }
         .tree-item {
-            padding: 5px 10px; font-size: 0.8rem; color: var(--subtext); cursor: pointer;
+            padding: 4px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer;
             display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; 
-            text-overflow: ellipsis; border-radius: var(--radius); transition: 0.1s;
-            margin-bottom: 1px;
+            text-overflow: ellipsis; border: none;
         }
-        .tree-item:hover { background: var(--surface); color: var(--text); }
-        .tree-item.active { background: var(--surface-hover); color: var(--blue); }
+        .tree-item:hover { background: var(--highlight); color: var(--text); }
+        .tree-item.active { background: var(--highlight); color: var(--accent); font-weight: bold; }
 
         /* Main Area */
-        main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--base); }
+        main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--bg); }
 
-        /* Tabs */
+        /* Tabs - Blocky */
         #tabs-scroll { 
-            height: var(--tab-h); background: var(--crust); display: flex; 
-            overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--surface);
-            gap: 1px; padding: 0 4px;
+            height: var(--tab-h); background: var(--header-bg); display: flex; 
+            overflow-x: auto; scrollbar-width: none;
+            gap: 1px; padding: 0; border-bottom: 1px solid var(--border);
         }
         #tabs-scroll::-webkit-scrollbar { display: none; }
         
         .tab {
-            height: 100%; padding: 0 12px; display: flex; align-items: center; gap: 10px;
-            color: var(--overlay); font-size: 0.75rem; cursor: pointer; 
-            transition: 0.2s; min-width: 110px; max-width: 180px; position: relative;
-            border-bottom: 1px solid transparent;
+            height: 100%; padding: 0 12px; display: flex; align-items: center;
+            color: var(--text-dim); font-size: 12px; cursor: pointer; 
+            min-width: 80px; max-width: 200px; position: relative;
+            background: var(--tab-inactive);
+            justify-content: space-between;
+            border-right: 1px solid var(--border);
         }
-        .tab:hover { color: var(--subtext); background: var(--surface); }
-        .tab.active { background: var(--base); color: var(--blue); border-bottom-color: var(--blue); }
+        .tab:hover { background: var(--highlight); color: var(--text); }
+        .tab.active { background: var(--bg); color: var(--accent); font-weight: bold; border-top: 2px solid var(--accent); margin-top: -2px; }
         
-        .tab-close { opacity: 0; border-radius: 3px; padding: 2px; font-size: 9px; line-height: 1; }
-        .tab:hover .tab-close { opacity: 0.6; }
-        .tab-close:hover { background: var(--red); color: var(--crust); opacity: 1 !important; }
-        .unsaved-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--yellow); display: none; }
+        .tab-close { 
+            opacity: 0; padding: 2px; font-size: 14px; margin-left: 8px; line-height: 0.8;
+        }
+        .tab:hover .tab-close { opacity: 0.7; }
+        .tab-close:hover { color: var(--text); opacity: 1 !important; }
+        
+        .unsaved-dot { width: 6px; height: 6px; background: var(--accent-sec); display: none; margin-left: auto; }
         .tab.dirty .unsaved-dot { display: block; }
         .tab.dirty .tab-close { display: none; }
         .tab.dirty:hover .unsaved-dot { display: none; }
-        .tab.dirty:hover .tab-close { display: block; }
+        .tab.dirty:hover .tab-close { display: flex; }
 
-        /* Breadcrumbs (Studio Logic) */
+        /* Breadcrumbs - Minimal */
         .breadcrumbs {
-            height: 26px; background: var(--base); border-bottom: 1px solid var(--surface);
-            display: flex; align-items: center; padding: 0 16px; gap: 8px;
-            font-size: 10px; color: var(--overlay); text-transform: uppercase; letter-spacing: 0.5px;
+            height: 22px; background: var(--bg); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 10px; gap: 8px;
+            font-size: 11px; color: var(--text-dim);
         }
 
         /* Editor Wrapper */
         #editor-split { flex: 1; display: flex; overflow: hidden; position: relative; }
-        #code-stage { flex: 1; position: relative; overflow: hidden; background: var(--base); }
+        #code-stage { flex: 1; position: relative; overflow: hidden; background: var(--bg); }
         
+        /* Typography Strictness for Code */
+        .code-font {
+            font-family: var(--font-stack) !important; 
+            font-size: 13px !important;
+            line-height: 20px !important;
+            letter-spacing: 0px !important;
+        }
+
         .code-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             margin: 0; border: none; background: transparent;
-            font-family: var(--font-code) !important; 
-            font-size: 14px !important; 
-            line-height: 21px !important;
             white-space: pre !important; 
-            padding: 12px 0 12px 50px !important; 
+            padding: 10px 0 10px 50px !important; 
             box-sizing: border-box;
         }
 
-        #hl-layer { z-index: 1; pointer-events: none; }
+        #hl-layer { z-index: 1; pointer-events: none; overflow: hidden; }
         #hl-layer code, #hl-layer pre { 
             font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
             white-space: pre !important; padding: 0 !important; margin: 0 !important;
@@ -141,155 +207,186 @@
         }
 
         #input-layer {
-            z-index: 2; color: transparent; caret-color: var(--blue);
+            z-index: 2; color: transparent; caret-color: var(--cursor);
             outline: none; resize: none; overflow: auto; 
         }
-        #input-layer::selection { background: rgba(76, 194, 255, 0.2); }
+        #input-layer::selection { background: rgba(137, 180, 250, 0.15); }
 
         #gutter {
-            width: 44px; background: var(--crust); color: var(--overlay);
-            text-align: right; padding: 12px 10px 12px 0; border-right: 1px solid var(--surface);
-            z-index: 5; user-select: none; opacity: 0.5;
-            font-family: var(--font-code); font-size: 11px; line-height: 21px;
+            position: absolute; top: 0; left: 0; bottom: 0;
+            width: 45px; background: var(--bg); color: var(--text-dim);
+            text-align: right; padding: 10px 10px 10px 0; border-right: 1px solid var(--border);
+            z-index: 5; user-select: none;
             overflow: hidden; 
         }
-        #gutter .active-line { background: var(--surface); color: var(--blue); opacity: 1; font-weight: 700; border-radius: 2px; }
+        #gutter .active-line { color: var(--text); font-weight: bold; background: var(--highlight); }
 
         /* Preview Pane */
         #preview-pane { 
-            width: 0; border-left: 1px solid var(--surface); background: #fff; 
+            width: 0; border-left: 1px solid var(--border); background: #fff; 
             display: flex; flex-direction: column; overflow: hidden;
-            transition: width 0.3s cubic-bezier(0.2, 1, 0.2, 1);
+            transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .preview-active #preview-pane { width: 45%; }
+        .preview-active #preview-pane { width: 50%; }
         iframe { width: 100%; height: 100%; border: none; }
         
         #resizer { 
-            width: 2px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
-            display: none; transition: background 0.2s;
+            width: 4px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
+            display: none;
         }
-        #resizer:hover { background: var(--blue); }
+        #resizer:hover { background: var(--accent); }
         .preview-active #code-stage #resizer { display: block; }
 
-        /* Header & Footer */
+        /* Header - Compact */
         header {
-            height: var(--header-h); background: var(--crust); border-bottom: 1px solid var(--surface);
-            display: flex; align-items: center; padding: 0 12px; gap: 6px;
+            height: var(--header-h); background: var(--header-bg); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 8px; gap: 8px;
         }
-        .logo { font-weight: 900; color: var(--text); letter-spacing: 1px; margin-right: 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
-        .logo span { color: var(--blue); }
+        .logo { font-weight: 800; color: var(--accent); font-size: 13px; margin-right: 8px; text-transform: uppercase; padding-left: 8px; }
         
-        footer {
-            height: var(--footer-h); background: var(--crust); border-top: 1px solid var(--surface);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-            font-size: 9px; color: var(--overlay); font-weight: 600; text-transform: uppercase;
+        .toolbar { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+        
+        /* Theme Switcher Rects */
+        .theme-swatches { display: flex; gap: 4px; margin-right: 8px; }
+        .theme-swatch {
+            width: 12px; height: 12px; cursor: pointer; border: 1px solid var(--border);
+            transition: transform 0.1s;
         }
+        .theme-swatch:hover { transform: scale(1.1); border-color: var(--text); }
+        .swatch-latte { background: #eff1f5; }
+        .swatch-frappe { background: #303446; }
+        .swatch-macchiato { background: #24273a; }
+        .swatch-mocha { background: #1e1e2e; }
 
+        /* Footer - Powerline style */
+        footer {
+            height: var(--footer-h); background: var(--header-bg); color: var(--text);
+            display: flex; align-items: center; justify-content: space-between; padding: 0;
+            font-size: 11px; font-weight: bold; border-top: 1px solid var(--border);
+        }
+        .stat-box { padding: 0 12px; height: 100%; display: flex; align-items: center; }
+        .stat-primary { background: var(--status-bg); color: var(--status-fg); }
+        .stat-secondary { background: transparent; color: var(--text-dim); border-left: 1px solid var(--border); }
+        
         /* Buttons */
         .btn {
-            background: transparent; border: 1px solid transparent; color: var(--overlay);
-            padding: 4px 8px; border-radius: var(--radius); font-size: 11px; cursor: pointer;
-            display: flex; align-items: center; gap: 6px; transition: 0.1s; font-weight: 600;
+            background: transparent; border: 1px solid transparent; color: var(--text-dim);
+            padding: 4px; width: 28px; height: 28px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 0; transition: all 0.1s;
         }
-        .btn:hover { background: var(--surface); color: var(--text); }
-        .btn.primary { background: var(--surface); border-color: var(--surface-hover); color: var(--blue); }
-        .btn.icon-only { padding: 6px; }
+        .btn:hover { background: var(--highlight); color: var(--text); }
+        .btn.primary { color: var(--accent); }
+        .btn.primary:hover { background: var(--highlight); color: var(--accent); }
         
-        .spacer { flex: 1; }
-
         /* Command Palette */
         .overlay-mask {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100;
-            display: none; align-items: flex-start; justify-content: center; padding-top: 10vh;
-            backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+            display: none; align-items: flex-start; justify-content: center; padding-top: 40px;
+            backdrop-filter: blur(2px);
         }
         .dialog {
-            background: var(--mantle); border: 1px solid var(--surface-hover); width: 600px;
-            border-radius: 8px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            background: var(--bg); border: 1px solid var(--accent); width: 600px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             display: flex; flex-direction: column;
+            border-radius: 0;
         }
 
         .dialog input {
-            background: transparent; border: none; color: var(--text); padding: 20px;
-            font-size: 15px; width: 100%; border-bottom: 1px solid var(--surface);
+            background: var(--header-bg); border: none; color: var(--text); padding: 12px 16px;
+            font-size: 13px; width: 100%; border-bottom: 1px solid var(--border);
+            font-family: var(--font-stack);
         }
-        .cmd-item { padding: 10px 20px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-        .cmd-item:hover, .cmd-item.selected { background: var(--blue); color: var(--bg); }
-        .cmd-hint { font-size: 10px; opacity: 0.7; font-weight: 700; text-transform: uppercase; }
+        .cmd-item { padding: 8px 16px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); }
+        .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--accent); }
 
         /* Toast */
         #toast {
-            position: fixed; bottom: 34px; right: 16px; background: var(--blue); color: var(--crust);
-            padding: 8px 16px; border-radius: 4px; font-size: 11px; font-weight: 800;
-            transform: translateY(100px); transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: fixed; bottom: 22px; right: 0; background: var(--accent); color: var(--status-fg);
+            padding: 4px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;
+            transform: translateY(100%); transition: transform 0.2s;
+            z-index: 200; border-radius: 0;
         }
         #toast.visible { transform: translateY(0); }
 
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--surface-hover); border-radius: 4px; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border: 2px solid var(--bg); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--highlight); }
+        ::-webkit-scrollbar-track { background: var(--bg); }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="btn icon-only" onclick="App.toggleSidebar()">
+    <button class="btn" onclick="App.toggleSidebar()" title="Sidebar">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
-    <div class="logo">AETHER<span>PRO</span></div>
+    <div class="logo">AETHER</div>
     
-    <button class="btn" onclick="Commands.trigger('newFile')">NEW</button>
-    <button class="btn" onclick="Commands.trigger('openFile')">OPEN</button>
-    <button class="btn" onclick="Commands.trigger('saveFile')">SAVE</button>
-    
-    <div class="spacer"></div>
-    
-    <button class="btn primary" onclick="Commands.trigger('togglePreview')">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-        PREVIEW
-    </button>
-    <button class="btn icon-only" onclick="Commands.showPalette()">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-    </button>
+    <div class="toolbar">
+        <div class="theme-swatches">
+            <div class="theme-swatch swatch-latte" onclick="Config.setTheme('latte')" title="Latte"></div>
+            <div class="theme-swatch swatch-frappe" onclick="Config.setTheme('frappe')" title="Frappe"></div>
+            <div class="theme-swatch swatch-macchiato" onclick="Config.setTheme('macchiato')" title="Macchiato"></div>
+            <div class="theme-swatch swatch-mocha" onclick="Config.setTheme('mocha')" title="Mocha"></div>
+        </div>
+        <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
+        <button class="btn" onclick="Commands.trigger('newFile')" title="New File">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button class="btn" onclick="Commands.trigger('openFile')" title="Open File">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="btn" onclick="Commands.trigger('saveFile')" title="Save">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
+        </button>
+        <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
+        <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Preview">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"/><path d="M12 13a1 1 0 100-2 1 1 0 000 2z"/></svg>
+        </button>
+        <button class="btn" onclick="Commands.showPalette()" title="Command Palette">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+    </div>
 </header>
 
 <div id="app-shell">
     <aside id="sidebar">
         <div class="side-header">
-            <span>Workspace</span>
-            <button class="btn icon-only" onclick="Commands.trigger('openFolder')">
+            <span>FILES</span>
+            <button class="btn" onclick="Commands.trigger('openFolder')" style="height:20px; width:20px;">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
         </div>
         <div id="file-tree" class="file-tree"></div>
         
-        <div class="side-header" style="border-top:1px solid var(--surface); padding-top:14px;">
-            <span id="opfs-header">Local (OPFS)</span>
-            <div style="display:flex; gap:2px">
-                <button class="btn icon-only" onclick="FileSys.createOPFSFile()" title="New OPFS File">
+        <div class="side-header" style="border-top:1px solid var(--border);">
+            <span id="opfs-header">OPFS</span>
+            <div style="display:flex;">
+                <button class="btn" onclick="FileSys.createOPFSFile()" style="height:20px; width:20px;">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 </button>
-                <button class="btn icon-only" onclick="FileSys.initOPFS()" title="Refresh OPFS">
+                <button class="btn" onclick="FileSys.initOPFS()" style="height:20px; width:20px;">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </button>
             </div>
         </div>
-        <div id="opfs-tree" class="file-tree" style="max-height: 220px;"></div>
+        <div id="opfs-tree" class="file-tree" style="max-height: 200px;"></div>
     </aside>
 
     <main>
         <div id="tabs-scroll"></div>
         <div class="breadcrumbs" id="breadcrumb-bar">
-            <span>root</span>
+            <span>~</span>
             <span>/</span>
-            <span id="bc-filename">--</span>
+            <span id="bc-filename">[No Name]</span>
         </div>
-
+        
         <div id="editor-split">
             <div id="code-stage">
-                <div id="gutter"></div>
-                <div id="hl-layer" class="code-layer"><code id="hl-code" class="language-javascript"></code></div>
-                <textarea id="input-layer" class="code-layer" spellcheck="false" wrap="off"></textarea>
+                <div id="gutter" class="code-font"></div>
+                <div id="hl-layer" class="code-layer code-font"><code id="hl-code" class="language-javascript"></code></div>
+                <textarea id="input-layer" class="code-layer code-font" spellcheck="false" wrap="off"></textarea>
                 <div id="resizer"></div>
             </div>
             
@@ -301,109 +398,115 @@
 </div>
 
 <footer>
-    <div style="display:flex; gap:24px;">
-        <span id="stat-file">--</span>
-        <span id="stat-lang">PLAIN TEXT</span>
+    <div style="display:flex; height:100%">
+        <span class="stat-box stat-primary">NORMAL</span>
+        <span class="stat-box stat-secondary" id="stat-file">--</span>
     </div>
-    <div style="display:flex; gap:24px;">
-        <span id="stat-pos">LN 1, COL 1</span>
-        <span id="stat-space">UTF-8</span>
+    <div style="display:flex; height:100%">
+        <span class="stat-box stat-secondary" id="stat-lang">TXT</span>
+        <span class="stat-box stat-secondary" id="stat-pos">1:1</span>
+        <span class="stat-box stat-primary" id="stat-enc">UTF-8</span>
     </div>
 </footer>
 
 <div id="palette-mask" class="overlay-mask" onclick="if(event.target===this) Commands.hidePalette()">
     <div class="dialog">
-        <input type="text" id="cmd-input" placeholder="Search commands..." autocomplete="off">
-        <div id="cmd-list" style="max-height: 320px; overflow-y: auto;"></div>
+        <input type="text" id="cmd-input" placeholder="> Type command..." autocomplete="off">
+        <div id="cmd-list" style="max-height: 300px; overflow-y: auto;"></div>
     </div>
 </div>
 
 <div id="prompt-mask" class="overlay-mask">
     <div class="dialog">
-        <div style="padding:16px 20px; font-size:10px; font-weight:800; background:var(--crust); color:var(--overlay);" id="prompt-msg">ACTION REQUIRED</div>
-        <input type="text" id="prompt-input" autocomplete="off">
-        <div style="display:flex; padding:12px; gap:8px; background: var(--crust)">
-            <button class="btn" onclick="Prompt.close()" style="flex:1; justify-content:center;">CANCEL</button>
-            <button class="btn primary" id="prompt-ok" style="flex:1; justify-content:center;">CONTINUE</button>
+        <div style="padding:10px 16px; font-weight:800; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:11px; text-transform:uppercase;" id="prompt-msg">Input</div>
+        <input type="text" id="prompt-input" autocomplete="off" style="background:var(--bg)">
+        <div style="display:flex; padding:8px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
+            <button class="btn" style="width:auto; padding:0 8px;" onclick="Prompt.close()">ESC</button>
+            <button class="btn primary" style="width:auto; padding:0 8px;" id="prompt-ok">RET</button>
         </div>
     </div>
 </div>
 
-<div id="toast">Operation Successful</div>
+<div id="toast">Ready</div>
 
 <script>
 /**
- * AETHER v3 Pro - Obsidian Edition
- * Studio-grade minimalist logic with persistent OPFS and high-density UI
+ * AETHER v3 - Flux Minimalist
  */
 
-const Store = {
-    state: {
-        buffers: [],
-        activeId: null,
-        workspace: null,
-        opfsRoot: null,
-        previewMode: false
+// --- CONFIG ---
+const Config = {
+    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220 },
+    state: {},
+    init() {
+        try { this.state = { ...this.defaults, ...JSON.parse(localStorage.getItem('aether_config') || '{}') }; } 
+        catch (e) { this.state = { ...this.defaults }; }
+        this.apply();
     },
+    save() {
+        localStorage.setItem('aether_config', JSON.stringify(this.state));
+        this.apply();
+        UI.toast("Config Written");
+    },
+    setTheme(name) {
+        this.state.theme = name;
+        this.save();
+    },
+    apply() {
+        document.body.setAttribute('data-theme', this.state.theme);
+        document.documentElement.style.setProperty('--sidebar-w', this.state.sidebarWidth + 'px');
+        
+        // Apply font size to specific shared class
+        const els = document.querySelectorAll('.code-font');
+        els.forEach(el => el.style.fontSize = this.state.fontSize + 'px');
+        
+        const prismLink = document.getElementById('prism-theme');
+        prismLink.href = this.state.theme === 'latte' 
+            ? 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css' 
+            : 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
+    }
+};
+
+const Store = {
+    state: { buffers: [], activeId: null, workspace: null, opfsRoot: null, previewMode: false },
     subs: [],
-    
     get activeBuffer() { return this.state.buffers.find(b => b.id === this.state.activeId); },
     subscribe(fn) { this.subs.push(fn); },
     notify(event) { this.subs.forEach(fn => fn(event, this.state)); },
-    
-    addBuffer(buffer) {
-        this.state.buffers.push(buffer);
-        this.state.activeId = buffer.id;
-        this.notify('buffer_added');
-        App.saveSession();
-    },
-    
+    addBuffer(b) { this.state.buffers.push(b); this.state.activeId = b.id; this.notify('buffer_added'); App.saveSession(); },
     closeBuffer(id) {
         const idx = this.state.buffers.findIndex(b => b.id === id);
         if (idx === -1) return;
         this.state.buffers.splice(idx, 1);
-        if (this.state.activeId === id) {
-            this.state.activeId = this.state.buffers.length ? this.state.buffers[Math.max(0, idx - 1)].id : null;
-        }
-        this.notify('buffer_closed');
-        App.saveSession();
+        if (this.state.activeId === id) this.state.activeId = this.state.buffers.length ? this.state.buffers[Math.max(0, idx - 1)].id : null;
+        this.notify('buffer_closed'); App.saveSession();
     },
-    
-    setActive(id) {
-        if (this.state.activeId === id) return;
-        this.state.activeId = id;
-        this.notify('buffer_switched');
-        App.saveSession();
+    setActive(id) { if(this.state.activeId !== id) { this.state.activeId = id; this.notify('buffer_switched'); App.saveSession(); } },
+    updateContent(id, c) { 
+        const b = this.state.buffers.find(b => b.id === id); 
+        if(b && b.content !== c) { b.content = c; if(!b.dirty) { b.dirty=true; this.notify('buffer_dirty'); } } 
     },
-    
-    updateContent(id, content) {
-        const b = this.state.buffers.find(b => b.id === id);
-        if (b && b.content !== content) {
-            b.content = content;
-            if (!b.dirty) { b.dirty = true; this.notify('buffer_dirty'); }
-        }
-    },
-    
-    markSaved(id) {
-        const b = this.state.buffers.find(b => b.id === id);
-        if (b) { b.dirty = false; this.notify('buffer_saved'); }
-    }
+    markSaved(id) { const b = this.state.buffers.find(b => b.id === id); if(b) { b.dirty=false; this.notify('buffer_saved'); } }
 };
 
 const Editor = {
-    els: {
-        input: document.getElementById('input-layer'),
-        hl: document.getElementById('hl-code'),
-        hlLayer: document.getElementById('hl-layer'),
-        gutter: document.getElementById('gutter')
-    },
-
+    els: { input: null, hl: null, hlLayer: null, gutter: null },
     init() {
+        this.els = {
+            input: document.getElementById('input-layer'),
+            hl: document.getElementById('hl-code'),
+            hlLayer: document.getElementById('hl-layer'),
+            gutter: document.getElementById('gutter')
+        };
+        
+        // Critical Scroll Sync Logic
         this.els.input.addEventListener('scroll', () => {
+            const top = this.els.input.scrollTop;
+            const left = this.els.input.scrollLeft;
             requestAnimationFrame(() => {
-                this.els.hlLayer.scrollTop = this.els.input.scrollTop;
-                this.els.hlLayer.scrollLeft = this.els.input.scrollLeft;
-                this.els.gutter.scrollTop = this.els.input.scrollTop;
+                this.els.hlLayer.scrollTop = top;
+                this.els.hlLayer.scrollLeft = left;
+                this.els.gutter.scrollTop = top;
             });
         }, { passive: true });
 
@@ -416,50 +519,51 @@ const Editor = {
         });
 
         this.els.input.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                document.execCommand('insertText', false, '    ');
-            }
+            if (e.key === 'Tab') { e.preventDefault(); document.execCommand('insertText', false, '    '); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
             setTimeout(() => App.updateStats(), 0);
         });
-
+        
         this.els.input.addEventListener('click', () => App.updateStats());
     },
-
     load(content, filename) {
         this.els.input.value = content;
         this.highlight(content, filename);
         this.updateGutter(content);
+        // Reset scroll
         this.els.input.scrollTop = 0;
+        this.els.hlLayer.scrollTop = 0;
+        this.els.gutter.scrollTop = 0;
+        
         App.updateStats();
         App.debouncePreview(true);
     },
-
     highlight(code, filename) {
         const buf = Store.activeBuffer;
         const name = filename || (buf ? buf.name : 'txt');
         const ext = name.split('.').pop().toLowerCase();
-        const map = {
-            'js': 'javascript', 'ts': 'javascript', 'py': 'python', 
-            'html': 'markup', 'css': 'css', 'json': 'json', 'md': 'markdown'
-        };
-        const lang = map[ext] || 'clike';
+        
+        let lang = 'clike';
+        if(ext === 'html') lang = 'markup';
+        else if(ext === 'js' || ext === 'ts') lang = 'javascript';
+        else if(ext === 'css') lang = 'css';
+        else if(ext === 'json') lang = 'json';
+        else if(ext === 'py') lang = 'python';
+        else if(ext === 'md') lang = 'markdown';
+        
         this.els.hl.className = `language-${lang}`;
+        
         if (Prism.languages[lang]) {
             this.els.hl.innerHTML = Prism.highlight(code, Prism.languages[lang], lang) + '<br>'; 
         } else {
             this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
         }
     },
-
     updateGutter(text) {
         const lines = text.split('\n').length;
         const currentLine = this.els.input.value.substring(0, this.els.input.selectionStart).split('\n').length;
         let html = '';
-        for (let i = 1; i <= lines; i++) {
-            const active = i === currentLine ? 'active-line' : '';
-            html += `<div class="${active}">${i}</div>`;
-        }
+        for (let i = 1; i <= lines; i++) html += `<div class="${i === currentLine ? 'active-line' : ''}">${i}</div>`;
         this.els.gutter.innerHTML = html;
     }
 };
@@ -471,11 +575,8 @@ const FileSys = {
             Store.state.opfsRoot = await navigator.storage.getDirectory();
             this.renderOPFS();
             UI.toast('OPFS Mounted');
-        } catch (e) { 
-            document.getElementById('opfs-header').innerText = "MEMORY-STORAGE ONLY";
-        }
+        } catch (e) { document.getElementById('opfs-header').innerText = "MEMORY ONLY"; }
     },
-
     async renderOPFS() {
         if (!Store.state.opfsRoot) return;
         const div = document.getElementById('opfs-tree');
@@ -484,30 +585,26 @@ const FileSys = {
             if (handle.kind === 'file') {
                 const el = document.createElement('div');
                 el.className = 'tree-item';
-                el.innerHTML = `📄 ${name}`;
-                el.onclick = async () => {
-                    const file = await handle.getFile();
-                    App.openBuffer(name, await file.text(), handle, 'opfs');
-                };
+                el.innerHTML = `> ${name}`;
+                el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
                 div.appendChild(el);
             }
         }
     },
-
     async createOPFSFile() {
         if (!Store.state.opfsRoot) return;
-        Prompt.open("NEW OPFS FILENAME:", "script.js", async (name) => {
+        Prompt.open("New OPFS File:", "script.js", async (name) => {
             try {
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
                 this.renderOPFS();
                 UI.toast(`Created ${name}`);
-            } catch (e) { UI.toast('Failed to create file', true); }
+            } catch (e) { UI.toast('Error creating file', true); }
         });
     },
-
     async saveToOPFS(buf) {
-        if (!Store.state.opfsRoot) { UI.toast('OPFS unavailable', true); return; }
+        if (buf.name === 'config.json') return this.saveConfigBuffer(buf);
+        if (!Store.state.opfsRoot) { UI.toast('OPFS unavailable'); return; }
         try {
             const handle = await Store.state.opfsRoot.getFileHandle(buf.name, { create: true });
             const writable = await handle.createWritable();
@@ -518,10 +615,9 @@ const FileSys = {
             Store.markSaved(buf.id);
             this.renderOPFS();
             UI.renderTabs();
-            UI.toast('Saved to OPFS');
-        } catch (e) { UI.toast('OPFS Write Error', true); }
+            UI.toast(`"${buf.name}" written`);
+        } catch (e) { UI.toast('Write failed'); }
     },
-
     async openDiskFile() {
         try {
             const [handle] = await window.showOpenFilePicker();
@@ -529,29 +625,27 @@ const FileSys = {
             App.openBuffer(file.name, await file.text(), handle, 'disk');
         } catch (e) {}
     },
-
     async openFolder() {
         try {
             const handle = await window.showDirectoryPicker();
             this.renderWorkspace(handle);
         } catch(e) {}
     },
-
     async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0) {
         if(level === 0) parentEl.innerHTML = '';
         for await (const [name, handle] of dirHandle.entries()) {
             const el = document.createElement('div');
             el.className = 'tree-item';
-            el.style.paddingLeft = `${(level * 6) + 10}px`;
-            el.innerHTML = `${handle.kind === 'directory' ? '📁' : '📄'} ${name}`;
+            el.style.paddingLeft = `${(level * 10) + 10}px`;
+            el.innerHTML = `${handle.kind==='directory' ? '+ ' : '> '}${name}`;
             if (handle.kind === 'file') {
                 el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
             }
             parentEl.appendChild(el);
         }
     },
-
     async saveBuffer(buf) {
+        if (buf.name === 'config.json' && buf.kind === 'config') return this.saveConfigBuffer(buf);
         try {
             if (!buf.handle) {
                 buf.handle = await window.showSaveFilePicker({ suggestedName: buf.name });
@@ -561,56 +655,62 @@ const FileSys = {
             await writable.write(buf.content);
             await writable.close();
             Store.markSaved(buf.id);
-            UI.toast(`Saved ${buf.name}`);
-        } catch (e) { UI.toast('Save Interrupted', true); }
+            UI.toast(`"${buf.name}" written`);
+        } catch (e) { UI.toast('Write Cancelled'); }
+    },
+    saveConfigBuffer(buf) {
+        try {
+            Config.state = JSON.parse(buf.content);
+            Config.save();
+            Store.markSaved(buf.id);
+        } catch(e) { UI.toast("Invalid JSON"); }
     }
 };
 
 const App = {
     init() {
+        Config.init();
+        Editor.init(); 
+
         Store.subscribe((event) => {
             if (['buffer_added', 'buffer_closed', 'buffer_switched'].includes(event)) {
                 UI.renderTabs();
                 const buf = Store.activeBuffer;
                 Editor.load(buf?.content || '', buf?.name || 'txt');
-                document.getElementById('bc-filename').innerText = buf?.name || '--';
+                document.getElementById('bc-filename').innerText = buf?.name || '[No Name]';
             }
             if (event === 'buffer_dirty') UI.renderTabs();
         });
-
+        
         const saved = JSON.parse(localStorage.getItem('aether_v3_session') || '[]');
         if (saved.length) saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
-        else this.openBuffer('getting_started.md', '# Aether v3 Pro\n\nStudio-grade minimalist editor.\n\n- **Save to OPFS** for persistent browser storage.\n- **Preview** for live HTML/Markdown.\n- **Ctrl+P** for Command Palette.', null, 'memory');
+        else this.openBuffer('welcome.txt', 'Aether v3 - Minimalist\n\nUse Command Palette (Right Icon) for actions.', null, 'memory');
 
-        Editor.init();
         FileSys.initOPFS();
     },
-
     openBuffer(name, content, handle, kind) {
         const existing = Store.state.buffers.find(b => b.name === name);
         if (existing) return Store.setActive(existing.id);
         Store.addBuffer({ id: 'b'+Date.now(), name, content, handle, kind, dirty: false });
     },
-
     closeBuffer(id, e) {
-        e.stopPropagation();
+        if(e) e.stopPropagation();
         Store.closeBuffer(id);
     },
-
     updateStats() {
         const input = document.getElementById('input-layer');
         const text = input.value.substring(0, input.selectionStart);
         const lines = text.split('\n').length;
         const cols = text.split('\n').pop().length + 1;
-        document.getElementById('stat-pos').innerText = `LN ${lines}, COL ${cols}`;
+        document.getElementById('stat-pos').innerText = `${lines}:${cols}`;
+        
         const buf = Store.activeBuffer;
         if(buf) {
-            document.getElementById('stat-file').innerText = buf.name.toUpperCase();
+            document.getElementById('stat-file').innerText = buf.name;
             document.getElementById('stat-lang').innerText = buf.name.split('.').pop().toUpperCase();
         }
         Editor.updateGutter(input.value);
     },
-
     debouncePreview(immediate) {
         if (!Store.state.previewMode) return;
         clearTimeout(this.pvTimer);
@@ -619,15 +719,24 @@ const App = {
             if (!buf) return;
             const f = document.getElementById('preview-frame');
             const ext = buf.name.split('.').pop().toLowerCase();
-            if (ext === 'md') f.srcdoc = `<style>body{font-family:system-ui,-apple-system,sans-serif;padding:2rem;line-height:1.6;color:#222;background:#fff;} pre{background:#f4f4f7;padding:1rem;border-radius:4px;overflow:auto;} code{font-family:monospace;background:#f4f4f7;padding:2px 4px;border-radius:3px;}</style>${marked.parse(buf.content)}`;
-            else if (ext === 'html') f.srcdoc = buf.content;
-            else f.srcdoc = '<div style="font-family:sans-serif;padding:2rem;color:#888;">No live preview available for this file type.</div>';
+            
+            const style = `<style>body{background:#eff1f5;color:#4c4f69;font-family:monospace;padding:20px;}</style>`;
+            
+            if (ext === 'md') {
+                f.srcdoc = style + marked.parse(buf.content);
+            } else if (ext === 'html') {
+                f.srcdoc = buf.content;
+            } else {
+                f.srcdoc = style + `<pre>${buf.content}</pre>`;
+            }
         };
         if(immediate) run(); else this.pvTimer = setTimeout(run, 500);
     },
-
     toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); },
-    saveSession() { localStorage.setItem('aether_v3_session', JSON.stringify(Store.state.buffers.map(b => ({name:b.name, content:b.content})))); }
+    saveSession() { 
+        const sessionData = Store.state.buffers.filter(b => b.kind !== 'config').map(b => ({name:b.name, content:b.content}));
+        localStorage.setItem('aether_v3_session', JSON.stringify(sessionData)); 
+    }
 };
 
 const UI = {
@@ -637,32 +746,29 @@ const UI = {
         Store.state.buffers.forEach(b => {
             const el = document.createElement('div');
             el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
-            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><span class="tab-close" onclick="App.closeBuffer('${b.id}', event)">✕</span>`;
+            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><div class="tab-close" onclick="App.closeBuffer('${b.id}', event)">×</div>`;
             el.onclick = () => Store.setActive(b.id);
             con.appendChild(el);
         });
     },
     toast(msg) {
         const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.classList.add('visible');
-        setTimeout(() => t.classList.remove('visible'), 3000);
+        t.innerText = msg; t.classList.add('visible');
+        setTimeout(() => t.classList.remove('visible'), 2500);
     }
 };
 
 const Commands = {
     list: [
-        { id: 'newFile', name: 'New Memory File', hint: 'TMP', fn: () => Prompt.open("NEW FILENAME:", "script.js", (n) => App.openBuffer(n, "", null, 'memory')) },
-        { id: 'newOPFS', name: 'Create OPFS File', hint: 'PERSISTENT', fn: () => FileSys.createOPFSFile() },
-        { id: 'openFile', name: 'Open From Disk', hint: 'OS', fn: () => FileSys.openDiskFile() },
-        { id: 'saveFile', name: 'Save to Disk', hint: 'DOWNLOAD', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-        { id: 'saveToOPFS', name: 'Sync to OPFS', hint: 'SAVE', fn: () => Store.activeBuffer && FileSys.saveToOPFS(Store.activeBuffer) },
-        { id: 'togglePreview', name: 'Toggle Live Preview', hint: 'UI', fn: () => {
+        { id: 'newFile', name: 'New File', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
+        { id: 'openFile', name: 'Open File', fn: () => FileSys.openDiskFile() },
+        { id: 'saveFile', name: 'Save File', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
+        { id: 'settings', name: 'Open Config', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
+        { id: 'togglePreview', name: 'Toggle Preview', fn: () => {
             Store.state.previewMode = !Store.state.previewMode;
             document.body.classList.toggle('preview-active', Store.state.previewMode);
             App.debouncePreview(true);
-        }},
-        { id: 'toggleSide', name: 'Toggle Sidebar', hint: 'VIEW', fn: () => App.toggleSidebar() }
+        }}
     ],
     trigger(id) { this.list.find(c => c.id === id).fn(); },
     showPalette() {
@@ -672,12 +778,11 @@ const Commands = {
         this.list.forEach(cmd => {
             const el = document.createElement('div');
             el.className = 'cmd-item';
-            el.innerHTML = `<span>${cmd.name}</span><span class="cmd-hint">${cmd.hint}</span>`;
+            el.innerHTML = `<span>${cmd.name}</span>`;
             el.onclick = () => { cmd.fn(); this.hidePalette(); };
             list.appendChild(el);
         });
         mask.style.display = 'flex';
-        document.getElementById('cmd-input').value = '';
         document.getElementById('cmd-input').focus();
     },
     hidePalette() { document.getElementById('palette-mask').style.display = 'none'; }
@@ -715,7 +820,6 @@ window.onload = () => {
     window.onkeydown = (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); Commands.showPalette(); }
         if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); Commands.trigger('toggleSide'); }
     };
 };
 </script>
