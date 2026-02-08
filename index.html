@@ -3,60 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" id="meta-theme" content="#eff1f5">
     <title>Aether Editor</title>
     
-    <!-- Prism Syntax Highlighting -->
+    <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" id="prism-theme-link" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <!-- Markdown Renderer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
-            /* Catppuccin Latte (Default) */
+            /* Catppuccin Latte */
             --base: #eff1f5; --text: #4c4f69; --lavender: #7287fd;
             --crust: #ccd0da; --mantle: #e6e9ef; --subtext: #6c6f85;
             --border: #ccd0da;
             --selection: rgba(114, 135, 253, 0.3);
-            
-            /* Syntax Highlighting - Latte */
-            --token-comment: #9ca0b0;
-            --token-string: #40a02b;
-            --token-keyword: #8839ef;
-            --token-function: #1e66f5;
-            --token-attr: #fe640b;
-            --token-selector: #d20f39;
-            --token-property: #179287;
-            --token-operator: #04a5e5;
-
-            --header-h: 40px;
-            --footer-h: 32px;
-            --line-height: 1.6;
-            --sidebar-w: 260px;
+            --header-h: 40px; --footer-h: 32px; --line-height: 1.6; --sidebar-w: 260px;
+            /* Tokens */
+            --token-comment: #9ca0b0; --token-string: #40a02b; --token-keyword: #8839ef;
+            --token-function: #1e66f5; --token-attr: #fe640b; --token-selector: #d20f39;
+            --token-property: #179287; --token-operator: #04a5e5;
         }
 
         .theme-frappe {
-            /* Catppuccin Frappe */
             --base: #303446; --text: #c6d0f5; --lavender: #babbf1;
             --crust: #232634; --mantle: #292c3c; --subtext: #a5adce;
-            --border: #232634;
-            --selection: rgba(186, 187, 241, 0.4);
-
-            /* Syntax Highlighting - Frappe */
-            --token-comment: #838ba7;
-            --token-string: #a6d189;
-            --token-keyword: #ca9ee6;
-            --token-function: #8caaee;
-            --token-attr: #ef9f76;
-            --token-selector: #e78284;
-            --token-property: #81c8be;
-            --token-operator: #99d1db;
+            --border: #232634; --selection: rgba(186, 187, 241, 0.4);
+            --token-comment: #838ba7; --token-string: #a6d189; --token-keyword: #ca9ee6;
+            --token-function: #8caaee; --token-attr: #ef9f76; --token-selector: #e78284;
+            --token-property: #81c8be; --token-operator: #99d1db;
         }
 
         * { box-sizing: border-box; }
@@ -64,181 +47,79 @@
             margin: 0; padding: 0; background-color: var(--base); 
             height: 100vh; width: 100vw; overflow: hidden; 
             font-family: 'Fira Code', 'Cascadia Code', 'Source Code Pro', 'Courier New', monospace;
-            color: var(--text);
-            transition: background 0.2s ease, color 0.2s ease;
-            -webkit-font-smoothing: antialiased;
+            color: var(--text); -webkit-font-smoothing: antialiased;
         }
 
-        header {
-            display: flex; flex-direction: column;
-            background: var(--mantle); border-bottom: 1px solid var(--border);
-            height: var(--header-h); z-index: 100;
-        }
-
-        #toolbar {
-            height: var(--header-h); display: flex; align-items: center;
-            padding: 0 15px; gap: 8px;
-        }
-
-        .logo {
-            font-weight: 900;
-            font-size: 0.9rem;
-            color: var(--lavender);
-            margin-right: 20px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+        header { display: flex; flex-direction: column; background: var(--mantle); border-bottom: 1px solid var(--border); height: var(--header-h); z-index: 100; }
+        #toolbar { height: var(--header-h); display: flex; align-items: center; padding: 0 15px; gap: 6px; }
+        .logo { font-weight: 900; font-size: 0.85rem; color: var(--lavender); margin-right: 20px; letter-spacing: 2px; text-transform: uppercase; }
 
         .toolbar-btn {
-            height: 28px; padding: 0 10px; border-radius: 6px;
-            font-size: 0.7rem; font-weight: 600; cursor: pointer;
+            height: 26px; padding: 0 10px; border-radius: 4px;
+            font-size: 0.65rem; font-weight: 700; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             background: transparent; border: 1px solid transparent;
-            color: var(--subtext); transition: all 0.2s;
-            user-select: none; text-transform: uppercase;
+            color: var(--subtext); transition: all 0.1s; user-select: none; text-transform: uppercase;
         }
         .toolbar-btn:hover { background: var(--base); color: var(--lavender); border-color: var(--border); }
         .toolbar-btn.active { color: var(--lavender); background: var(--crust); }
 
         #main-layout { display: flex; width: 100%; height: calc(100vh - var(--header-h) - var(--footer-h)); }
-
-        #sidebar {
-            width: var(--sidebar-w); background: var(--mantle);
-            border-right: 1px solid var(--border); display: flex; flex-direction: column;
-            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0;
-            overflow: hidden;
-        }
+        #sidebar { width: var(--sidebar-w); background: var(--mantle); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: margin-left 0.2s ease; flex-shrink: 0; overflow: hidden; }
         .hide-sidebar #sidebar { margin-left: calc(-1 * var(--sidebar-w)); }
 
-        #sidebar-header {
-            padding: 12px 15px; font-size: 0.65rem; font-weight: bold;
-            color: var(--lavender); text-transform: uppercase; letter-spacing: 0.05rem;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
+        #sidebar-header { padding: 12px 15px; font-size: 0.65rem; font-weight: bold; color: var(--lavender); text-transform: uppercase; border-bottom: 1px solid var(--border); }
         #tree-container { flex: 1; overflow-y: auto; padding: 10px 0; font-size: 0.72rem; }
-        .tree-section-header {
-            padding: 10px 15px 5px; font-weight: 700; text-transform: uppercase; 
-            letter-spacing: 0.05em; color: var(--subtext); font-size: 0.6rem;
-        }
-        .tree-node { cursor: pointer; user-select: none; }
-        .tree-item {
-            padding: 6px 15px; display: flex; align-items: center; gap: 8px;
-            color: var(--subtext); transition: all 0.1s; white-space: nowrap; cursor: pointer;
-        }
+        .tree-section-header { padding: 12px 15px 5px; font-weight: 700; text-transform: uppercase; color: var(--subtext); font-size: 0.6rem; display: flex; justify-content: space-between; align-items: center; }
+        .tree-item { padding: 6px 15px; display: flex; align-items: center; gap: 8px; color: var(--subtext); transition: all 0.1s; white-space: nowrap; cursor: pointer; position: relative; }
         .tree-item:hover { background: var(--crust); color: var(--text); }
-        .tree-item.active { background: var(--base); color: var(--lavender); font-weight: 600; border-right: 3px solid var(--lavender); }
+        .tree-item.active { background: var(--base); color: var(--lavender); font-weight: 600; border-right: 2px solid var(--lavender); }
         
-        .tree-folder::before { content: "[+]"; width: 22px; display: inline-block; font-family: monospace; color: var(--lavender); opacity: 0.7; }
-        .tree-folder.open::before { content: "[-]"; }
-        .tree-file::before { content: "•"; color: var(--subtext); opacity: 0.5; width: 12px; }
-        
-        .tree-children { padding-left: 12px; display: none; border-left: 1px solid var(--crust); margin-left: 20px; }
+        .type-tag { font-size: 0.55rem; font-weight: 800; padding: 1px 4px; border-radius: 2px; background: var(--crust); color: var(--subtext); margin-right: 4px; opacity: 0.7; }
+        .active .type-tag { background: var(--lavender); color: var(--base); opacity: 1; }
+
+        .tree-children { padding-left: 0; display: none; margin-left: 15px; border-left: 1px solid var(--border); }
         .tree-children.open { display: block; }
+        .unlock-prompt { margin: 10px 15px; padding: 10px; border: 1px dashed var(--lavender); color: var(--lavender); border-radius: 4px; cursor: pointer; text-align: center; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; }
 
         #container { position: relative; display: flex; flex: 1; height: 100%; overflow: hidden; }
+        #search-box, #prompt-box { position: absolute; top: 10px; right: 20px; background: var(--mantle); border: 1px solid var(--lavender); border-radius: 4px; padding: 12px; z-index: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; flex-direction: column; gap: 8px; min-width: 280px; }
+        #search-box input, #prompt-box input { background: var(--base); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 2px; font-family: inherit; font-size: 0.75rem; outline: none; width: 100%; }
+        .search-actions, .prompt-actions { display: flex; gap: 5px; }
+        .search-actions .btn, .prompt-actions .btn { flex: 1; font-size: 0.65rem; padding: 6px; cursor: pointer; border-radius: 2px; border: 1px solid var(--border); background: var(--base); color: var(--text); text-transform: uppercase; font-weight: bold; }
+        .btn-primary { background: var(--lavender) !important; color: white !important; border: none !important; }
 
-        /* Search Box Styles */
-        #search-box {
-            position: absolute; top: 15px; right: 25px;
-            background: var(--mantle); border: 1px solid var(--lavender);
-            border-radius: 8px; padding: 12px; z-index: 500;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            display: none; flex-direction: column; gap: 8px; min-width: 300px;
-        }
-        #search-box input {
-            background: var(--base); border: 1px solid var(--border);
-            color: var(--text); padding: 8px 12px; border-radius: 6px;
-            font-family: inherit; font-size: 0.75rem; outline: none;
-            width: 100%;
-        }
-        #search-box input:focus { border-color: var(--lavender); }
-        #search-box .search-actions { display: flex; gap: 6px; margin-top: 4px; }
-        #search-box .search-actions .btn { flex: 1; font-size: 0.65rem; padding: 6px; }
+        #prompt-title { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: var(--lavender); margin-bottom: 2px; }
 
-        #gutter {
-            width: 55px; height: 100%; background: var(--mantle);
-            color: var(--token-comment); text-align: right; padding: 20px 10px;
-            font-size: 14px; line-height: var(--line-height); user-select: none; overflow: hidden;
-            border-right: 1px solid var(--border); flex-shrink: 0;
-        }
-
+        #gutter { width: 55px; height: 100%; background: var(--mantle); color: var(--token-comment); text-align: right; padding: 20px 10px; font-size: 14px; line-height: var(--line-height); user-select: none; overflow: hidden; border-right: 1px solid var(--border); flex-shrink: 0; }
         #editor-wrapper { position: relative; flex: 1; height: 100%; overflow: hidden; background: var(--base); }
-
-        #editor, #highlight-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            padding: 20px; margin: 0; line-height: var(--line-height); 
-            tab-size: 4; -moz-tab-size: 4; 
-            white-space: pre; word-wrap: normal;
-            overflow: auto; border: none; outline: none;
-            background: transparent; font-size: 14px; font-family: inherit;
-            font-variant-ligatures: none;
-        }
-
-        #editor { 
-            color: transparent; 
-            caret-color: var(--text); 
-            z-index: 2; 
-            resize: none; 
-            -webkit-text-fill-color: transparent;
-        }
-        
+        #editor, #highlight-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; margin: 0; line-height: var(--line-height); tab-size: 4; white-space: pre; word-wrap: normal; overflow: auto; border: none; outline: none; background: transparent; font-size: 14px; font-family: inherit; }
+        #editor { color: transparent; caret-color: var(--text); z-index: 2; resize: none; -webkit-text-fill-color: transparent; }
         #editor::selection { background: var(--selection); color: var(--text); -webkit-text-fill-color: var(--text); }
-
-        #highlight-layer { 
-            z-index: 1; pointer-events: none; scrollbar-width: none; 
-            color: var(--text) !important; background: transparent !important;
-        }
+        #highlight-layer { z-index: 1; pointer-events: none; scrollbar-width: none; color: var(--text) !important; background: transparent !important; }
         #highlight-layer::-webkit-scrollbar { display: none; }
-        
+        #highlight-content { display: block; width: 100%; min-height: 100%; font-family: inherit !important; font-size: inherit !important; line-height: inherit !important; }
+
         .token.comment { color: var(--token-comment) !important; font-style: italic; }
         .token.keyword { color: var(--token-keyword) !important; font-weight: bold; }
         .token.string { color: var(--token-string) !important; }
         .token.function { color: var(--token-function) !important; }
 
-        /* Preview System Styles */
-        #resizer { width: 4px; height: 100%; background: var(--border); cursor: col-resize; z-index: 30; flex-shrink: 0; display: none; }
-        #resizer:hover, #resizer.dragging { background: var(--lavender); width: 6px; }
-        
-        #preview-wrapper { width: 0; height: 100%; background: #fff; display: none; flex-shrink: 0; }
-        #preview-frame { width: 100%; height: 100%; border: none; background: white; }
+        #resizer { width: 2px; height: 100%; background: var(--border); cursor: col-resize; z-index: 30; flex-shrink: 0; display: none; }
+        #resizer:hover, #resizer.dragging { background: var(--lavender); width: 4px; }
+        #preview-wrapper { width: 0; height: 100%; background: #fff; display: none; flex-shrink: 0; overflow-y: auto; }
+        #preview-frame, #preview-render { width: 100%; height: 100%; border: none; background: white; padding: 0; margin: 0; }
+        #preview-render { padding: 40px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; color: #24292e; max-width: 800px; margin: 0 auto; }
+        #preview-render h1, #preview-render h2 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        #preview-render code { background: rgba(27,31,35,0.05); padding: 0.2em 0.4em; border-radius: 3px; font-family: inherit; }
+        .show-preview #preview-wrapper, .show-preview #resizer { display: block; }
 
-        .show-preview #preview-wrapper { display: block; }
-        .show-preview #resizer { display: block; }
-
-        #status-bar {
-            height: var(--footer-h); width: 100%;
-            background: var(--mantle); border-top: 1px solid var(--border);
-            display: flex; align-items: stretch; padding: 0;
-            font-size: 0.62rem; color: var(--subtext); justify-content: space-between;
-            user-select: none;
-        }
+        #status-bar { height: var(--footer-h); width: 100%; background: var(--mantle); border-top: 1px solid var(--border); display: flex; align-items: stretch; padding: 0; font-size: 0.62rem; color: var(--subtext); justify-content: space-between; user-select: none; }
         .status-section { display: flex; align-items: stretch; }
-        .status-item {
-            display: flex; align-items: center; padding: 0 14px;
-            border-right: 1px solid var(--border); gap: 8px;
-        }
-        .status-value { color: var(--text); font-weight: 600; }
-
-        #modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            display: none; align-items: center; justify-content: center; z-index: 2000;
-            backdrop-filter: blur(2px);
-        }
-        .modal {
-            background: var(--base); color: var(--text); padding: 30px;
-            border-radius: 12px; width: 90%; max-width: 450px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .modal-btns { display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end; }
-        .btn { padding: 6px 15px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; }
-        .btn-primary { background: var(--lavender); color: #fff; }
-        .btn-ghost { background: transparent; color: var(--subtext); border: 1px solid var(--border); }
-
-        .hide-toolbar #app-header { display: none; }
-        .hide-toolbar #main-layout { height: calc(100vh - var(--footer-h)); }
-        .hide-lines #gutter { display: none; }
+        .status-item { display: flex; align-items: center; padding: 0 14px; border-right: 1px solid var(--border); gap: 8px; }
+        .status-value { color: var(--text); font-weight: 700; text-transform: uppercase; }
+        #toast { position: fixed; bottom: 50px; right: 20px; background: var(--mantle); color: var(--text); padding: 10px 20px; border-radius: 4px; border: 1px solid var(--lavender); font-size: 0.7rem; font-weight: 700; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; display: none; text-transform: uppercase; }
+        #toast.show { display: block; }
     </style>
 </head>
 <body class="theme-latte">
@@ -260,24 +141,30 @@
 </header>
 
 <div id="main-layout">
-    <aside id="sidebar">
-        <div id="sidebar-header">
-            <span>Explorer</span>
-            <button class="toolbar-btn" style="height: 20px; padding: 0 5px;" onclick="addNewBuffer()">+</button>
-        </div>
+    <aside id="sidebar" ondragover="event.preventDefault()" ondrop="handleFolderDrop(event)">
+        <div id="sidebar-header">Workspace</div>
         <div id="tree-container"></div>
     </aside>
 
     <div id="container">
-        <!-- Search & Replace UI -->
+        <!-- Find/Replace UI -->
         <div id="search-box">
             <input type="text" id="find-input" placeholder="Find text...">
             <input type="text" id="replace-input" placeholder="Replace with...">
             <div class="search-actions">
                 <button class="btn btn-primary" onclick="findNext()">Next</button>
-                <button class="btn btn-ghost" onclick="replaceCurrent()">Replace</button>
-                <button class="btn btn-ghost" onclick="replaceAll()">Replace All</button>
-                <button class="btn btn-ghost" style="flex:0; min-width:32px" onclick="toggleFind()">×</button>
+                <button class="btn" onclick="replaceCurrent()">Replace</button>
+                <button class="btn" onclick="replaceAll()">All</button>
+                <button class="btn" style="flex:0; min-width:30px" onclick="toggleFind()">[X]</button>
+            </div>
+        </div>
+        <!-- Prompt UI -->
+        <div id="prompt-box">
+            <div id="prompt-title">Prompt</div>
+            <input type="text" id="prompt-input" placeholder="...">
+            <div class="prompt-actions">
+                <button class="btn btn-primary" id="prompt-confirm">Confirm</button>
+                <button class="btn" id="prompt-cancel">Cancel</button>
             </div>
         </div>
 
@@ -288,6 +175,7 @@
         </div>
         <div id="resizer"></div>
         <div id="preview-wrapper">
+            <div id="preview-render" style="display:none"></div>
             <iframe id="preview-frame" sandbox="allow-scripts"></iframe>
         </div>
     </div>
@@ -295,66 +183,38 @@
 
 <div id="status-bar">
     <div class="status-section">
-        <div class="status-item">
-            <span id="stat-file" class="status-value">HELP.MD</span>
-            <span id="stat-dirty" style="color: var(--lavender); display: none;">●</span>
-        </div>
+        <div class="status-item"><span id="stat-file" class="status-value">...</span><span id="stat-dirty" style="color: var(--lavender); display: none; margin-left: 8px">[MOD]</span></div>
     </div>
     <div class="status-section">
-        <div class="status-item"><span id="stat-pos">LINE 1, COL 1</span></div>
-        <div class="status-item"><span id="stat-lang" class="status-value">MARKDOWN</span></div>
-        <div class="status-item">AETHER v1.0.0</div>
+        <div class="status-item"><span id="stat-pos">LN 1, COL 1</span></div>
+        <div class="status-item"><span id="stat-lang" class="status-value">...</span></div>
     </div>
 </div>
 
-<div id="modal-overlay">
-    <div class="modal">
-        <h3 id="modal-title" style="margin-top:0">Title</h3>
-        <p id="modal-msg">Message.</p>
-        <div class="modal-btns">
-            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-            <button id="modal-confirm" class="btn btn-primary">Confirm</button>
-        </div>
-    </div>
-</div>
+<div id="toast">Message</div>
 
 <script>
-    const HELP_MD = `
-# Aether Editor - Help
+    /* * PERSISTENCE & DB * */
+    const dbName = "AetherDB", storeName = "handles";
+    const dbRequest = indexedDB.open(dbName, 1);
+    let db;
+    dbRequest.onupgradeneeded = e => e.target.result.createObjectStore(storeName);
+    dbRequest.onsuccess = e => { db = e.target.result; init(); };
+    function setIDB(k, v) { const tx = db.transaction(storeName, "readwrite"); tx.objectStore(storeName).put(v, k); }
+    function getIDB(k) { return new Promise(res => { const tx = db.transaction(storeName, "readonly"); const req = tx.objectStore(storeName).get(k); req.onsuccess = () => res(req.result); }); }
 
-## Keyboard Shortcuts
+    const WELCOME_MD = `# Welcome to Aether\n\nAether is a minimalist, pure-text code and markdown editor designed for speed and clarity. Your environment is currently stored locally in your browser session.\n\n### Quick Start\n- **Create** a new file with the **NEW** button or \`Ctrl+N\`.\n- **Open** individual files or an entire **FOLDER** to start a workspace.\n- **Preview** your work using the **PREVIEW** button (\`Alt+P\`). Aether automatically detects HTML and Markdown.\n\n### The Workspace\nThe sidebar on the left shows your active **Buffers** (open files) and your **Workspace** (connected folder). Elements are tagged as **[DIR]** for directories and **[BUF]** for open documents.`.trim();
 
-### File Operations
-- **Ctrl + N**: Create New Buffer
-- **Ctrl + O**: Open Local File (System Picker)
-- **Ctrl + Shift + O**: Open Workspace Folder
-- **Ctrl + S**: Save Buffer (Silent if linked to file)
-- **Ctrl + K**: Open/Edit \`config.json\`
-
-### Navigation & UI
-- **Alt + B**: Toggle Sidebar Explorer
-- **Alt + H**: Open this Help file (\`help.md\`)
-- **Alt + P**: Toggle Live Preview
-- **Ctrl + F**: Toggle Search & Replace
-- **Ctrl + + / -**: Zoom In / Zoom Out
-
-### Editor Features
-- **Tab**: Insert 4 spaces
-- **Enter**: Smart Indentation
-
----
-*Aether v1.0.0 - "The mirror of the mind."*
-    `.trim();
+    const HELP_MD = `# Aether Help & Documentation\n\n### Keyboard Shortcuts\n- **Ctrl + S**: Save current buffer to disk.\n- **Ctrl + F**: Toggle find and replace interface.\n- **Ctrl + N**: Create a new scratch buffer.\n- **Ctrl + K**: Open the JSON configuration buffer.\n- **Alt + B**: Toggle sidebar visibility.\n- **Alt + P**: Toggle live preview pane.\n- **Esc**: Close search box.\n\n### Key Features\n- **Folder Support**: Drag and drop a folder into the sidebar to open a full project workspace.\n- **Automatic Context**: Aether detects file extensions to provide appropriate syntax highlighting and preview rendering.\n- **Persistence**: Your open buffers are saved in IndexedDB, meaning they persist even if you refresh the page.\n- **Theming**: Edit the \`config.json\` via \`Ctrl+K\` to switch between 'latte' and 'frappe' themes.`.trim();
 
     const state = {
         buffers: [],
         currentIndex: -1,
-        folderTree: null, // DirectoryHandle
+        folderTree: null,
+        isWorkspaceLocked: false,
+        lastLineCount: 0,
         settings: {
             theme: localStorage.getItem('ae_theme') || 'latte',
-            showLines: localStorage.getItem('ae_lines') !== 'false',
-            showToolbar: localStorage.getItem('ae_toolbar') !== 'false',
-            showSidebar: localStorage.getItem('ae_sidebar') !== 'false',
             showPreview: localStorage.getItem('ae_preview') === 'true',
             previewWidth: parseFloat(localStorage.getItem('ae_pwidth')) || 40,
             fontSize: parseInt(localStorage.getItem('ae_zoom')) || 14
@@ -366,512 +226,293 @@
     const highlightLayer = document.getElementById('highlight-layer');
     const gutter = document.getElementById('gutter');
     const treeContainer = document.getElementById('tree-container');
-    const previewWrapper = document.getElementById('preview-wrapper');
     const previewFrame = document.getElementById('preview-frame');
-    const resizer = document.getElementById('resizer');
+    const previewRender = document.getElementById('preview-render');
     const searchBox = document.getElementById('search-box');
+    const promptBox = document.getElementById('prompt-box');
 
-    function init() {
+    let highlightTimeout;
+
+    async function init() {
+        applySettings();
         const saved = JSON.parse(localStorage.getItem('ae_buffers')) || [];
-        if (saved.length === 0) {
-            addNewBuffer('help.md', HELP_MD);
+        if (!saved.length) {
+            addNewBuffer('welcome.md', WELCOME_MD);
         } else {
             state.buffers = saved.map(b => ({ ...b, modified: false, handle: null }));
-            
             const configBuf = state.buffers.find(b => b.name === 'config.json');
-            if (configBuf) {
-                try {
-                    const loadedSettings = JSON.parse(configBuf.content);
-                    state.settings = { ...state.settings, ...loadedSettings };
-                } catch (e) {
-                    console.error("Could not parse saved config.json on init");
-                }
-            }
-            
-            loadBuffer(parseInt(localStorage.getItem('ae_idx')) || 0);
+            if (configBuf) try { Object.assign(state.settings, JSON.parse(configBuf.content)); } catch(e) {}
+            loadBuffer(parseInt(localStorage.getItem('ae_idx')) || 0, true);
         }
-        
-        applySettings();
+        const storedHandle = await getIDB("workspace_root");
+        if (storedHandle) { state.folderTree = storedHandle; state.isWorkspaceLocked = true; }
         setupEventListeners();
         renderTree();
+        updateUI();
     }
 
-    /**
-     * Robust check for existing buffers.
-     * Prioritizes Handle comparison for local files.
-     */
-    async function findExistingBufferIndex(handle, name) {
-        for (let i = 0; i < state.buffers.length; i++) {
-            const b = state.buffers[i];
-            if (handle && b.handle) {
-                try {
-                    if (await handle.isSameEntry(b.handle)) return i;
-                } catch(e) {}
-            } else if (!handle && !b.handle && b.name === name) {
-                return i;
+    /* * FILE OPS * */
+    async function verifyPermission(h) {
+        if (!h) return false;
+        if ((await h.queryPermission({mode: 'readwrite'})) === 'granted') return true;
+        try { return (await h.requestPermission({mode: 'readwrite'})) === 'granted'; } catch(e) { return false; }
+    }
+
+    async function handleFolderDrop(e) {
+        e.preventDefault();
+        const items = [...e.dataTransfer.items];
+        for (const item of items) {
+            if (item.kind === 'file' && item.getAsFileSystemHandle) {
+                const handle = await item.getAsFileSystemHandle();
+                if (handle.kind === 'directory') {
+                    state.folderTree = handle; state.isWorkspaceLocked = false;
+                    await setIDB("workspace_root", handle); renderTree(); return;
+                }
             }
         }
-        return -1;
     }
 
-    function loadBuffer(index) {
-        if (index < 0 || index >= state.buffers.length) return;
-        // Save current editor content to the current buffer before switching
-        if (state.currentIndex !== -1 && state.buffers[state.currentIndex]) {
-            state.buffers[state.currentIndex].content = editor.value;
+    async function openFile() {
+        if (!window.showOpenFilePicker) {
+            const inp = document.createElement('input'); inp.type = 'file';
+            inp.onchange = e => { const f = e.target.files[0]; const r = new FileReader(); r.onload = res => addNewBuffer(f.name, res.target.result); r.readAsText(f); };
+            inp.click(); return;
         }
-        state.currentIndex = index;
-        localStorage.setItem('ae_idx', index);
-        const buf = state.buffers[index];
+        try {
+            const [h] = await window.showOpenFilePicker();
+            for (let i=0; i<state.buffers.length; i++) if (state.buffers[i].handle && await h.isSameEntry(state.buffers[i].handle)) { loadBuffer(i); return; }
+            addNewBuffer(h.name, await (await h.getFile()).text(), h);
+        } catch(e) {}
+    }
+
+    async function openFolder() {
+        try { state.folderTree = await window.showDirectoryPicker(); setIDB("workspace_root", state.folderTree); state.isWorkspaceLocked = false; renderTree(); } catch(e) {}
+    }
+
+    async function saveFile() {
+        const buf = state.buffers[state.currentIndex]; if (!buf) return;
+        if (buf.name === 'config.json') try { Object.assign(state.settings, JSON.parse(editor.value)); applySettings(); } catch(e) {}
+        if (!window.showSaveFilePicker && !buf.handle) {
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([editor.value])); a.download = buf.name; a.click();
+            buf.modified = false; updateUI(); return;
+        }
+        try {
+            if (!buf.handle) buf.handle = await window.showSaveFilePicker({suggestedName: buf.name});
+            if (await verifyPermission(buf.handle)) {
+                const w = await buf.handle.createWritable(); await w.write(editor.value); await w.close();
+                buf.name = buf.handle.name; // Update name in case it changed in Save dialog
+                buf.modified = false; 
+                showToast(`Saved: ${buf.name}`); 
+                updateUI(); renderTree(); saveState();
+            }
+        } catch(e) { showToast("Disk Save Failed"); }
+    }
+
+    /* * BUFFERS * */
+    function loadBuffer(idx, skipSync = false) {
+        if (idx < 0 || idx >= state.buffers.length) return;
+        if (!skipSync && state.currentIndex !== -1) state.buffers[state.currentIndex].content = editor.value;
+        state.currentIndex = idx;
+        const buf = state.buffers[idx];
         editor.value = buf.content;
-        updateUI();
-        refreshHighlighter();
-        updateStats();
+        localStorage.setItem('ae_idx', idx);
+        refreshHighlighter(true); updateStats(); renderTree(); updateUI();
         if (state.settings.showPreview) updatePreview();
     }
 
     function addNewBuffer(name = 'untitled.txt', content = '', handle = null) {
-        const id = Date.now().toString(36);
-        state.buffers.push({ id, name, content, modified: false, handle });
+        state.buffers.push({ id: Date.now().toString(36), name, content, modified: false, handle });
         loadBuffer(state.buffers.length - 1);
-        renderTree();
         saveState();
     }
 
-    async function openFile() {
-        try {
-            if (!window.showOpenFilePicker) return;
-            const [handle] = await window.showOpenFilePicker();
-            
-            const existingIdx = await findExistingBufferIndex(handle, handle.name);
-            if (existingIdx !== -1) {
-                loadBuffer(existingIdx);
-                renderTree();
-                return;
-            }
-
-            const file = await handle.getFile();
-            const content = await file.text();
-            addNewBuffer(file.name, content, handle);
-        } catch (e) { console.warn("Open cancelled"); }
-    }
-
-    async function openFolder() {
-        try {
-            if (!window.showDirectoryPicker) return;
-            const handle = await window.showDirectoryPicker();
-            state.folderTree = handle;
-            renderTree();
-        } catch (err) { console.warn("Folder access denied"); }
-    }
-
-    async function openConfigFile() {
-        const idx = await findExistingBufferIndex(null, 'config.json');
-        if (idx !== -1) {
-            loadBuffer(idx);
-        } else {
-            const configContent = JSON.stringify(state.settings, null, 4);
-            addNewBuffer('config.json', configContent);
+    function closeBuffer(idx) {
+        if (state.currentIndex !== -1) state.buffers[state.currentIndex].content = editor.value;
+        const wasActive = (idx === state.currentIndex);
+        state.buffers.splice(idx, 1);
+        if (!state.buffers.length) addNewBuffer();
+        else {
+            if (wasActive) state.currentIndex = Math.max(0, Math.min(idx, state.buffers.length - 1));
+            else if (idx < state.currentIndex) state.currentIndex--;
+            loadBuffer(state.currentIndex, true);
         }
+        saveState();
     }
 
-    async function openHelp() {
-        const idx = await findExistingBufferIndex(null, 'help.md');
-        if (idx !== -1) {
-            loadBuffer(idx);
-        } else {
-            addNewBuffer('help.md', HELP_MD);
-        }
-    }
-
-    async function saveFile() {
-        const buf = state.buffers[state.currentIndex];
-        if (!buf) return;
-
-        if (buf.name === 'config.json') {
-            try {
-                const newSettings = JSON.parse(editor.value);
-                state.settings = { ...state.settings, ...newSettings };
-                applySettings();
-            } catch (e) {
-                console.error("Invalid config JSON");
-            }
-        }
-
-        try {
-            if (buf.handle) {
-                const writable = await buf.handle.createWritable();
-                await writable.write(editor.value);
-                await writable.close();
-            } else if (window.showSaveFilePicker) {
-                const handle = await window.showSaveFilePicker({ suggestedName: buf.name });
-                buf.handle = handle;
-                buf.name = handle.name;
-                const writable = await handle.createWritable();
-                await writable.write(editor.value);
-                await writable.close();
-            }
-            buf.modified = false;
-            updateUI();
-            renderTree();
-            saveState();
-        } catch (e) { console.warn("Save cancelled or not supported"); }
-    }
-
+    /* * UI * */
     async function renderTree() {
-        treeContainer.innerHTML = '';
-        
-        // Active Buffers Section
-        const bufferHeader = document.createElement('div');
-        bufferHeader.className = 'tree-section-header';
-        bufferHeader.textContent = 'Active Buffers';
-        treeContainer.appendChild(bufferHeader);
-
-        state.buffers.forEach((buf, i) => {
-            const item = document.createElement('div');
-            item.className = `tree-item tree-file ${state.currentIndex === i ? 'active' : ''}`;
-            item.innerHTML = `<span>${buf.name}${buf.modified ? '*' : ''}</span><span style="margin-left:auto; opacity:0.4;" onclick="event.stopPropagation(); closeBuffer(${i})">×</span>`;
-            item.onclick = () => loadBuffer(i);
-            treeContainer.appendChild(item);
+        const s = treeContainer.scrollTop; treeContainer.innerHTML = '';
+        const bHead = document.createElement('div'); bHead.className = 'tree-section-header'; bHead.innerHTML = '<span>Buffers</span>'; treeContainer.appendChild(bHead);
+        state.buffers.forEach((b, i) => {
+            const el = document.createElement('div'); el.className = `tree-item ${state.currentIndex === i ? 'active' : ''}`;
+            el.innerHTML = `<span class="type-tag">BUF</span><span>${b.name}${b.modified?'*':''}</span><span style="margin-left:auto;opacity:0.6;font-weight:900;" onclick="event.stopPropagation();closeBuffer(${i})">[X]</span>`;
+            el.onclick = () => loadBuffer(i); treeContainer.appendChild(el);
         });
-
-        // Workspace Section
         if (state.folderTree) {
-            const workspaceHeader = document.createElement('div');
-            workspaceHeader.className = 'tree-section-header';
-            workspaceHeader.style.marginTop = '15px';
-            workspaceHeader.textContent = `Workspace: ${state.folderTree.name}`;
-            treeContainer.appendChild(workspaceHeader);
+            const wHead = document.createElement('div'); wHead.className = 'tree-section-header'; wHead.style.marginTop = "15px"; wHead.innerHTML = `<span>${state.folderTree.name}</span>`; treeContainer.appendChild(wHead);
+            if (state.isWorkspaceLocked) {
+                const u = document.createElement('div'); u.className = "unlock-prompt"; u.textContent = "Unlock Project Folder";
+                u.onclick = async () => { if (await verifyPermission(state.folderTree)) { state.isWorkspaceLocked = false; renderTree(); } };
+                treeContainer.appendChild(u);
+            } else {
+                const root = document.createElement('div'); root.className = 'tree-children open'; treeContainer.appendChild(root); await buildTree(state.folderTree, root);
+            }
+        }
+        treeContainer.scrollTop = s;
+    }
 
-            const rootList = document.createElement('div');
-            rootList.className = 'tree-children open';
-            treeContainer.appendChild(rootList);
-            await buildDirectoryTree(state.folderTree, rootList);
+    async function buildTree(h, c) {
+        const ents = []; for await (const e of h.values()) ents.push(e);
+        ents.sort((a,b) => a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'directory' ? -1 : 1);
+        for (const e of ents) {
+            const el = document.createElement('div'); el.className = `tree-item`;
+            const type = e.kind === 'directory' ? 'DIR' : 'FIL';
+            el.innerHTML = `<span class="type-tag">${type}</span><span>${e.name}</span>`;
+            c.appendChild(el);
+            if (e.kind === 'directory') {
+                const cb = document.createElement('div'); cb.className = 'tree-children'; c.appendChild(cb);
+                el.onclick = async () => { const o = cb.classList.toggle('open'); if (o && !cb.children.length) await buildTree(e, cb); };
+            } else {
+                findExistingBufferIndex(e, e.name).then(idx => { if (idx === state.currentIndex && idx !== -1) el.classList.add('active'); });
+                el.onclick = async () => {
+                    const idx = await findExistingBufferIndex(e, e.name);
+                    if (idx !== -1) loadBuffer(idx);
+                    else addNewBuffer(e.name, await (await e.getFile()).text(), e);
+                };
+            }
         }
     }
 
-    async function buildDirectoryTree(dirHandle, parentEl) {
-        const entries = [];
-        for await (const entry of dirHandle.values()) {
-            entries.push(entry);
+    async function findExistingBufferIndex(h, n) {
+        for (let i=0; i<state.buffers.length; i++) {
+            const b = state.buffers[i];
+            if (h && b.handle) { try { if (await h.isSameEntry(b.handle)) return i; } catch(e) {} }
+            else if (!h && !b.handle && b.name === n) return i;
         }
-        
-        entries.sort((a, b) => {
-            if (a.kind !== b.kind) return a.kind === 'directory' ? -1 : 1;
-            return a.name.localeCompare(b.name);
-        });
-
-        for (const entry of entries) {
-            const node = document.createElement('div');
-            node.className = 'tree-node';
-            
-            if (entry.kind === 'directory') {
-                const item = document.createElement('div');
-                item.className = 'tree-item tree-folder';
-                item.textContent = entry.name;
-                
-                const children = document.createElement('div');
-                children.className = 'tree-children';
-                
-                item.onclick = async () => {
-                    const isOpen = children.classList.toggle('open');
-                    item.classList.toggle('open', isOpen);
-                    if (isOpen && children.children.length === 0) {
-                        await buildDirectoryTree(entry, children);
-                    }
-                };
-                
-                node.appendChild(item);
-                node.appendChild(children);
-            } else {
-                const item = document.createElement('div');
-                item.className = 'tree-item tree-file';
-                
-                // Compare with active buffers to show "active" state in tree
-                const checkActive = async () => {
-                    const idx = await findExistingBufferIndex(entry, entry.name);
-                    if (idx === state.currentIndex && idx !== -1) item.classList.add('active');
-                };
-                checkActive();
-
-                item.textContent = entry.name;
-                
-                item.onclick = async () => {
-                    const existingIdx = await findExistingBufferIndex(entry, entry.name);
-                    if (existingIdx !== -1) {
-                        loadBuffer(existingIdx);
-                        renderTree();
-                        return;
-                    }
-
-                    const file = await entry.getFile();
-                    const content = await file.text();
-                    addNewBuffer(entry.name, content, entry);
-                };
-                node.appendChild(item);
-            }
-            parentEl.appendChild(node);
-        }
+        return -1;
     }
 
-    function closeBuffer(index) {
-        if (state.currentIndex !== -1 && state.buffers[state.currentIndex]) {
-            state.buffers[state.currentIndex].content = editor.value;
+    function refreshHighlighter(force = false) {
+        const val = editor.value; const lines = val.split('\n');
+        if (lines.length !== state.lastLineCount || force) {
+            state.lastLineCount = lines.length;
+            gutter.innerHTML = lines.map((_, i) => `<div>${i+1}</div>`).join('');
         }
-
-        const wasActive = (index === state.currentIndex);
-        const wasBefore = (index < state.currentIndex);
-
-        state.buffers.splice(index, 1);
-
-        if (state.buffers.length === 0) {
-            state.currentIndex = -1;
-            addNewBuffer();
-        } else {
-            if (wasActive) {
-                state.currentIndex = Math.max(0, Math.min(index, state.buffers.length - 1));
-                const buf = state.buffers[state.currentIndex];
-                editor.value = buf.content;
-                localStorage.setItem('ae_idx', state.currentIndex);
-                updateUI();
-                refreshHighlighter();
-                updateStats();
-                if (state.settings.showPreview) updatePreview();
-            } else {
-                if (wasBefore) {
-                    state.currentIndex--;
-                }
-                localStorage.setItem('ae_idx', state.currentIndex);
-                updateUI();
-            }
-        }
-        renderTree();
-        saveState();
+        clearTimeout(highlightTimeout);
+        highlightTimeout = setTimeout(() => {
+            requestAnimationFrame(() => {
+                const buf = state.buffers[state.currentIndex]; if (!buf) return;
+                const ext = (buf.name || "").split('.').pop();
+                const map = { html:'markup', css:'css', js:'javascript', py:'python', md:'markdown', json:'json' };
+                highlightContent.className = `language-${map[ext]||'javascript'}`;
+                highlightContent.textContent = val; Prism.highlightElement(highlightContent);
+            });
+        }, force ? 0 : 200);
     }
 
     function updateUI() {
-        const buf = state.buffers[state.currentIndex] || { name: 'untitled', modified: false };
-        document.body.className = `theme-${state.settings.theme} ${state.settings.showLines ? '' : 'hide-lines'} ${state.settings.showToolbar ? '' : 'hide-toolbar'} ${state.settings.showSidebar ? '' : 'hide-sidebar'} ${state.settings.showPreview ? 'show-preview' : ''}`;
-        
+        const buf = state.buffers[state.currentIndex] || { name:'...', modified:false };
+        document.body.className = `theme-${state.settings.theme} ${state.settings.showPreview ? 'show-preview' : ''}`;
         document.getElementById('stat-file').textContent = buf.name.toUpperCase();
         document.getElementById('stat-dirty').style.display = buf.modified ? 'inline' : 'none';
         document.getElementById('stat-lang').textContent = (buf.name.split('.').pop() || 'text').toUpperCase();
-        
-        editor.style.fontSize = highlightLayer.style.fontSize = gutter.style.fontSize = state.settings.fontSize + 'px';
-        const meta = document.getElementById('meta-theme');
-        meta.content = state.settings.theme === 'latte' ? '#eff1f5' : '#303446';
-
-        if (state.settings.showPreview) {
-            previewWrapper.style.width = state.settings.previewWidth + '%';
-        }
+        editor.style.fontSize = gutter.style.fontSize = highlightLayer.style.fontSize = state.settings.fontSize + 'px';
+        if (state.settings.showPreview) document.getElementById('preview-wrapper').style.width = state.settings.previewWidth + '%';
     }
 
-    function refreshHighlighter() {
+    function saveState() { localStorage.setItem('ae_buffers', JSON.stringify(state.buffers.map(b=>({id:b.id, name:b.name, content:b.content})))); localStorage.setItem('ae_idx', state.currentIndex); }
+    function applySettings() { ['theme', 'preview', 'pwidth', 'zoom'].forEach(k => localStorage.setItem('ae_'+k, state.settings[k])); updateUI(); }
+    function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+    
+    function updatePreview() { 
+        if (!state.settings.showPreview) return;
         const buf = state.buffers[state.currentIndex];
         if (!buf) return;
         const ext = buf.name.split('.').pop().toLowerCase();
-        let lang = 'javascript';
-        if (['html', 'htm'].includes(ext)) lang = 'markup';
-        else if (ext === 'css') lang = 'css';
-        else if (['md', 'markdown'].includes(ext)) lang = 'markdown';
-        else if (ext === 'py') lang = 'python';
-        else if (ext === 'json') lang = 'json';
-
-        highlightContent.className = `language-${lang}`;
-        highlightContent.textContent = editor.value;
-        Prism.highlightElement(highlightContent);
         
-        const lines = editor.value.split('\n').length;
-        gutter.innerHTML = Array.from({length: lines}, (_, i) => `<div>${i+1}</div>`).join('');
-    }
-
-    function updateStats() {
-        const textBefore = editor.value.substring(0, editor.selectionStart);
-        const rows = textBefore.split('\n');
-        document.getElementById('stat-pos').textContent = `LINE ${rows.length}, COL ${rows[rows.length-1].length + 1}`;
-    }
-
-    let previewDebounce;
-    function updatePreview() {
-        if (!state.settings.showPreview) return;
-        clearTimeout(previewDebounce);
-        previewDebounce = setTimeout(() => {
-            previewFrame.srcdoc = editor.value;
-        }, 300);
-    }
-
-    /* --- Search & Replace Functions --- */
-
-    function toggleFind() {
-        const isVisible = searchBox.style.display === 'flex';
-        searchBox.style.display = isVisible ? 'none' : 'flex';
-        if (!isVisible) {
-            document.getElementById('find-input').focus();
-            document.getElementById('find-input').select();
-        }
-    }
-
-    function findNext() {
-        const query = document.getElementById('find-input').value;
-        if (!query) return;
-        const content = editor.value;
-        const startPos = editor.selectionEnd;
-        let index = content.indexOf(query, startPos);
-        
-        if (index === -1) { // Wrap around to start
-            index = content.indexOf(query, 0);
-        }
-
-        if (index !== -1) {
-            editor.focus();
-            editor.setSelectionRange(index, index + query.length);
-            
-            // Scroll match into view roughly
-            const lineHeight = parseFloat(getComputedStyle(editor).lineHeight);
-            const linesBefore = content.substring(0, index).split('\n').length;
-            editor.scrollTop = (linesBefore - 5) * lineHeight;
-        }
-    }
-
-    function replaceCurrent() {
-        const findText = document.getElementById('find-input').value;
-        const replaceText = document.getElementById('replace-input').value;
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const selectedText = editor.value.substring(start, end);
-
-        if (selectedText === findText && findText !== "") {
-            editor.setRangeText(replaceText, start, end, 'select');
-            editor.dispatchEvent(new Event('input'));
-            findNext();
+        if (ext === 'md') {
+            previewFrame.style.display = 'none';
+            previewRender.style.display = 'block';
+            previewRender.innerHTML = marked.parse(editor.value);
         } else {
-            findNext();
+            previewRender.style.display = 'none';
+            previewFrame.style.display = 'block';
+            previewFrame.srcdoc = editor.value;
         }
     }
 
-    function replaceAll() {
-        const findText = document.getElementById('find-input').value;
-        const replaceText = document.getElementById('replace-input').value;
-        if (!findText) return;
-        
-        const content = editor.value;
-        const newContent = content.split(findText).join(replaceText);
-        
-        if (content !== newContent) {
-            editor.value = newContent;
-            editor.dispatchEvent(new Event('input'));
-        }
+    function updateStats() { const l = editor.value.substring(0, editor.selectionStart).split('\n'); document.getElementById('stat-pos').textContent = `LN ${l.length}, COL ${l[l.length-1].length + 1}`; }
+    
+    function toggleFind() {
+        const v = searchBox.style.display === 'flex'; searchBox.style.display = v ? 'none' : 'flex';
+        if (!v) { const i = document.getElementById('find-input'); i.focus(); i.select(); }
     }
-
-    function applySettings() {
-        localStorage.setItem('ae_theme', state.settings.theme);
-        localStorage.setItem('ae_lines', state.settings.showLines);
-        localStorage.setItem('ae_toolbar', state.settings.showToolbar);
-        localStorage.setItem('ae_sidebar', state.settings.showSidebar);
-        localStorage.setItem('ae_preview', state.settings.showPreview);
-        localStorage.setItem('ae_pwidth', state.settings.previewWidth);
-        localStorage.setItem('ae_zoom', state.settings.fontSize);
-        updateUI();
+    function findNext() {
+        const q = document.getElementById('find-input').value; if (!q) return;
+        let idx = editor.value.indexOf(q, editor.selectionEnd); if (idx === -1) idx = editor.value.indexOf(q, 0);
+        if (idx !== -1) { editor.focus(); editor.setSelectionRange(idx, idx + q.length); editor.scrollTop = (editor.value.substring(0, idx).split('\n').length - 5) * (state.settings.fontSize * 1.6); }
     }
+    function replaceCurrent() { const f = document.getElementById('find-input').value, r = document.getElementById('replace-input').value; if (editor.value.substring(editor.selectionStart, editor.selectionEnd) === f) { editor.setRangeText(r, editor.selectionStart, editor.selectionEnd, 'select'); editor.dispatchEvent(new Event('input')); findNext(); } else findNext(); }
+    function replaceAll() { const f = document.getElementById('find-input').value, r = document.getElementById('replace-input').value; if (f) { editor.value = editor.value.split(f).join(r); editor.dispatchEvent(new Event('input')); } }
 
-    function saveState() {
-        const clean = state.buffers.map(b => ({ id: b.id, name: b.name, content: b.content }));
-        localStorage.setItem('ae_buffers', JSON.stringify(clean));
-        localStorage.setItem('ae_idx', state.currentIndex);
+    /* * CUSTOM PROMPT * */
+    function customPrompt(title, defaultValue, callback) {
+        document.getElementById('prompt-title').textContent = title;
+        const input = document.getElementById('prompt-input');
+        input.value = defaultValue;
+        promptBox.style.display = 'flex';
+        input.focus();
+        input.select();
+
+        const close = () => { promptBox.style.display = 'none'; editor.focus(); };
+        const confirm = () => { if (input.value.trim()) callback(input.value.trim()); close(); };
+
+        document.getElementById('prompt-confirm').onclick = confirm;
+        document.getElementById('prompt-cancel').onclick = close;
+        input.onkeydown = e => {
+            if (e.key === 'Enter') confirm();
+            if (e.key === 'Escape') close();
+        };
     }
 
     function setupEventListeners() {
         editor.onscroll = () => { highlightLayer.scrollTop = gutter.scrollTop = editor.scrollTop; highlightLayer.scrollLeft = editor.scrollLeft; };
-        editor.oninput = () => {
-            const buf = state.buffers[state.currentIndex];
-            if (buf) {
-                buf.content = editor.value;
-                if (!buf.modified) { buf.modified = true; renderTree(); updateUI(); }
-                refreshHighlighter(); updateStats(); saveState();
-                if (state.settings.showPreview) updatePreview();
-            }
-        };
+        editor.oninput = () => { const b = state.buffers[state.currentIndex]; if (b) { b.content = editor.value; if (!b.modified) { b.modified = true; renderTree(); updateUI(); } refreshHighlighter(); updateStats(); saveState(); updatePreview(); } };
         editor.onmouseup = editor.onkeyup = updateStats;
-        
-        editor.onkeydown = (e) => {
-            const isMod = e.ctrlKey || e.metaKey;
-            
-            // Tab handling
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                editor.setRangeText('    ', editor.selectionStart, editor.selectionEnd, 'end');
-                editor.dispatchEvent(new Event('input'));
-            }
-            
-            // Enter auto-indent
+        editor.onkeydown = e => {
+            const mod = e.ctrlKey || e.metaKey;
+            if (e.key === 'Tab') { e.preventDefault(); editor.setRangeText('    ', editor.selectionStart, editor.selectionEnd, 'end'); editor.dispatchEvent(new Event('input')); }
             if (e.key === 'Enter') {
-                e.preventDefault();
-                const start = editor.selectionStart;
-                const line = editor.value.substring(0, start).split('\n').pop();
+                const line = editor.value.substring(0, editor.selectionStart).split('\n').pop();
                 const indent = line.match(/^\s*/)[0];
-                editor.setRangeText('\n' + indent, start, editor.selectionEnd, 'end');
-                editor.dispatchEvent(new Event('input'));
+                if (indent) { e.preventDefault(); editor.setRangeText('\n' + indent, editor.selectionStart, editor.selectionEnd, 'end'); editor.dispatchEvent(new Event('input')); }
             }
-
-            // Shortcuts
-            if (isMod && e.key === 's') { e.preventDefault(); saveFile(); }
-            if (isMod && e.key === 'n') { e.preventDefault(); addNewBuffer(); }
-            if (isMod && e.key === 'f') { e.preventDefault(); toggleFind(); }
-            if (isMod && e.key === 'o') { 
-                e.preventDefault(); 
-                if (e.shiftKey) openFolder();
-                else openFile();
-            }
-            if (isMod && e.key === 'k') { e.preventDefault(); openConfigFile(); }
-            
-            if (e.altKey && e.key === 'b') { e.preventDefault(); state.settings.showSidebar = !state.settings.showSidebar; applySettings(); }
-            if (e.altKey && e.key === 'h') { e.preventDefault(); openHelp(); }
-            if (e.altKey && e.key === 'p') { 
-                e.preventDefault(); 
-                state.settings.showPreview = !state.settings.showPreview; 
-                applySettings(); 
-                if (state.settings.showPreview) updatePreview();
-            }
-
-            if (isMod && (e.key === '=' || e.key === '+')) { e.preventDefault(); state.settings.fontSize = Math.min(48, state.settings.fontSize + 2); applySettings(); }
-            if (isMod && e.key === '-') { e.preventDefault(); state.settings.fontSize = Math.max(8, state.settings.fontSize - 2); applySettings(); }
-            
-            // Close search on Escape
-            if (e.key === 'Escape' && searchBox.style.display === 'flex') {
-                toggleFind();
+            if (mod && e.key === 's') { e.preventDefault(); saveFile(); }
+            if (mod && e.key === 'n') { e.preventDefault(); customPrompt('New Buffer Name', 'script.js', addNewBuffer); }
+            if (mod && e.key === 'o') { e.preventDefault(); e.shiftKey ? openFolder() : openFile(); }
+            if (mod && e.key === 'f') { e.preventDefault(); toggleFind(); }
+            if (mod && e.key === 'k') { e.preventDefault(); addNewBuffer('config.json', JSON.stringify(state.settings, null, 4)); }
+            if (e.altKey && e.key === 'b') { e.preventDefault(); document.body.classList.toggle('hide-sidebar'); }
+            if (e.altKey && e.key === 'p') { e.preventDefault(); state.settings.showPreview = !state.settings.showPreview; applySettings(); updatePreview(); }
+            if (e.key === 'Escape') {
+                if (searchBox.style.display === 'flex') toggleFind();
+                if (promptBox.style.display === 'flex') promptBox.style.display = 'none';
             }
         };
-
-        let dragging = false;
-        resizer.onmousedown = () => { dragging = true; resizer.classList.add('dragging'); };
-        window.onmousemove = (e) => {
-            if (!dragging) return;
-            const containerWidth = document.getElementById('container').clientWidth;
-            const rightEdge = document.getElementById('container').getBoundingClientRect().right;
-            const mouseXFromRight = rightEdge - e.clientX;
-            state.settings.previewWidth = Math.max(10, Math.min(80, (mouseXFromRight / containerWidth) * 100));
-            applySettings();
-        };
-        window.onmouseup = () => { dragging = false; resizer.classList.remove('dragging'); saveState(); };
-
-        document.getElementById('btn-new').onclick = () => addNewBuffer();
+        const res = document.getElementById('resizer'); let drag = false;
+        res.onmousedown = () => drag = true;
+        window.onmousemove = e => { if (drag) { const box = document.getElementById('container').getBoundingClientRect(); state.settings.previewWidth = Math.max(10, Math.min(80, ((box.right - e.clientX) / box.width) * 100)); applySettings(); } };
+        window.onmouseup = () => drag = false;
+        document.getElementById('btn-new').onclick = () => customPrompt('New Buffer Name', 'script.js', addNewBuffer);
         document.getElementById('btn-open').onclick = openFile;
         document.getElementById('btn-folder').onclick = openFolder;
         document.getElementById('btn-save').onclick = saveFile;
         document.getElementById('btn-find').onclick = toggleFind;
-        document.getElementById('btn-config').onclick = openConfigFile;
-        document.getElementById('btn-sidebar').onclick = () => { state.settings.showSidebar = !state.settings.showSidebar; applySettings(); };
-        document.getElementById('btn-preview').onclick = () => { 
-            state.settings.showPreview = !state.settings.showPreview; 
-            applySettings(); 
-            if (state.settings.showPreview) updatePreview();
-        };
-        document.getElementById('btn-help').onclick = openHelp;
+        document.getElementById('btn-config').onclick = () => addNewBuffer('config.json', JSON.stringify(state.settings, null, 4));
+        document.getElementById('btn-preview').onclick = () => { state.settings.showPreview = !state.settings.showPreview; applySettings(); updatePreview(); };
+        document.getElementById('btn-help').onclick = () => addNewBuffer('help.md', HELP_MD);
+        document.getElementById('btn-sidebar').onclick = () => { document.body.classList.toggle('hide-sidebar'); };
     }
-
-    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-
-    init();
 </script>
 </body>
 </html>
