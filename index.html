@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1e1e2e">
-    <title>Aether v3 - Minimalist</title>
+    <title>Aether v3 - Flux</title>
     
     <!-- Dependencies -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prism-theme" />
@@ -50,56 +50,32 @@
 
         /* Catppuccin Macchiato */
         [data-theme="macchiato"] {
-            --bg: #24273a;
-            --sidebar-bg: #1e2030;
-            --header-bg: #181926;
-            --tab-inactive: #181926;
-            --tab-active: #24273a;
-            --text: #cad3f5;
-            --text-dim: #939ab7;
-            --accent: #8aadf4;
-            --accent-sec: #b7bdf8;
-            --border: #363a4f;
-            --highlight: #363a4f;
-            --cursor: #f4dbd6;
-            --status-bg: #8aadf4;
-            --status-fg: #24273a;
+            --bg: #24273a; --sidebar-bg: #1e2030; --header-bg: #181926;
+            --tab-inactive: #181926; --tab-active: #24273a;
+            --text: #cad3f5; --text-dim: #939ab7;
+            --accent: #8aadf4; --accent-sec: #b7bdf8;
+            --border: #363a4f; --highlight: #363a4f;
+            --cursor: #f4dbd6; --status-bg: #8aadf4; --status-fg: #24273a;
         }
 
         /* Catppuccin Frappe */
         [data-theme="frappe"] {
-            --bg: #303446;
-            --sidebar-bg: #292c3c;
-            --header-bg: #232634;
-            --tab-inactive: #232634;
-            --tab-active: #303446;
-            --text: #c6d0f5;
-            --text-dim: #949cbb;
-            --accent: #8caaee;
-            --accent-sec: #babbf1;
-            --border: #414559;
-            --highlight: #414559;
-            --cursor: #f2d5cf;
-            --status-bg: #8caaee;
-            --status-fg: #303446;
+            --bg: #303446; --sidebar-bg: #292c3c; --header-bg: #232634;
+            --tab-inactive: #232634; --tab-active: #303446;
+            --text: #c6d0f5; --text-dim: #949cbb;
+            --accent: #8caaee; --accent-sec: #babbf1;
+            --border: #414559; --highlight: #414559;
+            --cursor: #f2d5cf; --status-bg: #8caaee; --status-fg: #303446;
         }
 
         /* Catppuccin Latte (Light) */
         [data-theme="latte"] {
-            --bg: #eff1f5;
-            --sidebar-bg: #e6e9ef;
-            --header-bg: #dce0e8;
-            --tab-inactive: #dce0e8;
-            --tab-active: #eff1f5;
-            --text: #4c4f69;
-            --text-dim: #9ca0b0;
-            --accent: #1e66f5;
-            --accent-sec: #7287fd;
-            --border: #bcc0cc;
-            --highlight: #ccd0da;
-            --cursor: #dc8a78;
-            --status-bg: #1e66f5;
-            --status-fg: #eff1f5;
+            --bg: #eff1f5; --sidebar-bg: #e6e9ef; --header-bg: #dce0e8;
+            --tab-inactive: #dce0e8; --tab-active: #eff1f5;
+            --text: #4c4f69; --text-dim: #9ca0b0;
+            --accent: #1e66f5; --accent-sec: #7287fd;
+            --border: #bcc0cc; --highlight: #ccd0da;
+            --cursor: #dc8a78; --status-bg: #1e66f5; --status-fg: #eff1f5;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -109,6 +85,7 @@
             height: 100dvh; width: 100vw; overflow: hidden;
             font-family: var(--font-stack); display: flex; flex-direction: column;
             font-size: 13px; letter-spacing: -0.01em;
+            transition: background 0.2s, color 0.2s;
         }
 
         svg.icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
@@ -198,6 +175,12 @@
             padding: 10px 0 10px 50px !important; 
             box-sizing: border-box;
         }
+        
+        /* Wrap Toggle Class */
+        .word-wrap .code-layer {
+            white-space: pre-wrap !important;
+            word-break: break-all;
+        }
 
         #hl-layer { z-index: 1; pointer-events: none; overflow: hidden; }
         #hl-layer code, #hl-layer pre { 
@@ -223,7 +206,7 @@
 
         /* Preview Pane */
         #preview-pane { 
-            width: 0; border-left: 1px solid var(--border); background: #fff; 
+            width: 0; border-left: 1px solid var(--border); background: var(--bg); 
             display: flex; flex-direction: column; overflow: hidden;
             transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -299,6 +282,7 @@
         }
         .cmd-item { padding: 8px 16px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); }
         .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--accent); }
+        .cmd-shortcut { font-size: 10px; opacity: 0.5; font-family: sans-serif; }
 
         /* Toast */
         #toast {
@@ -431,12 +415,12 @@
 
 <script>
 /**
- * AETHER v3 - Flux Minimalist
+ * AETHER v3 - Flux Minimalist (Polished)
  */
 
 // --- CONFIG ---
 const Config = {
-    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220 },
+    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220, wordWrap: false },
     state: {},
     init() {
         try { this.state = { ...this.defaults, ...JSON.parse(localStorage.getItem('aether_config') || '{}') }; } 
@@ -446,24 +430,39 @@ const Config = {
     save() {
         localStorage.setItem('aether_config', JSON.stringify(this.state));
         this.apply();
-        UI.toast("Config Written");
     },
     setTheme(name) {
         this.state.theme = name;
         this.save();
     },
+    toggleWrap() {
+        this.state.wordWrap = !this.state.wordWrap;
+        this.save();
+        UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`);
+    },
+    zoom(delta) {
+        this.state.fontSize = Math.max(8, Math.min(32, this.state.fontSize + delta));
+        this.save();
+        UI.toast(`Zoom: ${this.state.fontSize}px`);
+    },
     apply() {
         document.body.setAttribute('data-theme', this.state.theme);
         document.documentElement.style.setProperty('--sidebar-w', this.state.sidebarWidth + 'px');
         
-        // Apply font size to specific shared class
         const els = document.querySelectorAll('.code-font');
         els.forEach(el => el.style.fontSize = this.state.fontSize + 'px');
+        
+        const stage = document.getElementById('code-stage');
+        if (this.state.wordWrap) stage.classList.add('word-wrap');
+        else stage.classList.remove('word-wrap');
         
         const prismLink = document.getElementById('prism-theme');
         prismLink.href = this.state.theme === 'latte' 
             ? 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css' 
             : 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
+            
+        // Re-render preview to apply theme
+        App.debouncePreview(true);
     }
 };
 
@@ -519,8 +518,62 @@ const Editor = {
         });
 
         this.els.input.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') { e.preventDefault(); document.execCommand('insertText', false, '    '); }
+            if (e.key === 'Tab') { 
+                e.preventDefault();
+                const start = this.els.input.selectionStart;
+                const end = this.els.input.selectionEnd;
+                
+                // If single cursor with no selection, just insert spacing
+                if (!e.shiftKey && start === end) {
+                    document.execCommand('insertText', false, '    ');
+                } else {
+                    // Block Indent/Unindent logic
+                    const val = this.els.input.value;
+                    // Find start of the line where selection begins
+                    const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
+                    // Find end of the line where selection ends
+                    const endLineEnd = val.indexOf('\n', end);
+                    const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
+                    
+                    const block = val.substring(startLineStart, effectiveEnd);
+                    const lines = block.split('\n');
+                    
+                    let newBlock = '';
+                    if (e.shiftKey) {
+                        // Unindent
+                        newBlock = lines.map(line => {
+                            if (line.startsWith('    ')) return line.substring(4);
+                            if (line.startsWith('\t')) return line.substring(1);
+                            // handle less than 4 spaces
+                            const match = line.match(/^\s+/);
+                            if(match && match[0].length < 4) return line.trimStart();
+                            return line;
+                        }).join('\n');
+                    } else {
+                        // Indent
+                        newBlock = lines.map(line => '    ' + line).join('\n');
+                    }
+                    
+                    // Use execCommand to preserve undo stack
+                    this.els.input.setSelectionRange(startLineStart, effectiveEnd);
+                    document.execCommand('insertText', false, newBlock);
+                    // Reselect the block to allow repeated indentation
+                    this.els.input.setSelectionRange(startLineStart, startLineStart + newBlock.length);
+                }
+            }
+            // Smart Indent on Enter
+            if (e.key === 'Enter') {
+                const start = this.els.input.selectionStart;
+                const val = this.els.input.value;
+                const prevLine = val.substring(0, start).split('\n').pop();
+                const indent = prevLine.match(/^\s*/)[0];
+                if (indent) {
+                    e.preventDefault();
+                    document.execCommand('insertText', false, '\n' + indent);
+                }
+            }
             if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
             setTimeout(() => App.updateStats(), 0);
         });
         
@@ -530,7 +583,6 @@ const Editor = {
         this.els.input.value = content;
         this.highlight(content, filename);
         this.updateGutter(content);
-        // Reset scroll
         this.els.input.scrollTop = 0;
         this.els.hlLayer.scrollTop = 0;
         this.els.gutter.scrollTop = 0;
@@ -586,7 +638,10 @@ const FileSys = {
                 const el = document.createElement('div');
                 el.className = 'tree-item';
                 el.innerHTML = `> ${name}`;
-                el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+                el.onclick = async () => {
+                    const file = await handle.getFile();
+                    App.openBuffer(name, await file.text(), handle, 'opfs');
+                };
                 div.appendChild(el);
             }
         }
@@ -597,9 +652,10 @@ const FileSys = {
             try {
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
-                this.renderOPFS();
+                // Use explicit global reference to avoid 'this' context issues
+                FileSys.renderOPFS();
                 UI.toast(`Created ${name}`);
-            } catch (e) { UI.toast('Error creating file', true); }
+            } catch (e) { UI.toast('Error creating file'); }
         });
     },
     async saveToOPFS(buf) {
@@ -684,7 +740,7 @@ const App = {
         
         const saved = JSON.parse(localStorage.getItem('aether_v3_session') || '[]');
         if (saved.length) saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
-        else this.openBuffer('welcome.txt', 'Aether v3 - Minimalist\n\nUse Command Palette (Right Icon) for actions.', null, 'memory');
+        else this.openBuffer('welcome.txt', 'Aether v3 - Flux\n\n- Ctrl+P: Command Palette\n- Enter: Smart Indent\n- Drag right edge: Resize Preview', null, 'memory');
 
         FileSys.initOPFS();
     },
@@ -720,7 +776,19 @@ const App = {
             const f = document.getElementById('preview-frame');
             const ext = buf.name.split('.').pop().toLowerCase();
             
-            const style = `<style>body{background:#eff1f5;color:#4c4f69;font-family:monospace;padding:20px;}</style>`;
+            // Generate Theme-Aware CSS for Preview
+            const computedStyle = getComputedStyle(document.body);
+            const bg = computedStyle.getPropertyValue('--bg').trim();
+            const fg = computedStyle.getPropertyValue('--text').trim();
+            const accent = computedStyle.getPropertyValue('--accent').trim();
+            
+            const style = `<style>
+                body{background:${bg};color:${fg};font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:2rem;line-height:1.6;}
+                a { color: ${accent}; }
+                pre { background: rgba(0,0,0,0.1); padding:1rem; border-radius:4px; overflow:auto; }
+                code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
+                blockquote { border-left: 3px solid ${accent}; margin:0; padding-left:1rem; opacity:0.8; }
+            </style>`;
             
             if (ext === 'md') {
                 f.srcdoc = style + marked.parse(buf.content);
@@ -760,15 +828,18 @@ const UI = {
 
 const Commands = {
     list: [
-        { id: 'newFile', name: 'New File', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
-        { id: 'openFile', name: 'Open File', fn: () => FileSys.openDiskFile() },
-        { id: 'saveFile', name: 'Save File', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-        { id: 'settings', name: 'Open Config', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
-        { id: 'togglePreview', name: 'Toggle Preview', fn: () => {
+        { id: 'newFile', name: 'New File', hint: 'CMD+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
+        { id: 'openFile', name: 'Open File', hint: 'CMD+O', fn: () => FileSys.openDiskFile() },
+        { id: 'saveFile', name: 'Save File', hint: 'CMD+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
+        { id: 'settings', name: 'Open Config', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
+        { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => {
             Store.state.previewMode = !Store.state.previewMode;
             document.body.classList.toggle('preview-active', Store.state.previewMode);
             App.debouncePreview(true);
-        }}
+        }},
+        { id: 'wrap', name: 'Toggle Word Wrap', hint: 'VIEW', fn: () => Config.toggleWrap() },
+        { id: 'zoomIn', name: 'Zoom In', hint: 'VIEW', fn: () => Config.zoom(1) },
+        { id: 'zoomOut', name: 'Zoom Out', hint: 'VIEW', fn: () => Config.zoom(-1) }
     ],
     trigger(id) { this.list.find(c => c.id === id).fn(); },
     showPalette() {
@@ -778,7 +849,7 @@ const Commands = {
         this.list.forEach(cmd => {
             const el = document.createElement('div');
             el.className = 'cmd-item';
-            el.innerHTML = `<span>${cmd.name}</span>`;
+            el.innerHTML = `<span>${cmd.name}</span>${cmd.hint ? `<span class="cmd-shortcut">${cmd.hint}</span>` : ''}`;
             el.onclick = () => { cmd.fn(); this.hidePalette(); };
             list.appendChild(el);
         });
@@ -804,13 +875,26 @@ const Resizer = {
     init() {
         const r = document.getElementById('resizer');
         const p = document.getElementById('preview-pane');
-        r.onmousedown = () => {
-            document.onmousemove = e => {
-                const pct = (1 - (e.clientX / window.innerWidth)) * 100;
-                p.style.width = Math.min(90, Math.max(10, pct)) + '%';
-            };
-            document.onmouseup = () => document.onmousemove = null;
-        };
+        let isResizing = false;
+
+        r.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const pct = (1 - (e.clientX / window.innerWidth)) * 100;
+            p.style.width = Math.min(90, Math.max(10, pct)) + '%';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if(isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+            }
+        });
     }
 };
 
@@ -820,6 +904,7 @@ window.onload = () => {
     window.onkeydown = (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); Commands.showPalette(); }
         if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
     };
 };
 </script>
