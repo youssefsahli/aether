@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1e1e2e">
-    <title>Aether v3 - Flux</title>
+    <title>Aether v3.1 - Flux</title>
     
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
     <!-- Dependencies -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prism-theme" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/inline-color/prism-inline-color.min.js"></script>
     
     <!-- Languages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
@@ -18,16 +24,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
-            /* Default: Catppuccin Mocha (Darkest) */
+            /* Default: Catppuccin Mocha */
             --bg: #1e1e2e;
             --sidebar-bg: #181825;
             --header-bg: #11111b;
-            --tab-inactive: #11111b;
+            --tab-inactive: #181825;
             --tab-active: #1e1e2e;
             --text: #cdd6f4;
             --text-dim: #9399b2;
@@ -36,16 +45,16 @@
             --border: #313244;
             --highlight: #313244;
             --cursor: #f5e0dc;
+            --selection: rgba(137, 180, 250, 0.25);
             --status-bg: #89b4fa;
             --status-fg: #1e1e2e;
             
-            /* Strict Monospace Stack */
-            --font-stack: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-stack: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
             
-            --header-h: 32px;
-            --footer-h: 22px;
-            --sidebar-w: 220px;
-            --tab-h: 28px;
+            --header-h: 36px;
+            --footer-h: 24px;
+            --sidebar-w: 240px;
+            --tab-h: 32px;
         }
 
         /* Catppuccin Macchiato */
@@ -68,14 +77,14 @@
             --cursor: #f2d5cf; --status-bg: #8caaee; --status-fg: #303446;
         }
 
-        /* Catppuccin Latte (Light) */
+        /* Catppuccin Latte */
         [data-theme="latte"] {
             --bg: #eff1f5; --sidebar-bg: #e6e9ef; --header-bg: #dce0e8;
             --tab-inactive: #dce0e8; --tab-active: #eff1f5;
             --text: #4c4f69; --text-dim: #9ca0b0;
             --accent: #1e66f5; --accent-sec: #7287fd;
             --border: #bcc0cc; --highlight: #ccd0da;
-            --cursor: #dc8a78; --status-bg: #1e66f5; --status-fg: #eff1f5;
+            --cursor: #dc8a78; --selection: rgba(30, 102, 245, 0.15); --status-bg: #1e66f5; --status-fg: #eff1f5;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -88,37 +97,39 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        svg.icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+        svg.icon { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         /* --- Layout --- */
-        #app-shell { display: flex; flex: 1; overflow: hidden; }
+        #app-shell { display: flex; flex: 1; overflow: hidden; position: relative; }
         
         aside {
             width: var(--sidebar-w); background: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; transition: transform 0.1s steps(2, jump-none);
+            display: flex; flex-direction: column; 
+            transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), margin 0.25s cubic-bezier(0.2, 0, 0, 1);
             z-index: 10; flex-shrink: 0;
+            backdrop-filter: blur(10px);
         }
         aside.collapsed { margin-left: calc(var(--sidebar-w) * -1); }
         
         .side-header { 
-            padding: 8px 12px; font-weight: 800; font-size: 11px;
-            color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 10px 14px; font-weight: 700; font-size: 11px;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 1px;
             display:flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border); opacity: 0.9;
         }
-        .file-tree { flex: 1; overflow-y: auto; padding: 4px 0; }
+        .file-tree { flex: 1; overflow-y: auto; padding: 6px 0; }
         .tree-item {
-            padding: 4px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer;
+            padding: 5px 14px; font-size: 12px; color: var(--text-dim); cursor: pointer;
             display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; 
-            text-overflow: ellipsis; border: none;
+            text-overflow: ellipsis; border: none; transition: color 0.1s, background 0.1s;
         }
         .tree-item:hover { background: var(--highlight); color: var(--text); }
-        .tree-item.active { background: var(--highlight); color: var(--accent); font-weight: bold; }
+        .tree-item.active { background: var(--highlight); color: var(--accent); font-weight: 600; border-left: 2px solid var(--accent); padding-left: 12px; }
 
         /* Main Area */
         main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--bg); }
 
-        /* Tabs - Blocky */
+        /* Tabs */
         #tabs-scroll { 
             height: var(--tab-h); background: var(--header-bg); display: flex; 
             overflow-x: auto; scrollbar-width: none;
@@ -127,56 +138,61 @@
         #tabs-scroll::-webkit-scrollbar { display: none; }
         
         .tab {
-            height: 100%; padding: 0 12px; display: flex; align-items: center;
+            height: 100%; padding: 0 14px; display: flex; align-items: center;
             color: var(--text-dim); font-size: 12px; cursor: pointer; 
-            min-width: 80px; max-width: 200px; position: relative;
+            min-width: 100px; max-width: 220px; position: relative;
             background: var(--tab-inactive);
             justify-content: space-between;
             border-right: 1px solid var(--border);
+            transition: background 0.1s;
+            user-select: none;
         }
         .tab:hover { background: var(--highlight); color: var(--text); }
-        .tab.active { background: var(--bg); color: var(--accent); font-weight: bold; border-top: 2px solid var(--accent); margin-top: -2px; }
+        .tab.active { background: var(--bg); color: var(--accent); font-weight: 500; border-top: 2px solid var(--accent); margin-top: -1px; }
         
         .tab-close { 
-            opacity: 0; padding: 2px; font-size: 14px; margin-left: 8px; line-height: 0.8;
+            opacity: 0; width: 16px; height: 16px; border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            margin-left: 8px;
         }
         .tab:hover .tab-close { opacity: 0.7; }
-        .tab-close:hover { color: var(--text); opacity: 1 !important; }
+        .tab-close:hover { background: rgba(255,255,255,0.1); color: var(--text); opacity: 1 !important; }
+        .tab.active .tab-close { opacity: 0.5; }
         
-        .unsaved-dot { width: 6px; height: 6px; background: var(--accent-sec); display: none; margin-left: auto; }
+        .unsaved-dot { width: 6px; height: 6px; background: var(--accent-sec); border-radius: 50%; display: none; margin-left: auto; }
         .tab.dirty .unsaved-dot { display: block; }
         .tab.dirty .tab-close { display: none; }
         .tab.dirty:hover .unsaved-dot { display: none; }
         .tab.dirty:hover .tab-close { display: flex; }
 
-        /* Breadcrumbs - Minimal */
+        /* Breadcrumbs */
         .breadcrumbs {
-            height: 22px; background: var(--bg); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; padding: 0 10px; gap: 8px;
+            height: 24px; background: var(--bg); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 12px; gap: 8px;
             font-size: 11px; color: var(--text-dim);
+            user-select: none;
         }
 
         /* Editor Wrapper */
         #editor-split { flex: 1; display: flex; overflow: hidden; position: relative; }
         #code-stage { flex: 1; position: relative; overflow: hidden; background: var(--bg); }
         
-        /* Typography Strictness for Code */
         .code-font {
             font-family: var(--font-stack) !important; 
             font-size: 13px !important;
-            line-height: 20px !important;
-            letter-spacing: 0px !important;
+            line-height: 22px !important;
+            font-variant-ligatures: normal;
         }
 
         .code-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             margin: 0; border: none; background: transparent;
             white-space: pre !important; 
-            padding: 10px 0 10px 50px !important; 
+            padding: 10px 10px 10px 56px !important; 
             box-sizing: border-box;
+            tab-size: 4;
         }
         
-        /* Wrap Toggle Class */
         .word-wrap .code-layer {
             white-space: pre-wrap !important;
             word-break: break-all;
@@ -185,7 +201,7 @@
         #hl-layer { z-index: 1; pointer-events: none; overflow: hidden; }
         #hl-layer code, #hl-layer pre { 
             font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
-            white-space: pre !important; padding: 0 !important; margin: 0 !important;
+            white-space: inherit !important; padding: 0 !important; margin: 0 !important;
             background: transparent !important; border: none !important; box-shadow: none !important;
         }
 
@@ -193,47 +209,52 @@
             z-index: 2; color: transparent; caret-color: var(--cursor);
             outline: none; resize: none; overflow: auto; 
         }
-        #input-layer::selection { background: rgba(137, 180, 250, 0.15); }
+        #input-layer::selection { background: var(--selection); }
 
         #gutter {
             position: absolute; top: 0; left: 0; bottom: 0;
-            width: 45px; background: var(--bg); color: var(--text-dim);
-            text-align: right; padding: 10px 10px 10px 0; border-right: 1px solid var(--border);
-            z-index: 5; user-select: none;
-            overflow: hidden; 
+            width: 48px; background: var(--bg); color: var(--text-dim);
+            text-align: right; padding: 10px 12px 10px 0; border-right: 1px solid var(--border);
+            z-index: 5; user-select: none; pointer-events: none;
+            overflow: hidden; opacity: 0.6;
         }
-        #gutter .active-line { color: var(--text); font-weight: bold; background: var(--highlight); }
+        #gutter .active-line { color: var(--text); opacity: 1; font-weight: bold; }
 
         /* Preview Pane */
         #preview-pane { 
             width: 0; border-left: 1px solid var(--border); background: var(--bg); 
             display: flex; flex-direction: column; overflow: hidden;
-            transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.2s cubic-bezier(0.2, 0, 0, 1);
+            position: relative;
         }
         .preview-active #preview-pane { width: 50%; }
-        iframe { width: 100%; height: 100%; border: none; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+        
+        /* Iframe shield for dragging */
+        #iframe-shield {
+            position: absolute; inset: 0; z-index: 50; display: none; background: transparent;
+        }
         
         #resizer { 
-            width: 4px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
-            display: none;
+            width: 6px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
+            display: none; transition: background 0.1s;
         }
-        #resizer:hover { background: var(--accent); }
+        #resizer:hover, #resizer.dragging { background: var(--accent); }
         .preview-active #code-stage #resizer { display: block; }
 
-        /* Header - Compact */
+        /* Header */
         header {
             height: var(--header-h); background: var(--header-bg); border-bottom: 1px solid var(--border);
             display: flex; align-items: center; padding: 0 8px; gap: 8px;
         }
-        .logo { font-weight: 800; color: var(--accent); font-size: 13px; margin-right: 8px; text-transform: uppercase; padding-left: 8px; }
+        .logo { font-weight: 800; color: var(--accent); font-size: 14px; margin-right: 8px; text-transform: uppercase; padding-left: 8px; letter-spacing: 1px;}
         
-        .toolbar { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+        .toolbar { display: flex; align-items: center; gap: 4px; margin-left: auto; }
         
-        /* Theme Switcher Rects */
-        .theme-swatches { display: flex; gap: 4px; margin-right: 8px; }
+        .theme-swatches { display: flex; gap: 6px; margin-right: 12px; }
         .theme-swatch {
-            width: 12px; height: 12px; cursor: pointer; border: 1px solid var(--border);
-            transition: transform 0.1s;
+            width: 14px; height: 14px; cursor: pointer; border: 1px solid var(--border);
+            border-radius: 3px; transition: transform 0.1s;
         }
         .theme-swatch:hover { transform: scale(1.1); border-color: var(--text); }
         .swatch-latte { background: #eff1f5; }
@@ -241,11 +262,12 @@
         .swatch-macchiato { background: #24273a; }
         .swatch-mocha { background: #1e1e2e; }
 
-        /* Footer - Powerline style */
+        /* Footer */
         footer {
             height: var(--footer-h); background: var(--header-bg); color: var(--text);
             display: flex; align-items: center; justify-content: space-between; padding: 0;
-            font-size: 11px; font-weight: bold; border-top: 1px solid var(--border);
+            font-size: 11px; font-weight: 600; border-top: 1px solid var(--border);
+            user-select: none;
         }
         .stat-box { padding: 0 12px; height: 100%; display: flex; align-items: center; }
         .stat-primary { background: var(--status-bg); color: var(--status-fg); }
@@ -254,55 +276,66 @@
         /* Buttons */
         .btn {
             background: transparent; border: 1px solid transparent; color: var(--text-dim);
-            padding: 4px; width: 28px; height: 28px; cursor: pointer;
+            padding: 0; width: 30px; height: 30px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 0; transition: all 0.1s;
+            border-radius: 4px; transition: all 0.1s;
         }
         .btn:hover { background: var(--highlight); color: var(--text); }
+        .btn:active { transform: translateY(1px); }
         .btn.primary { color: var(--accent); }
-        .btn.primary:hover { background: var(--highlight); color: var(--accent); }
+        .btn.primary:hover { background: rgba(137, 180, 250, 0.1); color: var(--accent); }
         
         /* Command Palette */
         .overlay-mask {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
-            display: none; align-items: flex-start; justify-content: center; padding-top: 40px;
-            backdrop-filter: blur(2px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100;
+            display: none; align-items: flex-start; justify-content: center; padding-top: 80px;
+            backdrop-filter: blur(2px); animation: fadeIn 0.1s ease-out;
         }
         .dialog {
-            background: var(--bg); border: 1px solid var(--accent); width: 600px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: var(--bg); border: 1px solid var(--border); width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             display: flex; flex-direction: column;
-            border-radius: 0;
+            border-radius: 8px; overflow: hidden;
         }
 
         .dialog input {
-            background: var(--header-bg); border: none; color: var(--text); padding: 12px 16px;
-            font-size: 13px; width: 100%; border-bottom: 1px solid var(--border);
+            background: var(--header-bg); border: none; color: var(--text); padding: 16px;
+            font-size: 14px; width: 100%; border-bottom: 1px solid var(--border);
             font-family: var(--font-stack);
         }
-        .cmd-item { padding: 8px 16px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); }
-        .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--accent); }
-        .cmd-shortcut { font-size: 10px; opacity: 0.5; font-family: sans-serif; }
+        .cmd-item { 
+            padding: 10px 16px; cursor: pointer; font-size: 13px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            color: var(--text-dim); border-left: 2px solid transparent; 
+        }
+        .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--text); border-left-color: var(--accent); }
+        .cmd-shortcut { font-size: 10px; opacity: 0.5; font-family: sans-serif; background: var(--border); padding: 2px 6px; border-radius: 3px; }
 
         /* Toast */
         #toast {
-            position: fixed; bottom: 22px; right: 0; background: var(--accent); color: var(--status-fg);
-            padding: 4px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;
-            transform: translateY(100%); transition: transform 0.2s;
-            z-index: 200; border-radius: 0;
+            position: fixed; bottom: 32px; right: 24px; 
+            background: var(--bg); color: var(--text); border: 1px solid var(--accent);
+            padding: 8px 16px; font-size: 12px; font-weight: 600; 
+            transform: translateY(100px); transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 200; border-radius: 4px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 8px;
         }
+        #toast::before { content:''; display:block; width:8px; height:8px; background:var(--accent); border-radius:50%; }
         #toast.visible { transform: translateY(0); }
 
+        /* Scrollbars */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border: 2px solid var(--bg); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--highlight); }
-        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border: 2px solid var(--bg); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+        ::-webkit-scrollbar-corner { background: var(--bg); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="btn" onclick="App.toggleSidebar()" title="Sidebar">
+    <button class="btn" onclick="App.toggleSidebar()" title="Toggle Sidebar (Ctrl+B)">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
     <div class="logo">AETHER</div>
@@ -314,21 +347,21 @@
             <div class="theme-swatch swatch-macchiato" onclick="Config.setTheme('macchiato')" title="Macchiato"></div>
             <div class="theme-swatch swatch-mocha" onclick="Config.setTheme('mocha')" title="Mocha"></div>
         </div>
-        <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
-        <button class="btn" onclick="Commands.trigger('newFile')" title="New File">
+        <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
+        <button class="btn" onclick="Commands.trigger('newFile')" title="New File (Ctrl+N)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <button class="btn" onclick="Commands.trigger('openFile')" title="Open File">
+        <button class="btn" onclick="Commands.trigger('openFile')" title="Open File (Ctrl+O)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </button>
-        <button class="btn" onclick="Commands.trigger('saveFile')" title="Save">
+        <button class="btn" onclick="Commands.trigger('saveFile')" title="Save (Ctrl+S)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
         </button>
-        <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
-        <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Preview">
+        <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
+        <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Toggle Preview">
             <svg class="icon" viewBox="0 0 24 24"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"/><path d="M12 13a1 1 0 100-2 1 1 0 000 2z"/></svg>
         </button>
-        <button class="btn" onclick="Commands.showPalette()" title="Command Palette">
+        <button class="btn" onclick="Commands.showPalette()" title="Command Palette (Ctrl+P)">
             <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
         </button>
     </div>
@@ -338,20 +371,20 @@
     <aside id="sidebar">
         <div class="side-header">
             <span>FILES</span>
-            <button class="btn" onclick="Commands.trigger('openFolder')" style="height:20px; width:20px;">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <button class="btn" onclick="Commands.trigger('openFolder')" style="height:20px; width:20px;" title="Open Folder">
+                <svg class="icon" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
         </div>
         <div id="file-tree" class="file-tree"></div>
         
         <div class="side-header" style="border-top:1px solid var(--border);">
             <span id="opfs-header">OPFS</span>
-            <div style="display:flex;">
-                <button class="btn" onclick="FileSys.createOPFSFile()" style="height:20px; width:20px;">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            <div style="display:flex; gap: 4px;">
+                <button class="btn" onclick="FileSys.createOPFSFile()" style="height:20px; width:20px;" title="New Local File">
+                    <svg class="icon" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M12 5v14M5 12h14"/></svg>
                 </button>
-                <button class="btn" onclick="FileSys.initOPFS()" style="height:20px; width:20px;">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <button class="btn" onclick="FileSys.initOPFS()" style="height:20px; width:20px;" title="Refresh">
+                    <svg class="icon" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </button>
             </div>
         </div>
@@ -362,8 +395,8 @@
         <div id="tabs-scroll"></div>
         <div class="breadcrumbs" id="breadcrumb-bar">
             <span>~</span>
-            <span>/</span>
-            <span id="bc-filename">[No Name]</span>
+            <span style="opacity:0.5">/</span>
+            <span id="bc-filename" style="color:var(--text)">[No Name]</span>
         </div>
         
         <div id="editor-split">
@@ -375,7 +408,8 @@
             </div>
             
             <div id="preview-pane">
-                <iframe id="preview-frame" sandbox="allow-scripts allow-modals allow-forms"></iframe>
+                <div id="iframe-shield"></div>
+                <iframe id="preview-frame" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
             </div>
         </div>
     </main>
@@ -383,7 +417,7 @@
 
 <footer>
     <div style="display:flex; height:100%">
-        <span class="stat-box stat-primary">NORMAL</span>
+        <span class="stat-box stat-primary" style="cursor:pointer" onclick="UI.toast('Vim mode not implemented yet 😉')">NORMAL</span>
         <span class="stat-box stat-secondary" id="stat-file">--</span>
     </div>
     <div style="display:flex; height:100%">
@@ -400,13 +434,13 @@
     </div>
 </div>
 
-<div id="prompt-mask" class="overlay-mask">
-    <div class="dialog">
-        <div style="padding:10px 16px; font-weight:800; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:11px; text-transform:uppercase;" id="prompt-msg">Input</div>
+<div id="prompt-mask" class="overlay-mask" onclick="if(event.target===this) Prompt.close()">
+    <div class="dialog" style="width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+        <div style="padding:12px 16px; font-weight:700; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase; letter-spacing:0.5px;" id="prompt-msg">Input</div>
         <input type="text" id="prompt-input" autocomplete="off" style="background:var(--bg)">
         <div style="display:flex; padding:8px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
-            <button class="btn" style="width:auto; padding:0 8px;" onclick="Prompt.close()">ESC</button>
-            <button class="btn primary" style="width:auto; padding:0 8px;" id="prompt-ok">RET</button>
+            <button class="btn" style="width:auto; padding:0 12px; font-size:11px; font-weight:600;" onclick="Prompt.close()">ESC</button>
+            <button class="btn primary" style="width:auto; padding:0 12px; font-size:11px; font-weight:600;" id="prompt-ok">ENTER</button>
         </div>
     </div>
 </div>
@@ -415,12 +449,12 @@
 
 <script>
 /**
- * AETHER v3 - Flux Minimalist (Polished)
+ * AETHER v3.1 - Flux Polished
  */
 
 // --- CONFIG ---
 const Config = {
-    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220, wordWrap: false },
+    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 240, wordWrap: false },
     state: {},
     init() {
         try { this.state = { ...this.defaults, ...JSON.parse(localStorage.getItem('aether_config') || '{}') }; } 
@@ -441,7 +475,7 @@ const Config = {
         UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`);
     },
     zoom(delta) {
-        this.state.fontSize = Math.max(8, Math.min(32, this.state.fontSize + delta));
+        this.state.fontSize = Math.max(10, Math.min(24, this.state.fontSize + delta));
         this.save();
         UI.toast(`Zoom: ${this.state.fontSize}px`);
     },
@@ -461,7 +495,6 @@ const Config = {
             ? 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css' 
             : 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
             
-        // Re-render preview to apply theme
         App.debouncePreview(true);
     }
 };
@@ -498,15 +531,18 @@ const Editor = {
             gutter: document.getElementById('gutter')
         };
         
-        // Critical Scroll Sync Logic
+        // Optimized Scroll Sync
+        let ticking = false;
         this.els.input.addEventListener('scroll', () => {
-            const top = this.els.input.scrollTop;
-            const left = this.els.input.scrollLeft;
-            requestAnimationFrame(() => {
-                this.els.hlLayer.scrollTop = top;
-                this.els.hlLayer.scrollLeft = left;
-                this.els.gutter.scrollTop = top;
-            });
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    this.els.hlLayer.scrollTop = this.els.input.scrollTop;
+                    this.els.hlLayer.scrollLeft = this.els.input.scrollLeft;
+                    this.els.gutter.scrollTop = this.els.input.scrollTop;
+                    ticking = false;
+                });
+                ticking = true;
+            }
         }, { passive: true });
 
         this.els.input.addEventListener('input', () => {
@@ -517,67 +553,94 @@ const Editor = {
             App.debouncePreview();
         });
 
-        this.els.input.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') { 
-                e.preventDefault();
-                const start = this.els.input.selectionStart;
-                const end = this.els.input.selectionEnd;
-                
-                // If single cursor with no selection, just insert spacing
-                if (!e.shiftKey && start === end) {
-                    document.execCommand('insertText', false, '    ');
-                } else {
-                    // Block Indent/Unindent logic
-                    const val = this.els.input.value;
-                    // Find start of the line where selection begins
-                    const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
-                    // Find end of the line where selection ends
-                    const endLineEnd = val.indexOf('\n', end);
-                    const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
-                    
-                    const block = val.substring(startLineStart, effectiveEnd);
-                    const lines = block.split('\n');
-                    
-                    let newBlock = '';
-                    if (e.shiftKey) {
-                        // Unindent
-                        newBlock = lines.map(line => {
-                            if (line.startsWith('    ')) return line.substring(4);
-                            if (line.startsWith('\t')) return line.substring(1);
-                            // handle less than 4 spaces
-                            const match = line.match(/^\s+/);
-                            if(match && match[0].length < 4) return line.trimStart();
-                            return line;
-                        }).join('\n');
-                    } else {
-                        // Indent
-                        newBlock = lines.map(line => '    ' + line).join('\n');
-                    }
-                    
-                    // Use execCommand to preserve undo stack
-                    this.els.input.setSelectionRange(startLineStart, effectiveEnd);
-                    document.execCommand('insertText', false, newBlock);
-                    // Reselect the block to allow repeated indentation
-                    this.els.input.setSelectionRange(startLineStart, startLineStart + newBlock.length);
-                }
-            }
-            // Smart Indent on Enter
-            if (e.key === 'Enter') {
-                const start = this.els.input.selectionStart;
-                const val = this.els.input.value;
-                const prevLine = val.substring(0, start).split('\n').pop();
-                const indent = prevLine.match(/^\s*/)[0];
-                if (indent) {
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '\n' + indent);
-                }
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
-            setTimeout(() => App.updateStats(), 0);
-        });
-        
+        this.els.input.addEventListener('keydown', (e) => this.handleKey(e));
         this.els.input.addEventListener('click', () => App.updateStats());
+        this.els.input.addEventListener('keyup', () => App.updateStats());
+    },
+    handleKey(e) {
+        // Tab Indentation
+        if (e.key === 'Tab') { 
+            e.preventDefault();
+            const start = this.els.input.selectionStart;
+            const end = this.els.input.selectionEnd;
+            if (!e.shiftKey && start === end) {
+                document.execCommand('insertText', false, '    ');
+            } else {
+                this.handleBlockIndent(e.shiftKey, start, end);
+            }
+        }
+        // Comment Toggle (Ctrl + /)
+        if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+            e.preventDefault();
+            this.toggleComment();
+        }
+        // Smart Indent
+        if (e.key === 'Enter') {
+            const start = this.els.input.selectionStart;
+            const val = this.els.input.value;
+            const prevLine = val.substring(0, start).split('\n').pop();
+            const indent = prevLine.match(/^\s*/)[0];
+            if (indent) {
+                e.preventDefault();
+                document.execCommand('insertText', false, '\n' + indent);
+            }
+        }
+        // Shortcuts
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); App.toggleSidebar(); }
+        
+        setTimeout(() => App.updateStats(), 0);
+    },
+    handleBlockIndent(unindent, start, end) {
+        const val = this.els.input.value;
+        const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
+        const endLineEnd = val.indexOf('\n', end);
+        const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
+        const block = val.substring(startLineStart, effectiveEnd);
+        const lines = block.split('\n');
+        
+        let newBlock = lines.map(line => {
+            if (unindent) {
+                if (line.startsWith('    ')) return line.substring(4);
+                if (line.startsWith('\t')) return line.substring(1);
+                return line.replace(/^\s+/, m => m.slice(0, Math.max(0, m.length - 4))); // loose spaces
+            }
+            return '    ' + line;
+        }).join('\n');
+        
+        this.els.input.setSelectionRange(startLineStart, effectiveEnd);
+        document.execCommand('insertText', false, newBlock);
+        this.els.input.setSelectionRange(startLineStart, startLineStart + newBlock.length);
+    },
+    toggleComment() {
+        const start = this.els.input.selectionStart;
+        const end = this.els.input.selectionEnd;
+        const val = this.els.input.value;
+        
+        const buf = Store.activeBuffer;
+        const ext = buf ? buf.name.split('.').pop().toLowerCase() : 'txt';
+        const commentMap = { js: '// ', ts: '// ', html: '<!-- -->', css: '/* */', py: '# ' };
+        const syntax = commentMap[ext] || '// ';
+        const isBlock = syntax.includes('<!--') || syntax.includes('/*');
+        
+        // Simple line comment toggle for now
+        const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
+        const endLineEnd = val.indexOf('\n', end);
+        const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
+        const block = val.substring(startLineStart, effectiveEnd);
+        
+        // Detect if all lines are commented
+        const lines = block.split('\n');
+        const allCommented = lines.every(l => l.trim().startsWith(syntax.trim()));
+        
+        const newBlock = lines.map(line => {
+            if (allCommented) return line.replace(syntax, '');
+            return syntax + line;
+        }).join('\n');
+
+        this.els.input.setSelectionRange(startLineStart, effectiveEnd);
+        document.execCommand('insertText', false, newBlock);
     },
     load(content, filename) {
         this.els.input.value = content;
@@ -586,7 +649,6 @@ const Editor = {
         this.els.input.scrollTop = 0;
         this.els.hlLayer.scrollTop = 0;
         this.els.gutter.scrollTop = 0;
-        
         App.updateStats();
         App.debouncePreview(true);
     },
@@ -595,17 +657,19 @@ const Editor = {
         const name = filename || (buf ? buf.name : 'txt');
         const ext = name.split('.').pop().toLowerCase();
         
-        let lang = 'clike';
-        if(ext === 'html') lang = 'markup';
-        else if(ext === 'js' || ext === 'ts') lang = 'javascript';
-        else if(ext === 'css') lang = 'css';
-        else if(ext === 'json') lang = 'json';
-        else if(ext === 'py') lang = 'python';
-        else if(ext === 'md') lang = 'markdown';
+        const map = {
+            'html': 'markup', 'js': 'javascript', 'ts': 'typescript',
+            'css': 'css', 'json': 'json', 'py': 'python', 'md': 'markdown', 'jsx': 'jsx', 'tsx': 'tsx'
+        };
+        const lang = map[ext] || 'clike';
         
         this.els.hl.className = `language-${lang}`;
         
-        if (Prism.languages[lang]) {
+        // Small throttle for coloring large files
+        if(code.length > 50000) {
+            // Basic HTML escape for huge files to prevent hang
+             this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
+        } else if (Prism.languages[lang]) {
             this.els.hl.innerHTML = Prism.highlight(code, Prism.languages[lang], lang) + '<br>'; 
         } else {
             this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
@@ -613,12 +677,32 @@ const Editor = {
     },
     updateGutter(text) {
         const lines = text.split('\n').length;
-        const currentLine = this.els.input.value.substring(0, this.els.input.selectionStart).split('\n').length;
+        // Only update if line count changed significantly or first load
+        if(this.lastLineCount === lines) return;
+        this.lastLineCount = lines;
+        
         let html = '';
-        for (let i = 1; i <= lines; i++) html += `<div class="${i === currentLine ? 'active-line' : ''}">${i}</div>`;
+        for (let i = 1; i <= lines; i++) html += `<div>${i}</div>`;
         this.els.gutter.innerHTML = html;
+        this.highlightActiveLine();
+    },
+    highlightActiveLine() {
+        // Pure CSS/JS hybrid for performance?
+        // Actually, just calculating index is faster
+        const start = this.els.input.selectionStart;
+        const val = this.els.input.value;
+        const lineIdx = val.substring(0, start).split('\n').length - 1;
+        
+        const children = this.els.gutter.children;
+        if(this.prevLineIdx !== undefined && children[this.prevLineIdx]) children[this.prevLineIdx].className = '';
+        if(children[lineIdx]) children[lineIdx].className = 'active-line';
+        this.prevLineIdx = lineIdx;
     }
 };
+
+// Hook gutter update into click/keyup
+document.getElementById('input-layer').addEventListener('keyup', () => Editor.highlightActiveLine());
+document.getElementById('input-layer').addEventListener('click', () => Editor.highlightActiveLine());
 
 const FileSys = {
     async initOPFS() {
@@ -637,7 +721,7 @@ const FileSys = {
             if (handle.kind === 'file') {
                 const el = document.createElement('div');
                 el.className = 'tree-item';
-                el.innerHTML = `> ${name}`;
+                el.innerHTML = `<svg class="icon" style="width:12px;" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> ${name}`;
                 el.onclick = async () => {
                     const file = await handle.getFile();
                     App.openBuffer(name, await file.text(), handle, 'opfs');
@@ -652,27 +736,10 @@ const FileSys = {
             try {
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
-                // Use explicit global reference to avoid 'this' context issues
                 FileSys.renderOPFS();
                 UI.toast(`Created ${name}`);
             } catch (e) { UI.toast('Error creating file'); }
         });
-    },
-    async saveToOPFS(buf) {
-        if (buf.name === 'config.json') return this.saveConfigBuffer(buf);
-        if (!Store.state.opfsRoot) { UI.toast('OPFS unavailable'); return; }
-        try {
-            const handle = await Store.state.opfsRoot.getFileHandle(buf.name, { create: true });
-            const writable = await handle.createWritable();
-            await writable.write(buf.content);
-            await writable.close();
-            buf.handle = handle;
-            buf.kind = 'opfs';
-            Store.markSaved(buf.id);
-            this.renderOPFS();
-            UI.renderTabs();
-            UI.toast(`"${buf.name}" written`);
-        } catch (e) { UI.toast('Write failed'); }
     },
     async openDiskFile() {
         try {
@@ -692,16 +759,28 @@ const FileSys = {
         for await (const [name, handle] of dirHandle.entries()) {
             const el = document.createElement('div');
             el.className = 'tree-item';
-            el.style.paddingLeft = `${(level * 10) + 10}px`;
-            el.innerHTML = `${handle.kind==='directory' ? '+ ' : '> '}${name}`;
+            el.style.paddingLeft = `${(level * 10) + 14}px`;
+            
+            const icon = handle.kind === 'directory' 
+                ? '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>' 
+                : '<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline>';
+            
+            el.innerHTML = `<svg class="icon" style="width:12px;opacity:0.7;" viewBox="0 0 24 24">${icon}</svg> ${name}`;
+            
             if (handle.kind === 'file') {
                 el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
+            } else {
+                // Recursive render could go here, but avoiding complexity for single file
+                el.style.fontWeight = "bold";
+                el.style.color = "var(--accent)";
             }
             parentEl.appendChild(el);
         }
     },
     async saveBuffer(buf) {
         if (buf.name === 'config.json' && buf.kind === 'config') return this.saveConfigBuffer(buf);
+        if (buf.kind === 'opfs') return this.saveToOPFS(buf);
+        
         try {
             if (!buf.handle) {
                 buf.handle = await window.showSaveFilePicker({ suggestedName: buf.name });
@@ -711,14 +790,24 @@ const FileSys = {
             await writable.write(buf.content);
             await writable.close();
             Store.markSaved(buf.id);
-            UI.toast(`"${buf.name}" written`);
-        } catch (e) { UI.toast('Write Cancelled'); }
+            UI.toast(`Saved "${buf.name}"`);
+        } catch (e) { UI.toast('Save Cancelled'); }
+    },
+    async saveToOPFS(buf) {
+         try {
+            const writable = await buf.handle.createWritable();
+            await writable.write(buf.content);
+            await writable.close();
+            Store.markSaved(buf.id);
+            UI.toast(`Saved to OPFS`);
+        } catch (e) { UI.toast('Write failed'); }
     },
     saveConfigBuffer(buf) {
         try {
             Config.state = JSON.parse(buf.content);
             Config.save();
             Store.markSaved(buf.id);
+            UI.toast("Config Updated");
         } catch(e) { UI.toast("Invalid JSON"); }
     }
 };
@@ -734,13 +823,14 @@ const App = {
                 const buf = Store.activeBuffer;
                 Editor.load(buf?.content || '', buf?.name || 'txt');
                 document.getElementById('bc-filename').innerText = buf?.name || '[No Name]';
+                this.updateStats();
             }
-            if (event === 'buffer_dirty') UI.renderTabs();
+            if (event === 'buffer_dirty' || event === 'buffer_saved') UI.renderTabs();
         });
         
         const saved = JSON.parse(localStorage.getItem('aether_v3_session') || '[]');
         if (saved.length) saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
-        else this.openBuffer('welcome.txt', 'Aether v3 - Flux\n\n- Ctrl+P: Command Palette\n- Enter: Smart Indent\n- Drag right edge: Resize Preview', null, 'memory');
+        else this.openBuffer('welcome.md', '# Aether v3.1\n\n- **Ctrl+P**: Command Palette\n- **Ctrl+/**: Toggle Comment\n- **Ctrl+O**: Open File\n- **Drag** right edge to resize preview.', null, 'memory');
 
         FileSys.initOPFS();
     },
@@ -765,7 +855,7 @@ const App = {
             document.getElementById('stat-file').innerText = buf.name;
             document.getElementById('stat-lang').innerText = buf.name.split('.').pop().toUpperCase();
         }
-        Editor.updateGutter(input.value);
+        Editor.highlightActiveLine();
     },
     debouncePreview(immediate) {
         if (!Store.state.previewMode) return;
@@ -782,23 +872,25 @@ const App = {
             const fg = computedStyle.getPropertyValue('--text').trim();
             const accent = computedStyle.getPropertyValue('--accent').trim();
             
-            const style = `<style>
+            const baseStyle = `<style>
                 body{background:${bg};color:${fg};font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:2rem;line-height:1.6;}
                 a { color: ${accent}; }
-                pre { background: rgba(0,0,0,0.1); padding:1rem; border-radius:4px; overflow:auto; }
+                pre { background: rgba(0,0,0,0.2); padding:1rem; border-radius:4px; overflow:auto; }
                 code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
                 blockquote { border-left: 3px solid ${accent}; margin:0; padding-left:1rem; opacity:0.8; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid ${computedStyle.getPropertyValue('--border')}; padding: 8px; text-align: left; }
             </style>`;
             
             if (ext === 'md') {
-                f.srcdoc = style + marked.parse(buf.content);
+                f.srcdoc = baseStyle + marked.parse(buf.content);
             } else if (ext === 'html') {
                 f.srcdoc = buf.content;
             } else {
-                f.srcdoc = style + `<pre>${buf.content}</pre>`;
+                f.srcdoc = baseStyle + `<pre>${buf.content}</pre>`;
             }
         };
-        if(immediate) run(); else this.pvTimer = setTimeout(run, 500);
+        if(immediate) run(); else this.pvTimer = setTimeout(run, 600);
     },
     toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); },
     saveSession() { 
@@ -822,16 +914,17 @@ const UI = {
     toast(msg) {
         const t = document.getElementById('toast');
         t.innerText = msg; t.classList.add('visible');
-        setTimeout(() => t.classList.remove('visible'), 2500);
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => t.classList.remove('visible'), 2500);
     }
 };
 
 const Commands = {
     list: [
-        { id: 'newFile', name: 'New File', hint: 'CMD+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
-        { id: 'openFile', name: 'Open File', hint: 'CMD+O', fn: () => FileSys.openDiskFile() },
-        { id: 'saveFile', name: 'Save File', hint: 'CMD+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-        { id: 'settings', name: 'Open Config', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
+        { id: 'newFile', name: 'New File', hint: 'Ctrl+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
+        { id: 'openFile', name: 'Open File', hint: 'Ctrl+O', fn: () => FileSys.openDiskFile() },
+        { id: 'saveFile', name: 'Save File', hint: 'Ctrl+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
+        { id: 'settings', name: 'Edit Config', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
         { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => {
             Store.state.previewMode = !Store.state.previewMode;
             document.body.classList.toggle('preview-active', Store.state.previewMode);
@@ -839,16 +932,34 @@ const Commands = {
         }},
         { id: 'wrap', name: 'Toggle Word Wrap', hint: 'VIEW', fn: () => Config.toggleWrap() },
         { id: 'zoomIn', name: 'Zoom In', hint: 'VIEW', fn: () => Config.zoom(1) },
-        { id: 'zoomOut', name: 'Zoom Out', hint: 'VIEW', fn: () => Config.zoom(-1) }
+        { id: 'zoomOut', name: 'Zoom Out', hint: 'VIEW', fn: () => Config.zoom(-1) },
+        { id: 'find', name: 'Find Text', hint: 'Search', fn: () => Prompt.open("Find:", "", (q) => {
+            const val = Editor.els.input.value;
+            const idx = val.indexOf(q);
+            if(idx > -1) {
+                 Editor.els.input.focus();
+                 Editor.els.input.setSelectionRange(idx, idx + q.length);
+                 UI.toast("Found match");
+            } else UI.toast("Not found");
+        })},
+        { id: 'replace', name: 'Replace Text', hint: 'Search', fn: () => Prompt.open("Find:", "", (f) => Prompt.open("Replace with:", "", (r) => {
+            const buf = Store.activeBuffer;
+            if(!buf) return;
+            const count = buf.content.split(f).length - 1;
+            Store.updateContent(buf.id, buf.content.replaceAll(f, r));
+            Editor.load(buf.content, buf.name);
+            UI.toast(`Replaced ${count} occurrences`);
+        }))}
     ],
     trigger(id) { this.list.find(c => c.id === id).fn(); },
     showPalette() {
         const mask = document.getElementById('palette-mask');
         const list = document.getElementById('cmd-list');
         list.innerHTML = '';
-        this.list.forEach(cmd => {
+        this.list.forEach((cmd, i) => {
             const el = document.createElement('div');
             el.className = 'cmd-item';
+            if(i===0) el.classList.add('selected');
             el.innerHTML = `<span>${cmd.name}</span>${cmd.hint ? `<span class="cmd-shortcut">${cmd.hint}</span>` : ''}`;
             el.onclick = () => { cmd.fn(); this.hidePalette(); };
             list.appendChild(el);
@@ -865,8 +976,18 @@ const Prompt = {
         document.getElementById('prompt-msg').innerText = msg;
         const inp = document.getElementById('prompt-input');
         inp.value = def; inp.focus(); inp.select();
-        document.getElementById('prompt-ok').onclick = () => { if(inp.value) cb(inp.value); this.close(); };
-        inp.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('prompt-ok').click(); if(e.key === 'Escape') this.close(); };
+        
+        const okBtn = document.getElementById('prompt-ok');
+        // Remove old listeners to prevent stacking
+        const newOk = okBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOk, okBtn);
+        
+        newOk.onclick = () => { if(inp.value) cb(inp.value); this.close(); };
+        
+        inp.onkeydown = (e) => { 
+            if(e.key === 'Enter') newOk.click(); 
+            if(e.key === 'Escape') this.close(); 
+        };
     },
     close() { document.getElementById('prompt-mask').style.display = 'none'; }
 };
@@ -875,24 +996,29 @@ const Resizer = {
     init() {
         const r = document.getElementById('resizer');
         const p = document.getElementById('preview-pane');
+        const shield = document.getElementById('iframe-shield');
         let isResizing = false;
 
         r.addEventListener('mousedown', (e) => {
             isResizing = true;
             document.body.style.cursor = 'col-resize';
+            r.classList.add('dragging');
+            shield.style.display = 'block'; // Protect against iframe eating events
             e.preventDefault();
         });
 
-        document.addEventListener('mousemove', (e) => {
+        window.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
             const pct = (1 - (e.clientX / window.innerWidth)) * 100;
-            p.style.width = Math.min(90, Math.max(10, pct)) + '%';
+            p.style.width = Math.min(80, Math.max(10, pct)) + '%';
         });
 
-        document.addEventListener('mouseup', () => {
+        window.addEventListener('mouseup', () => {
             if(isResizing) {
                 isResizing = false;
                 document.body.style.cursor = '';
+                r.classList.remove('dragging');
+                shield.style.display = 'none';
             }
         });
     }
@@ -903,8 +1029,6 @@ window.onload = () => {
     Resizer.init(); 
     window.onkeydown = (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); Commands.showPalette(); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
     };
 };
 </script>
