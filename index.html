@@ -5,75 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1e1e2e">
-    <title>Aether v3 - Flux</title>
+    <title>Aether v3 - Ace Flux</title>
     
-    <!-- Dependencies -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prism-theme" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/inline-color/prism-inline-color.min.js"></script>
+    <!-- Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-tomorrow_night_eighties.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-chrome.min.js"></script>
     
-    <!-- Languages -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-    
+    <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
-            /* Default: Catppuccin Mocha (Darkest) */
+            /* Catppuccin Mocha Defaults */
             --bg: #1e1e2e;
             --sidebar-bg: #181825;
             --header-bg: #11111b;
-            --tab-inactive: #11111b;
-            --tab-active: #1e1e2e;
+            --tab-bg: #11111b;
+            --tab-active-bg: #1e1e2e;
+            
             --text: #cdd6f4;
             --text-dim: #9399b2;
+            --text-dark: #6c7086;
+            
             --accent: #89b4fa;
             --accent-sec: #b4befe;
             --border: #313244;
             --highlight: #313244;
+            
             --cursor: #f5e0dc;
             --status-bg: #89b4fa;
             --status-fg: #1e1e2e;
             
-            /* Strict Monospace Stack */
-            --font-stack: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-code: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             
-            --header-h: 32px;
-            --footer-h: 22px;
-            --sidebar-w: 220px;
-            --tab-h: 28px;
+            --header-h: 36px;
+            --footer-h: 28px;
+            --sidebar-w: 240px;
+            --outline-w: 200px; /* Width of symbol bar */
+            --tab-h: 32px;
         }
 
-        /* Catppuccin Macchiato */
         [data-theme="macchiato"] {
             --bg: #24273a; --sidebar-bg: #1e2030; --header-bg: #181926;
-            --tab-inactive: #181926; --tab-active: #24273a;
-            --text: #cad3f5; --text-dim: #939ab7;
+            --tab-bg: #181926; --tab-active-bg: #24273a;
+            --text: #cad3f5; --text-dim: #939ab7; --text-dark: #6e738d;
             --accent: #8aadf4; --accent-sec: #b7bdf8;
             --border: #363a4f; --highlight: #363a4f;
             --cursor: #f4dbd6; --status-bg: #8aadf4; --status-fg: #24273a;
         }
 
-        /* Catppuccin Frappe */
         [data-theme="frappe"] {
             --bg: #303446; --sidebar-bg: #292c3c; --header-bg: #232634;
-            --tab-inactive: #232634; --tab-active: #303446;
-            --text: #c6d0f5; --text-dim: #949cbb;
+            --tab-bg: #232634; --tab-active-bg: #303446;
+            --text: #c6d0f5; --text-dim: #949cbb; --text-dark: #737994;
             --accent: #8caaee; --accent-sec: #babbf1;
             --border: #414559; --highlight: #414559;
             --cursor: #f2d5cf; --status-bg: #8caaee; --status-fg: #303446;
         }
 
-        /* Catppuccin Latte (Light) */
         [data-theme="latte"] {
             --bg: #eff1f5; --sidebar-bg: #e6e9ef; --header-bg: #dce0e8;
-            --tab-inactive: #dce0e8; --tab-active: #eff1f5;
-            --text: #4c4f69; --text-dim: #9ca0b0;
+            --tab-bg: #dce0e8; --tab-active-bg: #eff1f5;
+            --text: #4c4f69; --text-dim: #9ca0b0; --text-dark: #acb0be;
             --accent: #1e66f5; --accent-sec: #7287fd;
             --border: #bcc0cc; --highlight: #ccd0da;
             --cursor: #dc8a78; --status-bg: #1e66f5; --status-fg: #eff1f5;
@@ -84,229 +85,288 @@
         body { 
             margin: 0; background: var(--bg); color: var(--text);
             height: 100dvh; width: 100vw; overflow: hidden;
-            font-family: var(--font-stack); display: flex; flex-direction: column;
+            font-family: var(--font-ui); display: flex; flex-direction: column;
             font-size: 13px; letter-spacing: -0.01em;
             transition: background 0.2s, color 0.2s;
         }
+        
+        /* Dragging state */
+        body.resizing { cursor: col-resize !important; user-select: none; }
+        body.resizing iframe { pointer-events: none; }
+        body.dragging-preview { cursor: move !important; user-select: none; }
+        body.dragging-preview iframe { pointer-events: none; }
+        
+        body.drag-over::after {
+            content: 'DROP FILE TO OPEN';
+            position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-weight: 800; font-size: 24px; z-index: 999;
+            backdrop-filter: blur(4px); pointer-events: none;
+        }
 
-        svg.icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+        svg.icon { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         /* --- Layout --- */
         #app-shell { display: flex; flex: 1; overflow: hidden; }
         
         aside {
-            width: var(--sidebar-w); background: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; transition: transform 0.1s steps(2, jump-none);
-            z-index: 10; flex-shrink: 0;
+            background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; z-index: 10; flex-shrink: 0;
+            transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.2s;
         }
-        aside.collapsed { margin-left: calc(var(--sidebar-w) * -1); }
+        
+        #sidebar-left { width: var(--sidebar-w); }
+        #sidebar-left.collapsed { margin-left: calc(var(--sidebar-w) * -1); }
+
+        #sidebar-right { 
+            width: var(--outline-w); border-right: none; border-left: 1px solid var(--border); 
+            transition: margin-right 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #sidebar-right.collapsed { margin-right: calc(var(--outline-w) * -1); }
         
         .side-header { 
-            padding: 8px 12px; font-weight: 800; font-size: 11px;
-            color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0 16px; font-weight: 700; font-size: 11px;
+            color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;
             display:flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid var(--border);
+            height: 36px;
         }
-        .file-tree { flex: 1; overflow-y: auto; padding: 4px 0; }
+        
+        .file-tree { flex: 1; overflow-y: auto; padding: 8px 0; }
+        
         .tree-item {
-            padding: 4px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer;
-            display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; 
-            text-overflow: ellipsis; border: none;
+            padding: 4px 16px; font-size: 13px; color: var(--text-dim); cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            white-space: nowrap; overflow: hidden; height: 26px;
+            margin: 0 8px; border-radius: 4px;
         }
+        .tree-item-label { display: flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-ui); }
         .tree-item:hover { background: var(--highlight); color: var(--text); }
-        .tree-item.active { background: var(--highlight); color: var(--accent); font-weight: bold; }
+        .tree-item.active { background: var(--highlight); color: var(--accent); font-weight: 500; }
+        
+        /* Symbol List Styling */
+        .symbol-item {
+            padding: 4px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            border-left: 2px solid transparent;
+        }
+        .symbol-item:hover { color: var(--text); background: var(--highlight); }
+        .symbol-kind { opacity: 0.5; font-size: 10px; width: 14px; text-align: center; }
+        .symbol-name { overflow: hidden; text-overflow: ellipsis; }
 
-        /* Main Area */
+        .tree-actions { display: flex; gap: 4px; opacity: 0; }
+        .tree-item:hover .tree-actions { opacity: 1; }
+        
+        .action-btn { padding: 3px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; opacity: 0.7; }
+        .action-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); opacity: 1; }
+        .action-delete:hover { background: rgba(255,100,100,0.15); color: #ff8888; }
+
+        .reconnect-btn {
+            margin: 10px 16px; padding: 8px; background: rgba(137, 180, 250, 0.1); border: 1px dashed var(--accent);
+            color: var(--accent); text-align: center; border-radius: 6px; cursor: pointer; font-size: 12px;
+            font-weight: 500;
+        }
+        .reconnect-btn:hover { background: var(--accent); color: var(--bg); }
+
         main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--bg); }
 
-        /* Tabs - Blocky */
+        /* Tabs */
         #tabs-scroll { 
             height: var(--tab-h); background: var(--header-bg); display: flex; 
             overflow-x: auto; scrollbar-width: none;
-            gap: 1px; padding: 0; border-bottom: 1px solid var(--border);
+            gap: 1px; padding: 0;
         }
         #tabs-scroll::-webkit-scrollbar { display: none; }
         
         .tab {
             height: 100%; padding: 0 12px; display: flex; align-items: center;
             color: var(--text-dim); font-size: 12px; cursor: pointer; 
-            min-width: 80px; max-width: 200px; position: relative;
-            background: var(--tab-inactive);
-            justify-content: space-between;
-            border-right: 1px solid var(--border);
+            min-width: 100px; max-width: 200px; position: relative;
+            background: transparent; justify-content: space-between;
+            border-right: 1px solid var(--border); transition: all 0.1s;
+            font-family: var(--font-ui); border-top: 2px solid transparent;
         }
         .tab:hover { background: var(--highlight); color: var(--text); }
-        .tab.active { background: var(--bg); color: var(--accent); font-weight: bold; border-top: 2px solid var(--accent); margin-top: -2px; }
+        .tab.active { 
+            background: var(--bg); color: var(--accent); 
+            border-top: 2px solid var(--accent); 
+            font-weight: 500;
+        }
         
         .tab-close { 
-            opacity: 0; padding: 2px; font-size: 14px; margin-left: 8px; line-height: 0.8;
+            opacity: 0; padding: 2px; font-size: 14px; margin-left: 8px; 
+            line-height: 1; border-radius: 3px; width: 16px; height: 16px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .tab:hover .tab-close { opacity: 0.7; }
-        .tab-close:hover { color: var(--text); opacity: 1 !important; }
+        .tab:hover .tab-close, .tab.active .tab-close { opacity: 0.6; }
+        .tab-close:hover { background: rgba(255,100,100,0.15); color: #ff8888; opacity: 1 !important; }
         
-        .unsaved-dot { width: 6px; height: 6px; background: var(--accent-sec); display: none; margin-left: auto; }
+        .unsaved-dot { width: 8px; height: 8px; background: var(--text-dim); border-radius: 50%; display: none; margin-left: auto; transform: scale(0.8); }
         .tab.dirty .unsaved-dot { display: block; }
-        .tab.dirty .tab-close { display: none; }
         .tab.dirty:hover .unsaved-dot { display: none; }
         .tab.dirty:hover .tab-close { display: flex; }
+        .tab.active .unsaved-dot { background: var(--accent); }
 
-        /* Breadcrumbs - Minimal */
         .breadcrumbs {
-            height: 22px; background: var(--bg); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; padding: 0 10px; gap: 8px;
-            font-size: 11px; color: var(--text-dim);
+            height: 28px; background: var(--bg); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 16px; gap: 8px;
+            font-size: 11px; color: var(--text-dark);
         }
 
-        /* Editor Wrapper */
-        #editor-split { flex: 1; display: flex; overflow: hidden; position: relative; }
-        #code-stage { flex: 1; position: relative; overflow: hidden; background: var(--bg); }
+        #editor-row { flex: 1; display: flex; overflow: hidden; position: relative; }
         
-        /* Typography Strictness for Code */
-        .code-font {
-            font-family: var(--font-stack) !important; 
-            font-size: 13px !important;
-            line-height: 20px !important;
-            letter-spacing: 0px !important;
-        }
-
-        .code-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            margin: 0; border: none; background: transparent;
-            white-space: pre !important; 
-            padding: 10px 0 10px 50px !important; 
-            box-sizing: border-box;
-        }
+        #editor-split { flex: 1; display: flex; position: relative; min-width: 0; }
         
-        /* Wrap Toggle Class */
-        .word-wrap .code-layer {
-            white-space: pre-wrap !important;
-            word-break: break-all;
-        }
+        #code-stage { flex: 1; position: relative; }
 
-        #hl-layer { z-index: 1; pointer-events: none; overflow: hidden; }
-        #hl-layer code, #hl-layer pre { 
-            font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
-            white-space: pre !important; padding: 0 !important; margin: 0 !important;
-            background: transparent !important; border: none !important; box-shadow: none !important;
-        }
-
-        #input-layer {
-            z-index: 2; color: transparent; caret-color: var(--cursor);
-            outline: none; resize: none; overflow: auto; 
-        }
-        #input-layer::selection { background: rgba(137, 180, 250, 0.15); }
-
-        #gutter {
-            position: absolute; top: 0; left: 0; bottom: 0;
-            width: 45px; background: var(--bg); color: var(--text-dim);
-            text-align: right; padding: 10px 10px 10px 0; border-right: 1px solid var(--border);
-            z-index: 5; user-select: none;
-            overflow: hidden; 
-        }
-        #gutter .active-line { color: var(--text); font-weight: bold; background: var(--highlight); }
-
-        /* Preview Pane */
+        /* Preview Pane Styles */
         #preview-pane { 
-            width: 0; border-left: 1px solid var(--border); background: var(--bg); 
-            display: flex; flex-direction: column; overflow: hidden;
-            transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg); display: flex; flex-direction: column; overflow: hidden;
+            border-left: 1px solid var(--border);
+            /* Defaults for split mode handled by JS/CSS classes */
         }
-        .preview-active #preview-pane { width: 50%; }
-        iframe { width: 100%; height: 100%; border: none; }
-        
-        #resizer { 
-            width: 4px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
-            display: none;
-        }
-        #resizer:hover { background: var(--accent); }
-        .preview-active #code-stage #resizer { display: block; }
 
-        /* Header - Compact */
+        /* Split Mode (Default) */
+        #editor-split:not(.mode-float) #preview-pane {
+            width: 0; transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .preview-active #editor-split:not(.mode-float) #preview-pane { width: 50%; }
+
+        /* Float Mode */
+        #editor-split.mode-float #preview-pane {
+            position: absolute; width: 400px; height: 300px;
+            top: 20px; right: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid var(--border); border-radius: 8px;
+            z-index: 100; display: none;
+        }
+        .preview-active #editor-split.mode-float #preview-pane { display: flex; }
+
+        .preview-header {
+            height: 28px; background: var(--header-bg); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 8px;
+            cursor: default;
+        }
+        /* Only draggable header in float mode */
+        #editor-split.mode-float .preview-header { cursor: move; }
+
+        iframe { width: 100%; height: 100%; border: none; background: #fff; flex: 1; }
+        
+        /* Resize Handles */
+        #resizer { 
+            width: 4px; background: transparent; cursor: col-resize; position: absolute; top: 0; bottom: 0; z-index: 50;
+            display: none; transition: background 0.2s;
+        }
+        #resizer:hover, #resizer.active { background: var(--accent); }
+        .preview-active #editor-split:not(.mode-float) #resizer { display: block; }
+
+        #float-resizer {
+            width: 14px; height: 14px; position: absolute; bottom: 0; right: 0;
+            cursor: se-resize; z-index: 101; display: none;
+            background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
+            opacity: 0.6; border-bottom-right-radius: 7px;
+        }
+        #editor-split.mode-float #float-resizer { display: block; }
+        #float-resizer:hover { opacity: 1; }
+
         header {
             height: var(--header-h); background: var(--header-bg); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; padding: 0 8px; gap: 8px;
+            display: flex; align-items: center; padding: 0 12px; gap: 12px;
         }
-        .logo { font-weight: 800; color: var(--accent); font-size: 13px; margin-right: 8px; text-transform: uppercase; padding-left: 8px; }
-        
-        .toolbar { display: flex; align-items: center; gap: 2px; margin-left: auto; }
-        
-        /* Theme Switcher Rects */
-        .theme-swatches { display: flex; gap: 4px; margin-right: 8px; }
-        .theme-swatch {
-            width: 12px; height: 12px; cursor: pointer; border: 1px solid var(--border);
-            transition: transform 0.1s;
+        .logo { 
+            font-weight: 800; color: var(--accent); font-size: 14px; 
+            margin-right: 12px; letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 8px;
         }
+        .toolbar { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+        
+        .theme-swatches { display: flex; gap: 6px; margin-right: 12px; }
+        .theme-swatch { width: 12px; height: 12px; cursor: pointer; border: 1px solid var(--border); border-radius: 50%; }
         .theme-swatch:hover { transform: scale(1.1); border-color: var(--text); }
         .swatch-latte { background: #eff1f5; }
         .swatch-frappe { background: #303446; }
         .swatch-macchiato { background: #24273a; }
         .swatch-mocha { background: #1e1e2e; }
 
-        /* Footer - Powerline style */
+        /* New Footer Style */
         footer {
-            height: var(--footer-h); background: var(--header-bg); color: var(--text);
-            display: flex; align-items: center; justify-content: space-between; padding: 0;
-            font-size: 11px; font-weight: bold; border-top: 1px solid var(--border);
+            height: var(--footer-h); background: var(--header-bg); 
+            border-top: 2px solid var(--accent);
+            color: var(--text-dim);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
+            font-size: 11px; font-weight: 500;
+            user-select: none; z-index: 50; position: relative;
         }
-        .stat-box { padding: 0 12px; height: 100%; display: flex; align-items: center; }
-        .stat-primary { background: var(--status-bg); color: var(--status-fg); }
-        .stat-secondary { background: transparent; color: var(--text-dim); border-left: 1px solid var(--border); }
+        .stat-group { display: flex; height: 100%; gap: 16px; align-items: center; }
+        .stat-box { display: flex; align-items: center; gap: 6px; opacity: 0.8; }
+        .stat-box:hover { opacity: 1; color: var(--text); }
+        .stat-highlight { color: var(--accent); font-weight: 700; }
         
-        /* Buttons */
         .btn {
             background: transparent; border: 1px solid transparent; color: var(--text-dim);
             padding: 4px; width: 28px; height: 28px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 0; transition: all 0.1s;
+            border-radius: 5px; transition: all 0.1s;
         }
         .btn:hover { background: var(--highlight); color: var(--text); }
-        .btn.primary { color: var(--accent); }
-        .btn.primary:hover { background: var(--highlight); color: var(--accent); }
+        .btn.primary { color: var(--accent); background: rgba(137, 180, 250, 0.1); }
+        .btn.primary:hover { background: var(--accent); color: var(--bg); }
         
-        /* Command Palette */
         .overlay-mask {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
-            display: none; align-items: flex-start; justify-content: center; padding-top: 40px;
-            backdrop-filter: blur(2px);
+            display: none; align-items: flex-start; justify-content: center; padding-top: 80px;
+            backdrop-filter: blur(4px);
         }
         .dialog {
-            background: var(--bg); border: 1px solid var(--accent); width: 600px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-            border-radius: 0;
+            background: var(--bg); border: 1px solid var(--border); width: 480px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            border-radius: 8px; overflow: hidden;
         }
 
         .dialog input {
-            background: var(--header-bg); border: none; color: var(--text); padding: 12px 16px;
-            font-size: 13px; width: 100%; border-bottom: 1px solid var(--border);
-            font-family: var(--font-stack);
+            background: var(--header-bg); border: none; color: var(--text); padding: 14px 20px;
+            font-size: 14px; width: 100%; border-bottom: 1px solid var(--border);
+            font-family: var(--font-code);
         }
-        .cmd-item { padding: 8px 16px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); }
+        .cmd-item { padding: 10px 20px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); }
         .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--accent); }
-        .cmd-shortcut { font-size: 10px; opacity: 0.5; font-family: sans-serif; }
+        .cmd-shortcut { font-size: 11px; opacity: 0.6; font-family: var(--font-ui); background: var(--border); padding: 2px 6px; border-radius: 4px; font-weight: 500;}
 
-        /* Toast */
         #toast {
-            position: fixed; bottom: 22px; right: 0; background: var(--accent); color: var(--status-fg);
-            padding: 4px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;
-            transform: translateY(100%); transition: transform 0.2s;
-            z-index: 200; border-radius: 0;
+            position: fixed; bottom: 36px; right: 20px; 
+            background: var(--sidebar-bg); color: var(--text); border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            padding: 8px 16px; font-size: 12px; font-weight: 500; 
+            border-radius: 4px; display: flex; align-items: center; gap: 10px;
+            transform: translateY(10px); opacity: 0; pointer-events: none;
+            transition: all 0.2s; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
-        #toast.visible { transform: translateY(0); }
+        #toast.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        #toast svg { color: var(--accent); }
 
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border: 2px solid var(--bg); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--highlight); }
-        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--bg); }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        /* Ace Tweaks */
+        .ace_editor { font-family: var(--font-code) !important; line-height: 1.6 !important; }
+        .ace_gutter { background: var(--bg) !important; color: var(--text-dark) !important; border-right: 1px solid var(--border); }
+        .ace_content { background: var(--bg) !important; }
+        .ace_active-line { background: rgba(255,255,255,0.03) !important; }
+        .ace_gutter-active-line { background: rgba(255,255,255,0.03) !important; }
     </style>
 </head>
-<body>
+<body data-theme="mocha">
 
 <header>
-    <button class="btn" onclick="App.toggleSidebar()" title="Sidebar">
+    <button class="btn" onclick="App.toggleSidebar('left')" title="Toggle Sidebar">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
-    <div class="logo">AETHER</div>
+    <div class="logo">
+        <svg class="icon" viewBox="0 0 24 24" style="color:var(--accent); width:18px; height:18px;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span>AETHER</span>
+    </div>
     
     <div class="toolbar">
         <div class="theme-swatches">
@@ -315,320 +375,344 @@
             <div class="theme-swatch swatch-macchiato" onclick="Config.setTheme('macchiato')" title="Macchiato"></div>
             <div class="theme-swatch swatch-mocha" onclick="Config.setTheme('mocha')" title="Mocha"></div>
         </div>
-        <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
-        <button class="btn" onclick="Commands.trigger('newFile')" title="New File">
+        <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
+        <button class="btn" onclick="Commands.trigger('newFile')" title="New File (Alt+N)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <button class="btn" onclick="Commands.trigger('openFile')" title="Open File">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        </button>
-        <button class="btn" onclick="Commands.trigger('saveFile')" title="Save">
+        <button class="btn" onclick="Commands.trigger('saveFile')" title="Save (Ctrl+S)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
         </button>
-        <div style="width:1px; height:16px; background:var(--border); margin:0 4px;"></div>
+        <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
         <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Preview">
             <svg class="icon" viewBox="0 0 24 24"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"/><path d="M12 13a1 1 0 100-2 1 1 0 000 2z"/></svg>
         </button>
-        <button class="btn" onclick="Commands.showPalette()" title="Command Palette">
+        <button class="btn" onclick="App.toggleSidebar('right')" title="Outline">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg>
+        </button>
+        <button class="btn" onclick="Commands.showPalette()" title="Commands (F1)">
             <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
         </button>
     </div>
 </header>
 
 <div id="app-shell">
-    <aside id="sidebar">
-        <div class="side-header">
-            <span>FILES</span>
-            <button class="btn" onclick="Commands.trigger('openFolder')" style="height:20px; width:20px;">
+    <aside id="sidebar-left">
+        <div class="side-header" style="margin-top:8px;">
+            <span>Workspace</span>
+            <button class="btn" onclick="FileSys.openFolder()" title="Open Folder">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
         </div>
         <div id="file-tree" class="file-tree"></div>
         
-        <div class="side-header" style="border-top:1px solid var(--border);">
-            <span id="opfs-header">OPFS</span>
+        <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+            <span id="opfs-header">Local Storage</span>
             <div style="display:flex;">
-                <button class="btn" onclick="FileSys.createOPFSFile()" style="height:20px; width:20px;">
+                <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                </button>
-                <button class="btn" onclick="FileSys.initOPFS()" style="height:20px; width:20px;">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </button>
             </div>
         </div>
-        <div id="opfs-tree" class="file-tree" style="max-height: 200px;"></div>
+        <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
     </aside>
 
     <main>
         <div id="tabs-scroll"></div>
-        <div class="breadcrumbs" id="breadcrumb-bar">
-            <span>~</span>
-            <span>/</span>
-            <span id="bc-filename">[No Name]</span>
+        <div class="breadcrumbs">
+            <span>root</span><span>/</span><span id="bc-filename" style="color:var(--text)">[No Selection]</span>
         </div>
         
-        <div id="editor-split">
-            <div id="code-stage">
-                <div id="gutter" class="code-font"></div>
-                <div id="hl-layer" class="code-layer code-font"><code id="hl-code" class="language-javascript"></code></div>
-                <textarea id="input-layer" class="code-layer code-font" spellcheck="false" wrap="off"></textarea>
+        <div id="editor-row">
+            <div id="editor-split">
+                <div id="code-stage"></div>
                 <div id="resizer"></div>
+                
+                <div id="preview-pane">
+                    <div class="preview-header" id="preview-header">
+                        <span style="font-size:10px; font-weight:700; color:var(--text-dim);">PREVIEW</span>
+                        <button class="btn" style="width:20px; height:20px;" onclick="Commands.trigger('togglePreview')">
+                            <svg class="icon" style="width:12px; height:12px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <iframe id="preview-frame" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
+                    <div id="float-resizer"></div>
+                </div>
             </div>
             
-            <div id="preview-pane">
-                <iframe id="preview-frame" sandbox="allow-scripts allow-modals allow-forms"></iframe>
-            </div>
+            <aside id="sidebar-right" class="collapsed">
+                 <div class="side-header" style="margin-top:8px;"><span>Outline</span></div>
+                 <div id="symbol-tree" class="file-tree"></div>
+            </aside>
         </div>
     </main>
 </div>
 
 <footer>
-    <div style="display:flex; height:100%">
-        <span class="stat-box stat-primary">NORMAL</span>
-        <span class="stat-box stat-secondary" id="stat-file">--</span>
+    <div class="stat-group">
+        <span class="stat-highlight">ACE FLUX</span>
+        <span style="opacity:0.3">|</span>
+        <span class="stat-box" id="stat-file">--</span>
     </div>
-    <div style="display:flex; height:100%">
-        <span class="stat-box stat-secondary" id="stat-lang">TXT</span>
-        <span class="stat-box stat-secondary" id="stat-pos">1:1</span>
-        <span class="stat-box stat-primary" id="stat-enc">UTF-8</span>
+    <div class="stat-group">
+        <span class="stat-box" id="stat-lang">TXT</span>
+        <span class="stat-box" id="stat-pos">1:1</span>
+        <span class="stat-box" id="stat-indent">Space: 4</span>
     </div>
 </footer>
 
 <div id="palette-mask" class="overlay-mask" onclick="if(event.target===this) Commands.hidePalette()">
     <div class="dialog">
-        <input type="text" id="cmd-input" placeholder="> Type command..." autocomplete="off">
-        <div id="cmd-list" style="max-height: 300px; overflow-y: auto;"></div>
+        <input type="text" id="cmd-input" placeholder="> Type a command..." autocomplete="off">
+        <div id="cmd-list" style="max-height: 350px; overflow-y: auto;"></div>
     </div>
 </div>
 
 <div id="prompt-mask" class="overlay-mask">
     <div class="dialog">
-        <div style="padding:10px 16px; font-weight:800; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:11px; text-transform:uppercase;" id="prompt-msg">Input</div>
+        <div style="padding:14px 20px; font-weight:700; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase;" id="prompt-msg">Input</div>
         <input type="text" id="prompt-input" autocomplete="off" style="background:var(--bg)">
-        <div style="display:flex; padding:8px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
-            <button class="btn" style="width:auto; padding:0 8px;" onclick="Prompt.close()">ESC</button>
-            <button class="btn primary" style="width:auto; padding:0 8px;" id="prompt-ok">RET</button>
+        <div style="display:flex; padding:12px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
+            <button class="btn" style="width:auto; padding:6px 12px; font-size:12px;" onclick="Prompt.close()">Cancel</button>
+            <button class="btn primary" style="width:auto; padding:6px 12px; font-size:12px;" id="prompt-ok">Submit</button>
         </div>
     </div>
 </div>
 
-<div id="toast">Ready</div>
+<div id="confirm-mask" class="overlay-mask">
+    <div class="dialog">
+        <div style="padding:14px 20px; font-weight:700; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase;" id="confirm-title">Confirmation</div>
+        <div style="padding:20px 20px; color:var(--text); font-size:13px;" id="confirm-msg">Are you sure?</div>
+        <div style="display:flex; padding:12px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
+            <button class="btn" style="width:auto; padding:6px 12px; font-size:12px;" onclick="Confirm.close()">Cancel</button>
+            <button class="btn primary" style="width:auto; padding:6px 12px; font-size:12px; color:#ff8888;" id="confirm-ok">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    <span id="toast-msg">Initialized</span>
+</div>
 
 <script>
 /**
- * AETHER v3 - Flux Minimalist (Polished)
+ * AETHER v3 - Final Polish + Persistence + Floating Preview + Symbols + Resizing
  */
 
-// --- CONFIG ---
+const DB = {
+    db: null,
+    async init() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open('AetherDB', 2);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
+                if (!db.objectStoreNames.contains('session')) db.createObjectStore('session', { keyPath: 'id' });
+            };
+            req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
+            req.onerror = reject;
+        });
+    },
+    async set(store, key, val) {
+        if(!this.db) return;
+        return new Promise((resolve) => {
+            const tx = this.db.transaction(store, 'readwrite');
+            if (store === 'session') tx.objectStore(store).put(val);
+            else tx.objectStore(store).put(val, key);
+            tx.oncomplete = resolve;
+        });
+    },
+    async get(store, key) {
+        if(!this.db) return null;
+        return new Promise((resolve) => {
+            const tx = this.db.transaction(store, 'readonly');
+            const req = tx.objectStore(store).get(key);
+            req.onsuccess = () => resolve(req.result);
+        });
+    },
+    async getAll(store) {
+        if(!this.db) return [];
+        return new Promise((resolve) => {
+            const tx = this.db.transaction(store, 'readonly');
+            const req = tx.objectStore(store).getAll();
+            req.onsuccess = () => resolve(req.result);
+        });
+    },
+    async clear(store) {
+        if(!this.db) return;
+        return new Promise(r => {
+            const tx = this.db.transaction(store, 'readwrite');
+            tx.objectStore(store).clear();
+            tx.oncomplete = r;
+        });
+    }
+};
+
 const Config = {
-    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220, wordWrap: false },
+    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220, wordWrap: true, previewType: 'split' },
     state: {},
     init() {
         try { this.state = { ...this.defaults, ...JSON.parse(localStorage.getItem('aether_config') || '{}') }; } 
         catch (e) { this.state = { ...this.defaults }; }
         this.apply();
     },
-    save() {
-        localStorage.setItem('aether_config', JSON.stringify(this.state));
-        this.apply();
+    save() { localStorage.setItem('aether_config', JSON.stringify(this.state)); this.apply(); },
+    setTheme(name) { this.state.theme = name; this.save(); },
+    toggleWrap() { this.state.wordWrap = !this.state.wordWrap; this.save(); UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`); },
+    togglePreviewType() { 
+        this.state.previewType = this.state.previewType === 'split' ? 'float' : 'split'; 
+        this.save(); 
+        UI.toast(`Preview: ${this.state.previewType.toUpperCase()}`);
     },
-    setTheme(name) {
-        this.state.theme = name;
-        this.save();
-    },
-    toggleWrap() {
-        this.state.wordWrap = !this.state.wordWrap;
-        this.save();
-        UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`);
-    },
-    zoom(delta) {
-        this.state.fontSize = Math.max(8, Math.min(32, this.state.fontSize + delta));
-        this.save();
-        UI.toast(`Zoom: ${this.state.fontSize}px`);
-    },
+    zoom(delta) { this.state.fontSize = Math.max(10, Math.min(24, this.state.fontSize + delta)); this.save(); UI.toast(`Zoom: ${this.state.fontSize}px`); },
     apply() {
         document.body.setAttribute('data-theme', this.state.theme);
         document.documentElement.style.setProperty('--sidebar-w', this.state.sidebarWidth + 'px');
+        const split = document.getElementById('editor-split');
+        if (this.state.previewType === 'float') split.classList.add('mode-float'); else split.classList.remove('mode-float');
         
-        const els = document.querySelectorAll('.code-font');
-        els.forEach(el => el.style.fontSize = this.state.fontSize + 'px');
-        
-        const stage = document.getElementById('code-stage');
-        if (this.state.wordWrap) stage.classList.add('word-wrap');
-        else stage.classList.remove('word-wrap');
-        
-        const prismLink = document.getElementById('prism-theme');
-        prismLink.href = this.state.theme === 'latte' 
-            ? 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css' 
-            : 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
-            
-        // Re-render preview to apply theme
-        App.debouncePreview(true);
+        if (Editor.instance) {
+            Editor.instance.setFontSize(this.state.fontSize);
+            Editor.instance.setOption("wrap", this.state.wordWrap);
+            Editor.instance.setTheme(this.state.theme === 'latte' ? 'ace/theme/chrome' : 'ace/theme/tomorrow_night_eighties');
+            Editor.instance.resize();
+        }
     }
 };
 
 const Store = {
-    state: { buffers: [], activeId: null, workspace: null, opfsRoot: null, previewMode: false },
-    subs: [],
+    state: { buffers: [], activeId: null, opfsRoot: null, previewMode: false },
     get activeBuffer() { return this.state.buffers.find(b => b.id === this.state.activeId); },
-    subscribe(fn) { this.subs.push(fn); },
-    notify(event) { this.subs.forEach(fn => fn(event, this.state)); },
-    addBuffer(b) { this.state.buffers.push(b); this.state.activeId = b.id; this.notify('buffer_added'); App.saveSession(); },
+    addBuffer(b) { this.state.buffers.push(b); this.setActive(b.id); App.saveSession(); },
     closeBuffer(id) {
         const idx = this.state.buffers.findIndex(b => b.id === id);
         if (idx === -1) return;
         this.state.buffers.splice(idx, 1);
-        if (this.state.activeId === id) this.state.activeId = this.state.buffers.length ? this.state.buffers[Math.max(0, idx - 1)].id : null;
-        this.notify('buffer_closed'); App.saveSession();
+        if (this.state.activeId === id) {
+            const next = this.state.buffers[idx] || this.state.buffers[idx - 1];
+            this.setActive(next ? next.id : null);
+        } else UI.renderTabs();
+        App.saveSession();
     },
-    setActive(id) { if(this.state.activeId !== id) { this.state.activeId = id; this.notify('buffer_switched'); App.saveSession(); } },
+    setActive(id) { 
+        this.state.activeId = id; UI.renderTabs();
+        const buf = this.activeBuffer;
+        if (buf) { 
+            Editor.load(buf.content, buf.name); 
+            document.getElementById('bc-filename').innerText = buf.name; 
+        } 
+        else { Editor.load('', 'txt'); document.getElementById('bc-filename').innerText = '[No Selection]'; }
+        App.saveSession(); 
+    },
     updateContent(id, c) { 
         const b = this.state.buffers.find(b => b.id === id); 
-        if(b && b.content !== c) { b.content = c; if(!b.dirty) { b.dirty=true; this.notify('buffer_dirty'); } } 
+        if(b && b.content !== c) { 
+            b.content = c; 
+            if(!b.dirty) { b.dirty = true; UI.renderTabs(); }
+            App.debounceSaveSession(); 
+        } 
     },
-    markSaved(id) { const b = this.state.buffers.find(b => b.id === id); if(b) { b.dirty=false; this.notify('buffer_saved'); } }
+    markSaved(id) { 
+        const b = this.state.buffers.find(b => b.id === id); 
+        if(b) { b.dirty = false; UI.renderTabs(); App.saveSession(); } 
+    }
+};
+
+const Symbols = {
+    patterns: {
+        js: [
+            { r: /function\s+([a-zA-Z0-9_$]+)/g, icon: 'f', k: 'func' },
+            { r: /class\s+([a-zA-Z0-9_$]+)/g, icon: 'c', k: 'class' },
+            { r: /(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?(?:function|\(.*?\)\s*=>)/g, icon: 'v', k: 'var' }
+        ],
+        py: [
+            { r: /def\s+([a-zA-Z0-9_]+)/g, icon: 'f', k: 'func' },
+            { r: /class\s+([a-zA-Z0-9_]+)/g, icon: 'c', k: 'class' }
+        ],
+        css: [
+            { r: /([.#][a-zA-Z0-9_-]+)\s*\{/g, icon: '#', k: 'sel' }
+        ],
+        md: [
+            { r: /^(#{1,6})\s+(.*)$/gm, icon: 'H', k: 'head' }
+        ]
+    },
+    parse() {
+        const buf = Store.activeBuffer;
+        if (!buf) return;
+        const ext = buf.name.split('.').pop().toLowerCase();
+        let lang = 'js';
+        if (['ts','jsx'].includes(ext)) lang = 'js';
+        else if (ext === 'py') lang = 'py';
+        else if (ext === 'css') lang = 'css';
+        else if (ext === 'md') lang = 'md';
+        else return;
+
+        const lines = buf.content.split('\n');
+        const tree = document.getElementById('symbol-tree');
+        tree.innerHTML = '';
+        const rules = this.patterns[lang] || [];
+
+        lines.forEach((line, i) => {
+            rules.forEach(rule => {
+                let match;
+                // Reset regex if global
+                rule.r.lastIndex = 0; 
+                while ((match = rule.r.exec(line)) !== null) {
+                    const name = lang === 'md' ? match[2] : match[1];
+                    const el = document.createElement('div');
+                    el.className = 'symbol-item';
+                    el.innerHTML = `<span class="symbol-kind">${lang === 'md' ? match[1].length : rule.icon}</span><span class="symbol-name">${name}</span>`;
+                    el.onclick = () => { Editor.instance.gotoLine(i + 1); Editor.instance.focus(); };
+                    tree.appendChild(el);
+                }
+            });
+        });
+    }
 };
 
 const Editor = {
-    els: { input: null, hl: null, hlLayer: null, gutter: null },
+    instance: null,
     init() {
-        this.els = {
-            input: document.getElementById('input-layer'),
-            hl: document.getElementById('hl-code'),
-            hlLayer: document.getElementById('hl-layer'),
-            gutter: document.getElementById('gutter')
-        };
-        
-        // Critical Scroll Sync Logic
-        this.els.input.addEventListener('scroll', () => {
-            const top = this.els.input.scrollTop;
-            const left = this.els.input.scrollLeft;
-            requestAnimationFrame(() => {
-                this.els.hlLayer.scrollTop = top;
-                this.els.hlLayer.scrollLeft = left;
-                this.els.gutter.scrollTop = top;
-            });
-        }, { passive: true });
-
-        this.els.input.addEventListener('input', () => {
-            const val = this.els.input.value;
-            if (Store.state.activeId) Store.updateContent(Store.state.activeId, val);
-            this.highlight(val);
-            this.updateGutter(val);
-            App.debouncePreview();
+        this.instance = ace.edit("code-stage");
+        this.instance.setOptions({
+            enableBasicAutocompletion: true, enableLiveAutocompletion: true,
+            showPrintMargin: false, useSoftTabs: true, tabSize: 4,
+            fontSize: Config.state.fontSize, fontFamily: 'JetBrains Mono, monospace', scrollPastEnd: 0.5
         });
-
-        this.els.input.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') { 
-                e.preventDefault();
-                const start = this.els.input.selectionStart;
-                const end = this.els.input.selectionEnd;
-                
-                // If single cursor with no selection, just insert spacing
-                if (!e.shiftKey && start === end) {
-                    document.execCommand('insertText', false, '    ');
-                } else {
-                    // Block Indent/Unindent logic
-                    const val = this.els.input.value;
-                    // Find start of the line where selection begins
-                    const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
-                    // Find end of the line where selection ends
-                    const endLineEnd = val.indexOf('\n', end);
-                    const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
-                    
-                    const block = val.substring(startLineStart, effectiveEnd);
-                    const lines = block.split('\n');
-                    
-                    let newBlock = '';
-                    if (e.shiftKey) {
-                        // Unindent
-                        newBlock = lines.map(line => {
-                            if (line.startsWith('    ')) return line.substring(4);
-                            if (line.startsWith('\t')) return line.substring(1);
-                            // handle less than 4 spaces
-                            const match = line.match(/^\s+/);
-                            if(match && match[0].length < 4) return line.trimStart();
-                            return line;
-                        }).join('\n');
-                    } else {
-                        // Indent
-                        newBlock = lines.map(line => '    ' + line).join('\n');
-                    }
-                    
-                    // Use execCommand to preserve undo stack
-                    this.els.input.setSelectionRange(startLineStart, effectiveEnd);
-                    document.execCommand('insertText', false, newBlock);
-                    // Reselect the block to allow repeated indentation
-                    this.els.input.setSelectionRange(startLineStart, startLineStart + newBlock.length);
-                }
-            }
-            // Smart Indent on Enter
-            if (e.key === 'Enter') {
-                const start = this.els.input.selectionStart;
-                const val = this.els.input.value;
-                const prevLine = val.substring(0, start).split('\n').pop();
-                const indent = prevLine.match(/^\s*/)[0];
-                if (indent) {
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '\n' + indent);
-                }
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
-            setTimeout(() => App.updateStats(), 0);
+        this.instance.on('change', () => { 
+            if (Store.state.activeId) Store.updateContent(Store.state.activeId, this.instance.getValue()); 
+            App.debouncePreview(); 
+            this.debounceSymbols();
         });
-        
-        this.els.input.addEventListener('click', () => App.updateStats());
+        this.instance.on('changeSelection', () => App.updateStats());
+        // Shortcuts
+        this.instance.commands.addCommand({ name: 'save', bindKey: {win: 'Ctrl-S', mac: 'Command-S'}, exec: () => Commands.trigger('saveFile') });
+        this.instance.commands.addCommand({ name: 'palette', bindKey: {win: 'F1|Ctrl-P', mac: 'F1|Command-P'}, exec: () => Commands.showPalette() });
+        this.instance.commands.addCommand({ name: 'new', bindKey: {win: 'Alt-N', mac: 'Option-N'}, exec: () => Commands.trigger('newFile') });
     },
     load(content, filename) {
-        this.els.input.value = content;
-        this.highlight(content, filename);
-        this.updateGutter(content);
-        this.els.input.scrollTop = 0;
-        this.els.hlLayer.scrollTop = 0;
-        this.els.gutter.scrollTop = 0;
-        
-        App.updateStats();
-        App.debouncePreview(true);
+        if (this.instance.getValue() !== content) this.instance.setValue(content, -1);
+        const ext = filename ? filename.split('.').pop().toLowerCase() : 'txt';
+        const modes = { js:'javascript', ts:'javascript', html:'html', css:'css', py:'python', md:'markdown', json:'javascript' };
+        this.instance.session.setMode(`ace/mode/${modes[ext] || 'text'}`);
+        this.instance.session.getUndoManager().reset();
+        App.updateStats(); App.debouncePreview(true);
+        Symbols.parse();
     },
-    highlight(code, filename) {
-        const buf = Store.activeBuffer;
-        const name = filename || (buf ? buf.name : 'txt');
-        const ext = name.split('.').pop().toLowerCase();
-        
-        let lang = 'clike';
-        if(ext === 'html') lang = 'markup';
-        else if(ext === 'js' || ext === 'ts') lang = 'javascript';
-        else if(ext === 'css') lang = 'css';
-        else if(ext === 'json') lang = 'json';
-        else if(ext === 'py') lang = 'python';
-        else if(ext === 'md') lang = 'markdown';
-        
-        this.els.hl.className = `language-${lang}`;
-        
-        if (Prism.languages[lang]) {
-            this.els.hl.innerHTML = Prism.highlight(code, Prism.languages[lang], lang) + '<br>'; 
-        } else {
-            this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
-        }
-    },
-    updateGutter(text) {
-        const lines = text.split('\n').length;
-        const currentLine = this.els.input.value.substring(0, this.els.input.selectionStart).split('\n').length;
-        let html = '';
-        for (let i = 1; i <= lines; i++) html += `<div class="${i === currentLine ? 'active-line' : ''}">${i}</div>`;
-        this.els.gutter.innerHTML = html;
+    debounceSymbols() {
+        clearTimeout(this.symTimer);
+        this.symTimer = setTimeout(() => Symbols.parse(), 1000);
     }
 };
 
 const FileSys = {
+    rootDir: null,
     async initOPFS() {
         try {
             if (!navigator.storage?.getDirectory) throw 1;
             Store.state.opfsRoot = await navigator.storage.getDirectory();
             this.renderOPFS();
-            UI.toast('OPFS Mounted');
-        } catch (e) { document.getElementById('opfs-header').innerText = "MEMORY ONLY"; }
+        } catch (e) { document.getElementById('opfs-header').innerText = "LocalStorage Only"; }
     },
     async renderOPFS() {
         if (!Store.state.opfsRoot) return;
@@ -638,302 +722,430 @@ const FileSys = {
             if (handle.kind === 'file') {
                 const el = document.createElement('div');
                 el.className = 'tree-item';
-                el.innerHTML = `> ${name}`;
-                el.onclick = async () => {
-                    const file = await handle.getFile();
-                    App.openBuffer(name, await file.text(), handle, 'opfs');
-                };
+                const label = document.createElement('span');
+                label.className = 'tree-item-label';
+                label.innerHTML = `<svg class="icon" style="width:12px;" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> ${name}`;
+                label.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+                
+                const actions = document.createElement('div');
+                actions.className = 'tree-actions';
+                
+                const renBtn = document.createElement('span');
+                renBtn.className = 'action-btn'; renBtn.title = "Rename";
+                renBtn.innerHTML = `<svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+                renBtn.onclick = (e) => { e.stopPropagation(); this.renameOPFSFile(name, handle); };
+
+                const delBtn = document.createElement('span');
+                delBtn.className = 'action-btn action-delete'; delBtn.title = "Delete";
+                delBtn.innerHTML = `<svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+                delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSFile(name); };
+
+                actions.append(renBtn, delBtn);
+                el.append(label, actions);
                 div.appendChild(el);
             }
         }
     },
     async createOPFSFile() {
-        if (!Store.state.opfsRoot) return;
-        Prompt.open("New OPFS File:", "script.js", async (name) => {
+        Prompt.open("New Local File:", "script.js", async (name) => {
+            if(!name) return;
             try {
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
-                // Use explicit global reference to avoid 'this' context issues
-                FileSys.renderOPFS();
-                UI.toast(`Created ${name}`);
+                this.renderOPFS();
             } catch (e) { UI.toast('Error creating file'); }
         });
     },
-    async saveToOPFS(buf) {
-        if (buf.name === 'config.json') return this.saveConfigBuffer(buf);
-        if (!Store.state.opfsRoot) { UI.toast('OPFS unavailable'); return; }
+    async renameOPFSFile(oldName, handle) {
+        Prompt.open(`Rename "${oldName}" to:`, oldName, async (newName) => {
+            if (!newName || newName === oldName) return;
+            try {
+                const file = await handle.getFile();
+                const content = await file.text();
+                const newHandle = await Store.state.opfsRoot.getFileHandle(newName, { create: true });
+                const writable = await newHandle.createWritable();
+                await writable.write(content);
+                await writable.close();
+                await Store.state.opfsRoot.removeEntry(oldName);
+                
+                const buf = Store.state.buffers.find(b => b.name === oldName && b.kind === 'opfs');
+                if (buf) { buf.name = newName; buf.handle = newHandle; UI.renderTabs(); document.getElementById('bc-filename').innerText = newName; }
+                
+                this.renderOPFS(); UI.toast('Renamed');
+            } catch(e) { UI.toast('Rename Failed'); }
+        });
+    },
+    async deleteOPFSFile(name) {
+        Confirm.open("Delete File", `Permanently delete "${name}"?`, async () => {
+            try {
+                await Store.state.opfsRoot.removeEntry(name);
+                const buf = Store.state.buffers.find(b => b.name === name && b.kind === 'opfs');
+                if (buf) App.closeBuffer(buf.id);
+                this.renderOPFS(); UI.toast('Deleted');
+            } catch (e) { UI.toast('Delete failed'); }
+        });
+    },
+    async saveBuffer(buf) {
+        if (buf.name === 'config.json' && buf.kind === 'config') { Config.state = JSON.parse(buf.content); Config.save(); Store.markSaved(buf.id); return; }
         try {
-            const handle = await Store.state.opfsRoot.getFileHandle(buf.name, { create: true });
+            let handle = buf.handle;
+            if (!handle && buf.kind === 'memory') {
+                handle = await window.showSaveFilePicker({ suggestedName: buf.name });
+                buf.handle = handle; buf.kind = 'disk'; buf.name = handle.name;
+            }
             const writable = await handle.createWritable();
             await writable.write(buf.content);
             await writable.close();
-            buf.handle = handle;
-            buf.kind = 'opfs';
             Store.markSaved(buf.id);
-            this.renderOPFS();
-            UI.renderTabs();
-            UI.toast(`"${buf.name}" written`);
-        } catch (e) { UI.toast('Write failed'); }
-    },
-    async openDiskFile() {
-        try {
-            const [handle] = await window.showOpenFilePicker();
-            const file = await handle.getFile();
-            App.openBuffer(file.name, await file.text(), handle, 'disk');
-        } catch (e) {}
+            UI.toast(`Saved: ${buf.name}`);
+        } catch (e) { UI.toast('Save Cancelled'); }
     },
     async openFolder() {
         try {
             const handle = await window.showDirectoryPicker();
+            this.rootDir = handle;
+            await DB.set('handles', 'rootDir', handle);
             this.renderWorkspace(handle);
         } catch(e) {}
+    },
+    async restoreRoot(handle) {
+        this.rootDir = handle;
+        if ((await handle.queryPermission({mode: 'read'})) === 'granted') {
+            this.renderWorkspace(handle);
+        } else {
+            document.getElementById('file-tree').innerHTML = `<div class="reconnect-btn" onclick="FileSys.reconnectRoot()">Reconnect to /${handle.name}</div>`;
+        }
+    },
+    async reconnectRoot() {
+        if (this.rootDir && (await this.rootDir.requestPermission({mode: 'read'})) === 'granted') {
+            this.renderWorkspace(this.rootDir);
+        }
     },
     async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0) {
         if(level === 0) parentEl.innerHTML = '';
         for await (const [name, handle] of dirHandle.entries()) {
             const el = document.createElement('div');
             el.className = 'tree-item';
-            el.style.paddingLeft = `${(level * 10) + 10}px`;
+            el.style.paddingLeft = `${(level * 10) + 12}px`;
             el.innerHTML = `${handle.kind==='directory' ? '+ ' : '> '}${name}`;
             if (handle.kind === 'file') {
                 el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
             }
             parentEl.appendChild(el);
+            if (handle.kind === 'directory') await this.renderWorkspace(handle, parentEl, level + 1);
         }
-    },
-    async saveBuffer(buf) {
-        if (buf.name === 'config.json' && buf.kind === 'config') return this.saveConfigBuffer(buf);
-        try {
-            if (!buf.handle) {
-                buf.handle = await window.showSaveFilePicker({ suggestedName: buf.name });
-                buf.name = buf.handle.name;
-            }
-            const writable = await buf.handle.createWritable();
-            await writable.write(buf.content);
-            await writable.close();
-            Store.markSaved(buf.id);
-            UI.toast(`"${buf.name}" written`);
-        } catch (e) { UI.toast('Write Cancelled'); }
-    },
-    saveConfigBuffer(buf) {
-        try {
-            Config.state = JSON.parse(buf.content);
-            Config.save();
-            Store.markSaved(buf.id);
-        } catch(e) { UI.toast("Invalid JSON"); }
     }
 };
 
 const App = {
-    init() {
-        Config.init();
-        Editor.init(); 
+    async init() {
+        await DB.init();
+        Editor.init(); Config.init(); FileSys.initOPFS(); Resizer.init(); Dragger.init();
+        
+        const rootHandle = await DB.get('handles', 'rootDir');
+        if (rootHandle) FileSys.restoreRoot(rootHandle);
 
-        Store.subscribe((event) => {
-            if (['buffer_added', 'buffer_closed', 'buffer_switched'].includes(event)) {
-                UI.renderTabs();
-                const buf = Store.activeBuffer;
-                Editor.load(buf?.content || '', buf?.name || 'txt');
-                document.getElementById('bc-filename').innerText = buf?.name || '[No Name]';
+        const welcomeText = "# AETHER v3 // TECHNICAL SPECIFICATION\n" +
+"> Kernel: Ace Flux 1.32.7\n" +
+"> Storage Engine: IndexedDB + OPFS (Origin Private File System)\n\n" +
+"Aether v3 is a browser-based IDE leveraging low-level Web APIs for a local-first development experience. It utilizes an asynchronous non-blocking architecture for file I/O and buffer management.\n\n" +
+"--- \n\n" +
+"### SYSTEM ARCHITECTURE & DATA FLOW\n\n" +
+"The editor handles state persistence through a dual-layer strategy. Buffers are mirrored in IndexedDB to survive page lifecycle events, while the file tree interfaces directly with the host filesystem via the File System Access API.\n\n" +
+"```text\n" +
+"    [ UI LAYER ] <--- Event Bus ---> [ COMMAND PALETTE ]\n" +
+"          |                                |\n" +
+"    [ ACE ENGINE ] <--- Buffer Sync ---> [ MEMORY CACHE ]\n" +
+"          |                                |\n" +
+"    [ VIRTUAL DOM ]                  [ SERIALIZATION ]\n" +
+"          |                         ________|________\n" +
+"          |                        |                 |\n" +
+"    [ WEB WORKERS ]        [ INDEXED DB ]      [ OPFS / DISK ]\n" +
+"     (Highlighting)         (Session State)     (Persistent I/O)\n" +
+"```\n\n" +
+"--- \n\n" +
+"### CORE FEATURES FOR POWER USERS\n\n" +
+"| Feature | Implementation Detail |\n" +
+"| :--- | :--- |\n" +
+"| Live Preview | Debounced (500ms) iframe injection with srcdoc manipulation |\n" +
+"| Multi-Cursor | Native Ace implementation; supports Alt+Click or Ctrl+Alt+Up/Down |\n" +
+"| Theme Engine | CSS Variable injection scoped to data-theme attributes |\n" +
+"| Persistence | Auto-syncing buffer state to IDB on 'change' events |\n" +
+"| OPFS | Uses StorageManager.getDirectory() for high-performance sandboxed I/O |\n\n" +
+"--- \n\n" +
+"### KEYMAP & MACROS\n\n" +
+"| Command | Action | Keybinding |\n" +
+"| :--- | :--- | :--- |\n" +
+"| palette | Trigger Command Palette | F1 / Ctrl+P |\n" +
+"| newFile | Initialize Memory Buffer | Alt+N |\n" +
+"| saveFile | Flush Buffer to Disk/OPFS | Ctrl+S |\n" +
+"| closeTab | Destroy Active Buffer | Alt+W |\n" +
+"| toggleWrap | Update Editor Wrap Mode | Internal Only |\n\n" +
+"--- \n\n" +
+"### COMPONENT LAYOUT\n\n" +
+"```text\n" +
+" ___________________________________________________________________\n" +
+"| [=] AETHER v3 [v]     [L][F][M][D]  [New][Save][View][Cmd]        |\n" +
+"|___________________________________________________________________|\n" +
+"| WORKSPACE [O] |                                                   |\n" +
+"|---------------| main.js [dirty]  config.json [x]  index.html [x]  |\n" +
+"| /root         |___________________________________________________|\n" +
+"|  |_ src/      |                                         |         |\n" +
+"|  |_ tests/    |        CODE EDITING SURFACE             | LIVE    |\n" +
+"|               |                                         | PREVIEW |\n" +
+"| LOCAL STORAGE |        - Syntax Highlighting            |         |\n" +
+"|  |_ cache.log |        - Emmet Support                  | (MD/    |\n" +
+"|  |_ dev.env   |        - Code Folding                   |  HTML)  |\n" +
+"|               |                                         |         |\n" +
+"|_______________|_________________________________________|_________|\n" +
+"| ACE | utf-8             Line 1, Col 1 | Indent: 4 | Lang: JS      |\n" +
+"|___________________________________________________________________|\n" +
+"```\n\n" +
+"--- \n\n" +
+"### ADVANCED CONFIGURATION\n\n" +
+"You can modify the internal state by opening 'config.json' through the Command Palette. This grants direct access to the `Config.state` object, allowing you to override font scaling, sidebar constants, and Catppuccin flavor variants. \n\n" +
+"Current Build: 3.1.0-stable\n" +
+"Render Engine: Tomorrow Night Eighties / Chrome High-Contrast";
+        
+        const savedBuffers = await DB.getAll('session');
+        if (savedBuffers.length) {
+            savedBuffers.forEach(b => Store.addBuffer(b));
+            const active = savedBuffers.find(b => b.active); 
+            if(active) Store.setActive(active.id); else Store.setActive(savedBuffers[0].id);
+        } else {
+            this.openBuffer('welcome.md', welcomeText, null, 'memory');
+        }
+        
+        document.body.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drag-over'); });
+        document.body.addEventListener('dragleave', e => { if(e.relatedTarget === null) document.body.classList.remove('drag-over'); });
+        document.body.addEventListener('drop', async e => {
+            e.preventDefault(); document.body.classList.remove('drag-over');
+            for (const item of e.dataTransfer.items) {
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    this.openBuffer(file.name, await file.text(), null, 'memory');
+                }
             }
-            if (event === 'buffer_dirty') UI.renderTabs();
         });
         
-        const saved = JSON.parse(localStorage.getItem('aether_v3_session') || '[]');
-        if (saved.length) saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
-        else this.openBuffer('welcome.txt', 'Aether v3 - Flux\n\n- Ctrl+P: Command Palette\n- Enter: Smart Indent\n- Drag right edge: Resize Preview', null, 'memory');
-
-        FileSys.initOPFS();
+        new ResizeObserver(() => Editor.instance.resize()).observe(document.querySelector('main'));
     },
     openBuffer(name, content, handle, kind) {
         const existing = Store.state.buffers.find(b => b.name === name);
         if (existing) return Store.setActive(existing.id);
         Store.addBuffer({ id: 'b'+Date.now(), name, content, handle, kind, dirty: false });
     },
-    closeBuffer(id, e) {
-        if(e) e.stopPropagation();
-        Store.closeBuffer(id);
-    },
     updateStats() {
-        const input = document.getElementById('input-layer');
-        const text = input.value.substring(0, input.selectionStart);
-        const lines = text.split('\n').length;
-        const cols = text.split('\n').pop().length + 1;
-        document.getElementById('stat-pos').innerText = `${lines}:${cols}`;
-        
+        if (!Editor.instance) return;
+        const pos = Editor.instance.getCursorPosition();
+        document.getElementById('stat-pos').innerText = `${pos.row + 1}:${pos.column + 1}`;
         const buf = Store.activeBuffer;
         if(buf) {
             document.getElementById('stat-file').innerText = buf.name;
             document.getElementById('stat-lang').innerText = buf.name.split('.').pop().toUpperCase();
         }
-        Editor.updateGutter(input.value);
     },
     debouncePreview(immediate) {
         if (!Store.state.previewMode) return;
         clearTimeout(this.pvTimer);
         const run = () => {
-            const buf = Store.activeBuffer;
-            if (!buf) return;
+            const buf = Store.activeBuffer; if (!buf) return;
             const f = document.getElementById('preview-frame');
             const ext = buf.name.split('.').pop().toLowerCase();
-            
-            // Generate Theme-Aware CSS for Preview
-            const computedStyle = getComputedStyle(document.body);
-            const bg = computedStyle.getPropertyValue('--bg').trim();
-            const fg = computedStyle.getPropertyValue('--text').trim();
-            const accent = computedStyle.getPropertyValue('--accent').trim();
-            
-            const style = `<style>
-                body{background:${bg};color:${fg};font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:2rem;line-height:1.6;}
-                a { color: ${accent}; }
-                pre { background: rgba(0,0,0,0.1); padding:1rem; border-radius:4px; overflow:auto; }
-                code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
-                blockquote { border-left: 3px solid ${accent}; margin:0; padding-left:1rem; opacity:0.8; }
-            </style>`;
-            
-            if (ext === 'md') {
-                f.srcdoc = style + marked.parse(buf.content);
-            } else if (ext === 'html') {
-                f.srcdoc = buf.content;
-            } else {
-                f.srcdoc = style + `<pre>${buf.content}</pre>`;
-            }
+            const styles = getComputedStyle(document.body);
+            const baseCss = `body{background:${styles.getPropertyValue('--bg')};color:${styles.getPropertyValue('--text')};font-family:sans-serif;padding:20px;line-height:1.6;}a{color:${styles.getPropertyValue('--accent')}}pre{background:rgba(0,0,0,0.2);padding:10px;border-radius:4px;overflow:auto}code{font-family:'JetBrains Mono',monospace;font-size:0.9em}blockquote{border-left:3px solid ${styles.getPropertyValue('--accent')};padding-left:1em;color:${styles.getPropertyValue('--text-dim')}}`;
+            let html = "";
+            if (ext === 'md') html = `<style>${baseCss}</style>` + marked.parse(buf.content);
+            else if (ext === 'html') html = buf.content;
+            else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g,'&lt;')}</pre>`;
+            f.srcdoc = html;
         };
         if(immediate) run(); else this.pvTimer = setTimeout(run, 500);
     },
-    toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); },
-    saveSession() { 
-        const sessionData = Store.state.buffers.filter(b => b.kind !== 'config').map(b => ({name:b.name, content:b.content}));
-        localStorage.setItem('aether_v3_session', JSON.stringify(sessionData)); 
+    debounceSaveSession() {
+        clearTimeout(this.saveTimer);
+        this.saveTimer = setTimeout(() => this.saveSession(), 1000); // 1s debounce
+    },
+    toggleSidebar(side) { 
+        document.getElementById(`sidebar-${side}`).classList.toggle('collapsed'); 
+        setTimeout(() => Editor.instance.resize(), 250);
+    },
+    async saveSession() {
+        await DB.clear('session');
+        for (const b of Store.state.buffers) {
+            if(b.kind === 'config') continue;
+            await DB.set('session', null, {
+                id: b.id, name: b.name, content: b.content,
+                handle: b.handle, kind: b.kind, dirty: b.dirty,
+                active: b.id === Store.state.activeId
+            });
+        }
     }
 };
 
 const UI = {
     renderTabs() {
-        const con = document.getElementById('tabs-scroll');
-        con.innerHTML = '';
+        const con = document.getElementById('tabs-scroll'); con.innerHTML = '';
         Store.state.buffers.forEach(b => {
             const el = document.createElement('div');
             el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
-            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><div class="tab-close" onclick="App.closeBuffer('${b.id}', event)">×</div>`;
+            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><div class="tab-close" onclick="event.stopPropagation(); Store.closeBuffer('${b.id}')">×</div>`;
             el.onclick = () => Store.setActive(b.id);
             con.appendChild(el);
+            if(b.id === Store.state.activeId) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     },
-    toast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg; t.classList.add('visible');
-        setTimeout(() => t.classList.remove('visible'), 2500);
-    }
+    toast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('visible'); clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => t.classList.remove('visible'), 2500); }
 };
 
 const Commands = {
     list: [
-        { id: 'newFile', name: 'New File', hint: 'CMD+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
-        { id: 'openFile', name: 'Open File', hint: 'CMD+O', fn: () => FileSys.openDiskFile() },
-        { id: 'saveFile', name: 'Save File', hint: 'CMD+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-        { id: 'settings', name: 'Open Config', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
-        { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => {
-            Store.state.previewMode = !Store.state.previewMode;
-            document.body.classList.toggle('preview-active', Store.state.previewMode);
-            App.debouncePreview(true);
-        }},
-        { id: 'wrap', name: 'Toggle Word Wrap', hint: 'VIEW', fn: () => Config.toggleWrap() },
-        { id: 'zoomIn', name: 'Zoom In', hint: 'VIEW', fn: () => Config.zoom(1) },
-        { id: 'zoomOut', name: 'Zoom Out', hint: 'VIEW', fn: () => Config.zoom(-1) },
-        { id: 'find', name: 'Find', hint: 'CMD+F', fn: () => {
-    Prompt.open("Find:", "", (query) => {
-        const content = Editor.els.input.value;
-        const index = content.indexOf(query);
-        if (index !== -1) {
-            Editor.els.input.setSelectionRange(index, index + query.length);
-            Editor.els.input.focus();
-            UI.toast(`Found "${query}"`);
-        } else {
-            UI.toast("No matches found");
-        }
-    });
-}},
-{ id: 'replace', name: 'Replace', hint: 'CMD+R', fn: () => {
-    Prompt.open("Find string:", "", (findStr) => {
-        Prompt.open(`Replace "${findStr}" with:`, "", (replaceStr) => {
-            const buf = Store.activeBuffer;
-            if (!buf) return;
-            const newContent = buf.content.split(findStr).join(replaceStr);
-            Editor.els.input.value = newContent;
-            Store.updateContent(buf.id, newContent);
-            Editor.highlight(newContent);
-            UI.toast("Replacement complete");
-        });
-    });
-}},
+        { id: 'newFile', name: 'New File', hint: 'Alt+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
+        { id: 'saveFile', name: 'Save File', hint: 'Ctrl+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
+        { id: 'closeTab', name: 'Close Tab', hint: 'Alt+W', fn: () => Store.activeBuffer && Store.closeBuffer(Store.activeBuffer.id) },
+        { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => { Store.state.previewMode = !Store.state.previewMode; document.body.classList.toggle('preview-active', Store.state.previewMode); App.debouncePreview(true); setTimeout(() => Editor.instance.resize(), 300); }},
+        { id: 'settings', name: 'Edit Settings', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
+        { id: 'switchPreview', name: 'Switch Preview Type', hint: 'Split/Float', fn: () => Config.togglePreviewType() },
+        { id: 'wrap', name: 'Toggle Word Wrap', hint: 'View', fn: () => Config.toggleWrap() },
+        { id: 'clear', name: 'Reset App', hint: 'Danger', fn: () => { DB.clear('session'); location.reload(); } }
     ],
-    trigger(id) { this.list.find(c => c.id === id).fn(); },
+    trigger(id) { const c = this.list.find(c => c.id === id); if(c) c.fn(); },
     showPalette() {
-        const mask = document.getElementById('palette-mask');
-        const list = document.getElementById('cmd-list');
-        list.innerHTML = '';
-        this.list.forEach(cmd => {
-            const el = document.createElement('div');
-            el.className = 'cmd-item';
-            el.innerHTML = `<span>${cmd.name}</span>${cmd.hint ? `<span class="cmd-shortcut">${cmd.hint}</span>` : ''}`;
-            el.onclick = () => { cmd.fn(); this.hidePalette(); };
-            list.appendChild(el);
-        });
-        mask.style.display = 'flex';
-        document.getElementById('cmd-input').focus();
+        const mask = document.getElementById('palette-mask'); 
+        const list = document.getElementById('cmd-list'); 
+        const input = document.getElementById('cmd-input');
+        
+        const render = (filter = '') => {
+            list.innerHTML = '';
+            const terms = filter.toLowerCase();
+            this.list.filter(c => c.name.toLowerCase().includes(terms)).forEach((cmd, idx) => {
+                const el = document.createElement('div'); el.className = 'cmd-item'; 
+                if(idx === 0) el.classList.add('selected');
+                el.innerHTML = `<span>${cmd.name}</span><span class="cmd-shortcut">${cmd.hint}</span>`;
+                el.onclick = () => { cmd.fn(); this.hidePalette(); }; 
+                list.appendChild(el);
+            });
+        };
+
+        mask.style.display = 'flex'; 
+        input.value = ''; 
+        input.focus();
+        render();
+
+        input.oninput = (e) => render(e.target.value);
+        input.onkeydown = (e) => { 
+            if(e.key === 'Escape') this.hidePalette(); 
+            if(e.key === 'Enter') {
+                const first = list.querySelector('.cmd-item');
+                if(first) first.click();
+            }
+        };
     },
-    hidePalette() { document.getElementById('palette-mask').style.display = 'none'; }
+    hidePalette() { document.getElementById('palette-mask').style.display = 'none'; Editor.instance.focus(); }
 };
 
 const Prompt = {
     open(msg, def, cb) {
-        document.getElementById('prompt-mask').style.display = 'flex';
-        document.getElementById('prompt-msg').innerText = msg;
-        const inp = document.getElementById('prompt-input');
-        inp.value = def; inp.focus(); inp.select();
-        document.getElementById('prompt-ok').onclick = () => { if(inp.value) cb(inp.value); this.close(); };
-        inp.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('prompt-ok').click(); if(e.key === 'Escape') this.close(); };
+        document.getElementById('prompt-mask').style.display = 'flex'; document.getElementById('prompt-msg').innerText = msg;
+        const inp = document.getElementById('prompt-input'); inp.value = def; inp.focus(); inp.select();
+        const sub = () => { if(inp.value) cb(inp.value); this.close(); };
+        document.getElementById('prompt-ok').onclick = sub; inp.onkeydown = (e) => { if(e.key==='Enter') sub(); if(e.key==='Escape') this.close(); };
     },
-    close() { document.getElementById('prompt-mask').style.display = 'none'; }
+    close() { document.getElementById('prompt-mask').style.display = 'none'; Editor.instance.focus(); }
+};
+
+const Confirm = {
+    open(title, msg, onYes) {
+        document.getElementById('confirm-mask').style.display = 'flex'; document.getElementById('confirm-title').innerText = title;
+        document.getElementById('confirm-msg').innerText = msg; document.getElementById('confirm-ok').onclick = () => { onYes(); this.close(); };
+        document.querySelector('#confirm-mask .btn').focus();
+    },
+    close() { document.getElementById('confirm-mask').style.display = 'none'; Editor.instance.focus(); }
 };
 
 const Resizer = {
     init() {
-        const r = document.getElementById('resizer');
-        const p = document.getElementById('preview-pane');
-        let isResizing = false;
+        // Split Resizer
+        const r = document.getElementById('resizer'); const p = document.getElementById('preview-pane'); let isResizing = false;
+        r.onmousedown = (e) => { 
+            if(document.getElementById('editor-split').classList.contains('mode-float')) return;
+            isResizing = true; r.classList.add('active'); document.body.classList.add('resizing'); e.preventDefault(); 
+        };
+        
+        // Float Resizer
+        const fr = document.getElementById('float-resizer');
+        let isFloatResizing = false;
+        let startX, startY, startW, startH;
 
-        r.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            document.body.style.cursor = 'col-resize';
-            e.preventDefault();
-        });
+        fr.onmousedown = (e) => {
+            isFloatResizing = true;
+            startX = e.clientX; startY = e.clientY;
+            startW = p.offsetWidth; startH = p.offsetHeight;
+            e.stopPropagation(); e.preventDefault();
+        };
 
         document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-            const pct = (1 - (e.clientX / window.innerWidth)) * 100;
-            p.style.width = Math.min(90, Math.max(10, pct)) + '%';
+            if (isResizing) {
+                const w = document.getElementById('editor-split').offsetWidth;
+                const pW = 100 - ((e.clientX - document.getElementById('sidebar-left').offsetWidth) / w * 100);
+                if (pW > 10 && pW < 90) { p.style.width = pW + '%'; Editor.instance.resize(); }
+            }
+            if (isFloatResizing) {
+                p.style.width = (startW + (e.clientX - startX)) + 'px';
+                p.style.height = (startH + (e.clientY - startY)) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => { 
+            if(isResizing) { isResizing = false; r.classList.remove('active'); document.body.classList.remove('resizing'); Editor.instance.resize(); }
+            if(isFloatResizing) { isFloatResizing = false; }
+        });
+    }
+};
+
+const Dragger = {
+    init() {
+        const header = document.getElementById('preview-header');
+        const pane = document.getElementById('preview-pane');
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        header.onmousedown = (e) => {
+            if(!document.getElementById('editor-split').classList.contains('mode-float')) return;
+            isDragging = true;
+            document.body.classList.add('dragging-preview');
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = pane.getBoundingClientRect();
+            const parentRect = document.getElementById('editor-split').getBoundingClientRect();
+            
+            initialLeft = rect.left - parentRect.left;
+            initialTop = rect.top - parentRect.top;
+            
+            pane.style.right = 'auto'; 
+            pane.style.left = initialLeft + 'px';
+            pane.style.top = initialTop + 'px';
+        };
+
+        document.addEventListener('mousemove', (e) => {
+            if(!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            pane.style.left = (initialLeft + dx) + 'px';
+            pane.style.top = (initialTop + dy) + 'px';
         });
 
         document.addEventListener('mouseup', () => {
-            if(isResizing) {
-                isResizing = false;
-                document.body.style.cursor = '';
+            if(isDragging) {
+                isDragging = false;
+                document.body.classList.remove('dragging-preview');
             }
         });
     }
 };
 
-window.onload = () => { 
-    App.init(); 
-    Resizer.init(); 
-    window.onkeydown = (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); Commands.showPalette(); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
-    };
-};
+window.onload = () => App.init();
 </script>
 </body>
 </html>
