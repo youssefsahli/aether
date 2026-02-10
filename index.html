@@ -5,38 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1e1e2e">
-    <title>Aether v3.1 - Flux</title>
+    <title>Aether v3 - Ace Flux</title>
     
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- Dependencies -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" id="prism-theme" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/inline-color/prism-inline-color.min.js"></script>
+    <!-- Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-tomorrow_night_eighties.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-chrome.min.js"></script>
     
-    <!-- Languages -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
-    
+    <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
-            /* Default: Catppuccin Mocha */
+            /* Catppuccin Mocha Defaults */
             --bg: #1e1e2e;
             --sidebar-bg: #181825;
             --header-bg: #11111b;
-            --tab-inactive: #181825;
+            --tab-inactive: #11111b;
             --tab-active: #1e1e2e;
             --text: #cdd6f4;
             --text-dim: #9399b2;
@@ -45,19 +36,16 @@
             --border: #313244;
             --highlight: #313244;
             --cursor: #f5e0dc;
-            --selection: rgba(137, 180, 250, 0.25);
             --status-bg: #89b4fa;
             --status-fg: #1e1e2e;
             
-            --font-stack: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
-            
-            --header-h: 36px;
-            --footer-h: 24px;
-            --sidebar-w: 240px;
-            --tab-h: 32px;
+            --font-code: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            --header-h: 32px; /* Tighter Header */
+            --footer-h: 22px; /* Tighter Footer */
+            --sidebar-w: 220px;
+            --tab-h: 28px;
         }
 
-        /* Catppuccin Macchiato */
         [data-theme="macchiato"] {
             --bg: #24273a; --sidebar-bg: #1e2030; --header-bg: #181926;
             --tab-inactive: #181926; --tab-active: #24273a;
@@ -67,7 +55,6 @@
             --cursor: #f4dbd6; --status-bg: #8aadf4; --status-fg: #24273a;
         }
 
-        /* Catppuccin Frappe */
         [data-theme="frappe"] {
             --bg: #303446; --sidebar-bg: #292c3c; --header-bg: #232634;
             --tab-inactive: #232634; --tab-active: #303446;
@@ -77,14 +64,13 @@
             --cursor: #f2d5cf; --status-bg: #8caaee; --status-fg: #303446;
         }
 
-        /* Catppuccin Latte */
         [data-theme="latte"] {
             --bg: #eff1f5; --sidebar-bg: #e6e9ef; --header-bg: #dce0e8;
             --tab-inactive: #dce0e8; --tab-active: #eff1f5;
             --text: #4c4f69; --text-dim: #9ca0b0;
             --accent: #1e66f5; --accent-sec: #7287fd;
             --border: #bcc0cc; --highlight: #ccd0da;
-            --cursor: #dc8a78; --selection: rgba(30, 102, 245, 0.15); --status-bg: #1e66f5; --status-fg: #eff1f5;
+            --cursor: #dc8a78; --status-bg: #1e66f5; --status-fg: #eff1f5;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -92,44 +78,63 @@
         body { 
             margin: 0; background: var(--bg); color: var(--text);
             height: 100dvh; width: 100vw; overflow: hidden;
-            font-family: var(--font-stack); display: flex; flex-direction: column;
+            font-family: var(--font-code); display: flex; flex-direction: column;
             font-size: 13px; letter-spacing: -0.01em;
             transition: background 0.2s, color 0.2s;
         }
+        
+        /* Dragging state to prevent iframe capture */
+        body.resizing { cursor: col-resize !important; user-select: none; }
+        body.resizing iframe { pointer-events: none; }
+        
+        /* Drag & Drop Overlay */
+        body.drag-over::after {
+            content: 'DROP FILE TO OPEN';
+            position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-weight: 800; font-size: 24px; z-index: 999;
+            backdrop-filter: blur(4px); pointer-events: none;
+        }
 
-        svg.icon { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        svg.icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         /* --- Layout --- */
-        #app-shell { display: flex; flex: 1; overflow: hidden; position: relative; }
+        #app-shell { display: flex; flex: 1; overflow: hidden; }
         
         aside {
             width: var(--sidebar-w); background: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; 
-            transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), margin 0.25s cubic-bezier(0.2, 0, 0, 1);
-            z-index: 10; flex-shrink: 0;
-            backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; z-index: 10; flex-shrink: 0;
+            transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         aside.collapsed { margin-left: calc(var(--sidebar-w) * -1); }
         
         .side-header { 
-            padding: 10px 14px; font-weight: 700; font-size: 11px;
-            color: var(--accent); text-transform: uppercase; letter-spacing: 1px;
+            padding: 8px 12px; font-weight: 800; font-size: 10px;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;
             display:flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid var(--border); opacity: 0.9;
+            border-bottom: 1px solid var(--border); height: 32px;
         }
-        .file-tree { flex: 1; overflow-y: auto; padding: 6px 0; }
+        
+        .file-tree { flex: 1; overflow-y: auto; padding: 4px 0; }
+        
         .tree-item {
-            padding: 5px 14px; font-size: 12px; color: var(--text-dim); cursor: pointer;
-            display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; 
-            text-overflow: ellipsis; border: none; transition: color 0.1s, background 0.1s;
+            padding: 4px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            white-space: nowrap; overflow: hidden; border-left: 2px solid transparent; height: 24px;
         }
+        .tree-item-label { display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; }
         .tree-item:hover { background: var(--highlight); color: var(--text); }
-        .tree-item.active { background: var(--highlight); color: var(--accent); font-weight: 600; border-left: 2px solid var(--accent); padding-left: 12px; }
+        .tree-item.active { background: var(--highlight); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+        
+        .tree-actions { display: flex; gap: 4px; opacity: 0; }
+        .tree-item:hover .tree-actions { opacity: 1; }
+        
+        .action-btn { padding: 2px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; }
+        .action-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+        .action-delete:hover { background: rgba(255,100,100,0.2); color: #ff8888; }
 
-        /* Main Area */
         main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--bg); }
 
-        /* Tabs */
         #tabs-scroll { 
             height: var(--tab-h); background: var(--header-bg); display: flex; 
             overflow-x: auto; scrollbar-width: none;
@@ -138,207 +143,138 @@
         #tabs-scroll::-webkit-scrollbar { display: none; }
         
         .tab {
-            height: 100%; padding: 0 14px; display: flex; align-items: center;
-            color: var(--text-dim); font-size: 12px; cursor: pointer; 
-            min-width: 100px; max-width: 220px; position: relative;
-            background: var(--tab-inactive);
-            justify-content: space-between;
-            border-right: 1px solid var(--border);
-            transition: background 0.1s;
-            user-select: none;
+            height: 100%; padding: 0 10px; display: flex; align-items: center;
+            color: var(--text-dim); font-size: 11px; cursor: pointer; 
+            min-width: 80px; max-width: 180px; position: relative;
+            background: var(--tab-inactive); justify-content: space-between;
+            border-right: 1px solid var(--border); transition: all 0.1s;
         }
         .tab:hover { background: var(--highlight); color: var(--text); }
-        .tab.active { background: var(--bg); color: var(--accent); font-weight: 500; border-top: 2px solid var(--accent); margin-top: -1px; }
+        .tab.active { background: var(--bg); color: var(--accent); font-weight: 600; border-top: 2px solid var(--accent); margin-top: -2px; }
         
-        .tab-close { 
-            opacity: 0; width: 16px; height: 16px; border-radius: 3px;
-            display: flex; align-items: center; justify-content: center;
-            margin-left: 8px;
-        }
+        .tab-close { opacity: 0; padding: 2px; font-size: 14px; margin-left: 6px; line-height: 0.8; border-radius: 3px; }
         .tab:hover .tab-close { opacity: 0.7; }
-        .tab-close:hover { background: rgba(255,255,255,0.1); color: var(--text); opacity: 1 !important; }
-        .tab.active .tab-close { opacity: 0.5; }
+        .tab-close:hover { background: rgba(255,50,50,0.2); color: #ff5555; opacity: 1 !important; }
         
         .unsaved-dot { width: 6px; height: 6px; background: var(--accent-sec); border-radius: 50%; display: none; margin-left: auto; }
         .tab.dirty .unsaved-dot { display: block; }
-        .tab.dirty .tab-close { display: none; }
         .tab.dirty:hover .unsaved-dot { display: none; }
         .tab.dirty:hover .tab-close { display: flex; }
 
-        /* Breadcrumbs */
         .breadcrumbs {
-            height: 24px; background: var(--bg); border-bottom: 1px solid var(--border);
+            height: 22px; background: var(--bg); border-bottom: 1px solid var(--border);
             display: flex; align-items: center; padding: 0 12px; gap: 8px;
-            font-size: 11px; color: var(--text-dim);
-            user-select: none;
+            font-size: 10px; color: var(--text-dim);
         }
 
-        /* Editor Wrapper */
         #editor-split { flex: 1; display: flex; overflow: hidden; position: relative; }
-        #code-stage { flex: 1; position: relative; overflow: hidden; background: var(--bg); }
         
-        .code-font {
-            font-family: var(--font-stack) !important; 
-            font-size: 13px !important;
-            line-height: 22px !important;
-            font-variant-ligatures: normal;
-        }
+        #code-stage { flex: 1; position: relative; }
 
-        .code-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            margin: 0; border: none; background: transparent;
-            white-space: pre !important; 
-            padding: 10px 10px 10px 56px !important; 
-            box-sizing: border-box;
-            tab-size: 4;
-        }
-        
-        .word-wrap .code-layer {
-            white-space: pre-wrap !important;
-            word-break: break-all;
-        }
-
-        #hl-layer { z-index: 1; pointer-events: none; overflow: hidden; }
-        #hl-layer code, #hl-layer pre { 
-            font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
-            white-space: inherit !important; padding: 0 !important; margin: 0 !important;
-            background: transparent !important; border: none !important; box-shadow: none !important;
-        }
-
-        #input-layer {
-            z-index: 2; color: transparent; caret-color: var(--cursor);
-            outline: none; resize: none; overflow: auto; 
-        }
-        #input-layer::selection { background: var(--selection); }
-
-        #gutter {
-            position: absolute; top: 0; left: 0; bottom: 0;
-            width: 48px; background: var(--bg); color: var(--text-dim);
-            text-align: right; padding: 10px 12px 10px 0; border-right: 1px solid var(--border);
-            z-index: 5; user-select: none; pointer-events: none;
-            overflow: hidden; opacity: 0.6;
-        }
-        #gutter .active-line { color: var(--text); opacity: 1; font-weight: bold; }
-
-        /* Preview Pane */
         #preview-pane { 
             width: 0; border-left: 1px solid var(--border); background: var(--bg); 
             display: flex; flex-direction: column; overflow: hidden;
-            transition: width 0.2s cubic-bezier(0.2, 0, 0, 1);
-            position: relative;
+            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .preview-active #preview-pane { width: 50%; }
+        .preview-active #preview-pane { width: 50%; } 
         iframe { width: 100%; height: 100%; border: none; background: #fff; }
         
-        /* Iframe shield for dragging */
-        #iframe-shield {
-            position: absolute; inset: 0; z-index: 50; display: none; background: transparent;
-        }
-        
         #resizer { 
-            width: 6px; background: transparent; cursor: col-resize; position: absolute; right: 0; top: 0; bottom: 0; z-index: 25;
-            display: none; transition: background 0.1s;
+            width: 4px; background: transparent; cursor: col-resize; position: absolute; top: 0; bottom: 0; z-index: 50;
+            display: none; transition: background 0.2s;
         }
-        #resizer:hover, #resizer.dragging { background: var(--accent); }
-        .preview-active #code-stage #resizer { display: block; }
+        #resizer:hover, #resizer.active { background: var(--accent); }
+        .preview-active #resizer { display: block; }
 
-        /* Header */
         header {
             height: var(--header-h); background: var(--header-bg); border-bottom: 1px solid var(--border);
             display: flex; align-items: center; padding: 0 8px; gap: 8px;
         }
-        .logo { font-weight: 800; color: var(--accent); font-size: 14px; margin-right: 8px; text-transform: uppercase; padding-left: 8px; letter-spacing: 1px;}
-        
+        .logo { font-weight: 800; color: var(--accent); font-size: 13px; margin-right: 8px; text-transform: uppercase; letter-spacing: 1px; }
         .toolbar { display: flex; align-items: center; gap: 4px; margin-left: auto; }
         
-        .theme-swatches { display: flex; gap: 6px; margin-right: 12px; }
-        .theme-swatch {
-            width: 14px; height: 14px; cursor: pointer; border: 1px solid var(--border);
-            border-radius: 3px; transition: transform 0.1s;
-        }
-        .theme-swatch:hover { transform: scale(1.1); border-color: var(--text); }
+        .theme-swatches { display: flex; gap: 4px; margin-right: 8px; }
+        .theme-swatch { width: 10px; height: 10px; cursor: pointer; border: 1px solid var(--border); border-radius: 50%; }
+        .theme-swatch:hover { transform: scale(1.2); border-color: var(--text); }
         .swatch-latte { background: #eff1f5; }
         .swatch-frappe { background: #303446; }
         .swatch-macchiato { background: #24273a; }
         .swatch-mocha { background: #1e1e2e; }
 
-        /* Footer */
         footer {
-            height: var(--footer-h); background: var(--header-bg); color: var(--text);
+            height: var(--footer-h); background: var(--header-bg); color: var(--text-dim);
             display: flex; align-items: center; justify-content: space-between; padding: 0;
-            font-size: 11px; font-weight: 600; border-top: 1px solid var(--border);
-            user-select: none;
+            font-size: 10px; font-weight: 500; border-top: 1px solid var(--border);
+            user-select: none; z-index: 50; position: relative;
         }
-        .stat-box { padding: 0 12px; height: 100%; display: flex; align-items: center; }
-        .stat-primary { background: var(--status-bg); color: var(--status-fg); }
-        .stat-secondary { background: transparent; color: var(--text-dim); border-left: 1px solid var(--border); }
+        .stat-group { display: flex; height: 100%; }
+        .stat-box { 
+            padding: 0 10px; height: 100%; display: flex; align-items: center; 
+            border-right: 1px solid var(--border); gap: 6px;
+        }
+        .stat-box:last-child { border-right: none; }
+        .stat-primary { background: var(--accent); color: var(--status-fg); font-weight: 700; border-right: none; }
         
-        /* Buttons */
         .btn {
             background: transparent; border: 1px solid transparent; color: var(--text-dim);
-            padding: 0; width: 30px; height: 30px; cursor: pointer;
+            padding: 4px; width: 24px; height: 24px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 4px; transition: all 0.1s;
+            border-radius: 3px; transition: all 0.1s;
         }
         .btn:hover { background: var(--highlight); color: var(--text); }
-        .btn:active { transform: translateY(1px); }
-        .btn.primary { color: var(--accent); }
-        .btn.primary:hover { background: rgba(137, 180, 250, 0.1); color: var(--accent); }
+        .btn.primary { color: var(--accent); background: rgba(137, 180, 250, 0.1); }
+        .btn.primary:hover { background: var(--accent); color: var(--bg); }
         
-        /* Command Palette */
         .overlay-mask {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100;
-            display: none; align-items: flex-start; justify-content: center; padding-top: 80px;
-            backdrop-filter: blur(2px); animation: fadeIn 0.1s ease-out;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+            display: none; align-items: flex-start; justify-content: center; padding-top: 60px;
+            backdrop-filter: blur(2px);
         }
         .dialog {
-            background: var(--bg); border: 1px solid var(--border); width: 600px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-            border-radius: 8px; overflow: hidden;
+            background: var(--bg); border: 1px solid var(--border); width: 450px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            border-radius: 6px; overflow: hidden;
         }
 
         .dialog input {
-            background: var(--header-bg); border: none; color: var(--text); padding: 16px;
-            font-size: 14px; width: 100%; border-bottom: 1px solid var(--border);
-            font-family: var(--font-stack);
+            background: var(--header-bg); border: none; color: var(--text); padding: 12px 16px;
+            font-size: 13px; width: 100%; border-bottom: 1px solid var(--border);
+            font-family: var(--font-code);
         }
-        .cmd-item { 
-            padding: 10px 16px; cursor: pointer; font-size: 13px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            color: var(--text-dim); border-left: 2px solid transparent; 
-        }
-        .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--text); border-left-color: var(--accent); }
-        .cmd-shortcut { font-size: 10px; opacity: 0.5; font-family: sans-serif; background: var(--border); padding: 2px 6px; border-radius: 3px; }
+        .cmd-item { padding: 8px 16px; cursor: pointer; font-size: 12px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); }
+        .cmd-item:hover, .cmd-item.selected { background: var(--highlight); color: var(--accent); }
+        .cmd-shortcut { font-size: 10px; opacity: 0.5; font-family: sans-serif; background: var(--border); padding: 2px 6px; border-radius: 4px;}
 
-        /* Toast */
         #toast {
-            position: fixed; bottom: 32px; right: 24px; 
-            background: var(--bg); color: var(--text); border: 1px solid var(--accent);
-            padding: 8px 16px; font-size: 12px; font-weight: 600; 
-            transform: translateY(100px); transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            z-index: 200; border-radius: 4px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            display: flex; align-items: center; gap: 8px;
+            position: fixed; bottom: 32px; right: 12px; 
+            background: var(--sidebar-bg); color: var(--text); border: 1px solid var(--accent);
+            padding: 6px 12px; font-size: 11px; font-weight: 600; 
+            border-radius: 4px; display: flex; align-items: center; gap: 8px;
+            transform: translateY(10px); opacity: 0; pointer-events: none;
+            transition: all 0.2s; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
-        #toast::before { content:''; display:block; width:8px; height:8px; background:var(--accent); border-radius:50%; }
-        #toast.visible { transform: translateY(0); }
+        #toast.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        #toast svg { color: var(--accent); }
 
-        /* Scrollbars */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border: 2px solid var(--bg); border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-        ::-webkit-scrollbar-corner { background: var(--bg); }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+
+        /* Ace Tweaks */
+        .ace_editor { font-family: var(--font-code) !important; line-height: 1.5 !important; }
+        .ace_gutter { background: var(--sidebar-bg) !important; color: var(--text-dim) !important; }
+        .ace_content { background: var(--bg) !important; }
+        .ace_active-line { background: rgba(255,255,255,0.05) !important; }
     </style>
 </head>
-<body>
+<body data-theme="mocha">
 
 <header>
-    <button class="btn" onclick="App.toggleSidebar()" title="Toggle Sidebar (Ctrl+B)">
+    <button class="btn" onclick="App.toggleSidebar()" title="Toggle Sidebar">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
-    <div class="logo">AETHER</div>
+    <div class="logo">AETHER v3</div>
     
     <div class="toolbar">
         <div class="theme-swatches">
@@ -348,20 +284,17 @@
             <div class="theme-swatch swatch-mocha" onclick="Config.setTheme('mocha')" title="Mocha"></div>
         </div>
         <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
-        <button class="btn" onclick="Commands.trigger('newFile')" title="New File (Ctrl+N)">
+        <button class="btn" onclick="Commands.trigger('newFile')" title="New File (Alt+N)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
-        <button class="btn" onclick="Commands.trigger('openFile')" title="Open File (Ctrl+O)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </button>
         <button class="btn" onclick="Commands.trigger('saveFile')" title="Save (Ctrl+S)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
         </button>
         <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
-        <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Toggle Preview">
+        <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Preview">
             <svg class="icon" viewBox="0 0 24 24"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"/><path d="M12 13a1 1 0 100-2 1 1 0 000 2z"/></svg>
         </button>
-        <button class="btn" onclick="Commands.showPalette()" title="Command Palette (Ctrl+P)">
+        <button class="btn" onclick="Commands.showPalette()" title="Commands (F1)">
             <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
         </button>
     </div>
@@ -370,45 +303,34 @@
 <div id="app-shell">
     <aside id="sidebar">
         <div class="side-header">
-            <span>FILES</span>
-            <button class="btn" onclick="Commands.trigger('openFolder')" style="height:20px; width:20px;" title="Open Folder">
-                <svg class="icon" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>Workspace</span>
+            <button class="btn" onclick="FileSys.openFolder()" title="Open Folder">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
         </div>
         <div id="file-tree" class="file-tree"></div>
         
         <div class="side-header" style="border-top:1px solid var(--border);">
-            <span id="opfs-header">OPFS</span>
-            <div style="display:flex; gap: 4px;">
-                <button class="btn" onclick="FileSys.createOPFSFile()" style="height:20px; width:20px;" title="New Local File">
-                    <svg class="icon" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M12 5v14M5 12h14"/></svg>
-                </button>
-                <button class="btn" onclick="FileSys.initOPFS()" style="height:20px; width:20px;" title="Refresh">
-                    <svg class="icon" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span id="opfs-header">Local Storage</span>
+            <div style="display:flex;">
+                <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 </button>
             </div>
         </div>
-        <div id="opfs-tree" class="file-tree" style="max-height: 200px;"></div>
+        <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
     </aside>
 
     <main>
         <div id="tabs-scroll"></div>
-        <div class="breadcrumbs" id="breadcrumb-bar">
-            <span>~</span>
-            <span style="opacity:0.5">/</span>
-            <span id="bc-filename" style="color:var(--text)">[No Name]</span>
+        <div class="breadcrumbs">
+            <span>root</span><span>/</span><span id="bc-filename" style="color:var(--text)">[No Selection]</span>
         </div>
         
         <div id="editor-split">
-            <div id="code-stage">
-                <div id="gutter" class="code-font"></div>
-                <div id="hl-layer" class="code-layer code-font"><code id="hl-code" class="language-javascript"></code></div>
-                <textarea id="input-layer" class="code-layer code-font" spellcheck="false" wrap="off"></textarea>
-                <div id="resizer"></div>
-            </div>
-            
+            <div id="code-stage"></div>
+            <div id="resizer"></div>
             <div id="preview-pane">
-                <div id="iframe-shield"></div>
                 <iframe id="preview-frame" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
             </div>
         </div>
@@ -416,293 +338,130 @@
 </div>
 
 <footer>
-    <div style="display:flex; height:100%">
-        <span class="stat-box stat-primary" style="cursor:pointer" onclick="UI.toast('Vim mode not implemented yet 😉')">NORMAL</span>
-        <span class="stat-box stat-secondary" id="stat-file">--</span>
+    <div class="stat-group">
+        <span class="stat-box stat-primary">ACE</span>
+        <span class="stat-box" id="stat-file">--</span>
     </div>
-    <div style="display:flex; height:100%">
-        <span class="stat-box stat-secondary" id="stat-lang">TXT</span>
-        <span class="stat-box stat-secondary" id="stat-pos">1:1</span>
-        <span class="stat-box stat-primary" id="stat-enc">UTF-8</span>
+    <div class="stat-group">
+        <span class="stat-box" id="stat-lang">TXT</span>
+        <span class="stat-box" id="stat-pos">1:1</span>
+        <span class="stat-box" id="stat-indent">Space: 4</span>
     </div>
 </footer>
 
 <div id="palette-mask" class="overlay-mask" onclick="if(event.target===this) Commands.hidePalette()">
     <div class="dialog">
-        <input type="text" id="cmd-input" placeholder="> Type command..." autocomplete="off">
-        <div id="cmd-list" style="max-height: 300px; overflow-y: auto;"></div>
+        <input type="text" id="cmd-input" placeholder="> Type a command..." autocomplete="off">
+        <div id="cmd-list" style="max-height: 350px; overflow-y: auto;"></div>
     </div>
 </div>
 
-<div id="prompt-mask" class="overlay-mask" onclick="if(event.target===this) Prompt.close()">
-    <div class="dialog" style="width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
-        <div style="padding:12px 16px; font-weight:700; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase; letter-spacing:0.5px;" id="prompt-msg">Input</div>
+<div id="prompt-mask" class="overlay-mask">
+    <div class="dialog">
+        <div style="padding:10px 16px; font-weight:800; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:10px; text-transform:uppercase;" id="prompt-msg">Input</div>
         <input type="text" id="prompt-input" autocomplete="off" style="background:var(--bg)">
         <div style="display:flex; padding:8px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
-            <button class="btn" style="width:auto; padding:0 12px; font-size:11px; font-weight:600;" onclick="Prompt.close()">ESC</button>
-            <button class="btn primary" style="width:auto; padding:0 12px; font-size:11px; font-weight:600;" id="prompt-ok">ENTER</button>
+            <button class="btn" style="width:auto; padding:0 8px; font-size:10px;" onclick="Prompt.close()">Cancel</button>
+            <button class="btn primary" style="width:auto; padding:0 8px; font-size:10px;" id="prompt-ok">Submit</button>
         </div>
     </div>
 </div>
 
-<div id="toast">Ready</div>
+<div id="confirm-mask" class="overlay-mask">
+    <div class="dialog">
+        <div style="padding:10px 16px; font-weight:800; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:10px; text-transform:uppercase;" id="confirm-title">Confirmation</div>
+        <div style="padding:20px 16px; color:var(--text); font-size:12px;" id="confirm-msg">Are you sure?</div>
+        <div style="display:flex; padding:8px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
+            <button class="btn" style="width:auto; padding:0 8px; font-size:10px;" onclick="Confirm.close()">Cancel</button>
+            <button class="btn primary" style="width:auto; padding:0 8px; font-size:10px; color:#ff8888;" id="confirm-ok">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    <span id="toast-msg">Initialized</span>
+</div>
 
 <script>
 /**
- * AETHER v3.1 - Flux Polished
+ * AETHER v3 - Final Polish
  */
 
-// --- CONFIG ---
 const Config = {
-    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 240, wordWrap: false },
+    defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220, wordWrap: true },
     state: {},
     init() {
         try { this.state = { ...this.defaults, ...JSON.parse(localStorage.getItem('aether_config') || '{}') }; } 
         catch (e) { this.state = { ...this.defaults }; }
         this.apply();
     },
-    save() {
-        localStorage.setItem('aether_config', JSON.stringify(this.state));
-        this.apply();
-    },
-    setTheme(name) {
-        this.state.theme = name;
-        this.save();
-    },
-    toggleWrap() {
-        this.state.wordWrap = !this.state.wordWrap;
-        this.save();
-        UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`);
-    },
-    zoom(delta) {
-        this.state.fontSize = Math.max(10, Math.min(24, this.state.fontSize + delta));
-        this.save();
-        UI.toast(`Zoom: ${this.state.fontSize}px`);
-    },
+    save() { localStorage.setItem('aether_config', JSON.stringify(this.state)); this.apply(); },
+    setTheme(name) { this.state.theme = name; this.save(); },
+    toggleWrap() { this.state.wordWrap = !this.state.wordWrap; this.save(); UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`); },
+    zoom(delta) { this.state.fontSize = Math.max(10, Math.min(24, this.state.fontSize + delta)); this.save(); UI.toast(`Zoom: ${this.state.fontSize}px`); },
     apply() {
         document.body.setAttribute('data-theme', this.state.theme);
         document.documentElement.style.setProperty('--sidebar-w', this.state.sidebarWidth + 'px');
-        
-        const els = document.querySelectorAll('.code-font');
-        els.forEach(el => el.style.fontSize = this.state.fontSize + 'px');
-        
-        const stage = document.getElementById('code-stage');
-        if (this.state.wordWrap) stage.classList.add('word-wrap');
-        else stage.classList.remove('word-wrap');
-        
-        const prismLink = document.getElementById('prism-theme');
-        prismLink.href = this.state.theme === 'latte' 
-            ? 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css' 
-            : 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
-            
-        App.debouncePreview(true);
+        if (Editor.instance) {
+            Editor.instance.setFontSize(this.state.fontSize);
+            Editor.instance.setOption("wrap", this.state.wordWrap);
+            Editor.instance.setTheme(this.state.theme === 'latte' ? 'ace/theme/chrome' : 'ace/theme/tomorrow_night_eighties');
+        }
     }
 };
 
 const Store = {
-    state: { buffers: [], activeId: null, workspace: null, opfsRoot: null, previewMode: false },
-    subs: [],
+    state: { buffers: [], activeId: null, opfsRoot: null, previewMode: false },
     get activeBuffer() { return this.state.buffers.find(b => b.id === this.state.activeId); },
-    subscribe(fn) { this.subs.push(fn); },
-    notify(event) { this.subs.forEach(fn => fn(event, this.state)); },
-    addBuffer(b) { this.state.buffers.push(b); this.state.activeId = b.id; this.notify('buffer_added'); App.saveSession(); },
+    addBuffer(b) { this.state.buffers.push(b); this.setActive(b.id); App.saveSession(); },
     closeBuffer(id) {
         const idx = this.state.buffers.findIndex(b => b.id === id);
         if (idx === -1) return;
         this.state.buffers.splice(idx, 1);
-        if (this.state.activeId === id) this.state.activeId = this.state.buffers.length ? this.state.buffers[Math.max(0, idx - 1)].id : null;
-        this.notify('buffer_closed'); App.saveSession();
+        if (this.state.activeId === id) {
+            const next = this.state.buffers[idx] || this.state.buffers[idx - 1];
+            this.setActive(next ? next.id : null);
+        } else UI.renderTabs();
+        App.saveSession();
     },
-    setActive(id) { if(this.state.activeId !== id) { this.state.activeId = id; this.notify('buffer_switched'); App.saveSession(); } },
-    updateContent(id, c) { 
-        const b = this.state.buffers.find(b => b.id === id); 
-        if(b && b.content !== c) { b.content = c; if(!b.dirty) { b.dirty=true; this.notify('buffer_dirty'); } } 
+    setActive(id) { 
+        this.state.activeId = id; UI.renderTabs();
+        const buf = this.activeBuffer;
+        if (buf) { Editor.load(buf.content, buf.name); document.getElementById('bc-filename').innerText = buf.name; } 
+        else { Editor.load('', 'txt'); document.getElementById('bc-filename').innerText = '[No Selection]'; }
+        App.saveSession(); 
     },
-    markSaved(id) { const b = this.state.buffers.find(b => b.id === id); if(b) { b.dirty=false; this.notify('buffer_saved'); } }
+    updateContent(id, c) { const b = this.state.buffers.find(b => b.id === id); if(b && b.content !== c) { b.content = c; if(!b.dirty) { b.dirty = true; UI.renderTabs(); } } },
+    markSaved(id) { const b = this.state.buffers.find(b => b.id === id); if(b) { b.dirty = false; UI.renderTabs(); } }
 };
 
 const Editor = {
-    els: { input: null, hl: null, hlLayer: null, gutter: null },
+    instance: null,
     init() {
-        this.els = {
-            input: document.getElementById('input-layer'),
-            hl: document.getElementById('hl-code'),
-            hlLayer: document.getElementById('hl-layer'),
-            gutter: document.getElementById('gutter')
-        };
-        
-        // Optimized Scroll Sync
-        let ticking = false;
-        this.els.input.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    this.els.hlLayer.scrollTop = this.els.input.scrollTop;
-                    this.els.hlLayer.scrollLeft = this.els.input.scrollLeft;
-                    this.els.gutter.scrollTop = this.els.input.scrollTop;
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true });
-
-        this.els.input.addEventListener('input', () => {
-            const val = this.els.input.value;
-            if (Store.state.activeId) Store.updateContent(Store.state.activeId, val);
-            this.highlight(val);
-            this.updateGutter(val);
-            App.debouncePreview();
+        this.instance = ace.edit("code-stage");
+        this.instance.setOptions({
+            enableBasicAutocompletion: true, enableLiveAutocompletion: true,
+            showPrintMargin: false, useSoftTabs: true, tabSize: 4,
+            fontSize: Config.state.fontSize, fontFamily: 'JetBrains Mono, monospace', scrollPastEnd: 0.5
         });
-
-        this.els.input.addEventListener('keydown', (e) => this.handleKey(e));
-        this.els.input.addEventListener('click', () => App.updateStats());
-        this.els.input.addEventListener('keyup', () => App.updateStats());
-    },
-    handleKey(e) {
-        // Tab Indentation
-        if (e.key === 'Tab') { 
-            e.preventDefault();
-            const start = this.els.input.selectionStart;
-            const end = this.els.input.selectionEnd;
-            if (!e.shiftKey && start === end) {
-                document.execCommand('insertText', false, '    ');
-            } else {
-                this.handleBlockIndent(e.shiftKey, start, end);
-            }
-        }
-        // Comment Toggle (Ctrl + /)
-        if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-            e.preventDefault();
-            this.toggleComment();
-        }
-        // Smart Indent
-        if (e.key === 'Enter') {
-            const start = this.els.input.selectionStart;
-            const val = this.els.input.value;
-            const prevLine = val.substring(0, start).split('\n').pop();
-            const indent = prevLine.match(/^\s*/)[0];
-            if (indent) {
-                e.preventDefault();
-                document.execCommand('insertText', false, '\n' + indent);
-            }
-        }
+        this.instance.on('change', () => { if (Store.state.activeId) Store.updateContent(Store.state.activeId, this.instance.getValue()); App.debouncePreview(); });
+        this.instance.on('changeSelection', () => App.updateStats());
         // Shortcuts
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); Commands.trigger('saveFile'); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); Commands.trigger('openFile'); }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); App.toggleSidebar(); }
-        
-        setTimeout(() => App.updateStats(), 0);
-    },
-    handleBlockIndent(unindent, start, end) {
-        const val = this.els.input.value;
-        const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
-        const endLineEnd = val.indexOf('\n', end);
-        const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
-        const block = val.substring(startLineStart, effectiveEnd);
-        const lines = block.split('\n');
-        
-        let newBlock = lines.map(line => {
-            if (unindent) {
-                if (line.startsWith('    ')) return line.substring(4);
-                if (line.startsWith('\t')) return line.substring(1);
-                return line.replace(/^\s+/, m => m.slice(0, Math.max(0, m.length - 4))); // loose spaces
-            }
-            return '    ' + line;
-        }).join('\n');
-        
-        this.els.input.setSelectionRange(startLineStart, effectiveEnd);
-        document.execCommand('insertText', false, newBlock);
-        this.els.input.setSelectionRange(startLineStart, startLineStart + newBlock.length);
-    },
-    toggleComment() {
-        const start = this.els.input.selectionStart;
-        const end = this.els.input.selectionEnd;
-        const val = this.els.input.value;
-        
-        const buf = Store.activeBuffer;
-        const ext = buf ? buf.name.split('.').pop().toLowerCase() : 'txt';
-        const commentMap = { js: '// ', ts: '// ', html: '<!-- -->', css: '/* */', py: '# ' };
-        const syntax = commentMap[ext] || '// ';
-        const isBlock = syntax.includes('<!--') || syntax.includes('/*');
-        
-        // Simple line comment toggle for now
-        const startLineStart = val.lastIndexOf('\n', start - 1) + 1;
-        const endLineEnd = val.indexOf('\n', end);
-        const effectiveEnd = endLineEnd === -1 ? val.length : endLineEnd;
-        const block = val.substring(startLineStart, effectiveEnd);
-        
-        // Detect if all lines are commented
-        const lines = block.split('\n');
-        const allCommented = lines.every(l => l.trim().startsWith(syntax.trim()));
-        
-        const newBlock = lines.map(line => {
-            if (allCommented) return line.replace(syntax, '');
-            return syntax + line;
-        }).join('\n');
-
-        this.els.input.setSelectionRange(startLineStart, effectiveEnd);
-        document.execCommand('insertText', false, newBlock);
+        this.instance.commands.addCommand({ name: 'save', bindKey: {win: 'Ctrl-S', mac: 'Command-S'}, exec: () => Commands.trigger('saveFile') });
+        this.instance.commands.addCommand({ name: 'palette', bindKey: {win: 'F1|Ctrl-P', mac: 'F1|Command-P'}, exec: () => Commands.showPalette() });
+        this.instance.commands.addCommand({ name: 'new', bindKey: {win: 'Alt-N', mac: 'Option-N'}, exec: () => Commands.trigger('newFile') });
+        this.instance.commands.addCommand({ name: 'closeTab', bindKey: {win: 'Alt-W', mac: 'Option-W'}, exec: () => Commands.trigger('closeTab') });
     },
     load(content, filename) {
-        this.els.input.value = content;
-        this.highlight(content, filename);
-        this.updateGutter(content);
-        this.els.input.scrollTop = 0;
-        this.els.hlLayer.scrollTop = 0;
-        this.els.gutter.scrollTop = 0;
-        App.updateStats();
-        App.debouncePreview(true);
-    },
-    highlight(code, filename) {
-        const buf = Store.activeBuffer;
-        const name = filename || (buf ? buf.name : 'txt');
-        const ext = name.split('.').pop().toLowerCase();
-        
-        const map = {
-            'html': 'markup', 'js': 'javascript', 'ts': 'typescript',
-            'css': 'css', 'json': 'json', 'py': 'python', 'md': 'markdown', 'jsx': 'jsx', 'tsx': 'tsx'
-        };
-        const lang = map[ext] || 'clike';
-        
-        this.els.hl.className = `language-${lang}`;
-        
-        // Small throttle for coloring large files
-        if(code.length > 50000) {
-            // Basic HTML escape for huge files to prevent hang
-             this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
-        } else if (Prism.languages[lang]) {
-            this.els.hl.innerHTML = Prism.highlight(code, Prism.languages[lang], lang) + '<br>'; 
-        } else {
-            this.els.hl.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '<br>';
-        }
-    },
-    updateGutter(text) {
-        const lines = text.split('\n').length;
-        // Only update if line count changed significantly or first load
-        if(this.lastLineCount === lines) return;
-        this.lastLineCount = lines;
-        
-        let html = '';
-        for (let i = 1; i <= lines; i++) html += `<div>${i}</div>`;
-        this.els.gutter.innerHTML = html;
-        this.highlightActiveLine();
-    },
-    highlightActiveLine() {
-        // Pure CSS/JS hybrid for performance?
-        // Actually, just calculating index is faster
-        const start = this.els.input.selectionStart;
-        const val = this.els.input.value;
-        const lineIdx = val.substring(0, start).split('\n').length - 1;
-        
-        const children = this.els.gutter.children;
-        if(this.prevLineIdx !== undefined && children[this.prevLineIdx]) children[this.prevLineIdx].className = '';
-        if(children[lineIdx]) children[lineIdx].className = 'active-line';
-        this.prevLineIdx = lineIdx;
+        if (this.instance.getValue() !== content) this.instance.setValue(content, -1);
+        const ext = filename ? filename.split('.').pop().toLowerCase() : 'txt';
+        const modes = { js:'javascript', ts:'javascript', html:'html', css:'css', py:'python', md:'markdown', json:'javascript' };
+        this.instance.session.setMode(`ace/mode/${modes[ext] || 'text'}`);
+        this.instance.session.getUndoManager().reset();
+        App.updateStats(); App.debouncePreview(true);
     }
 };
-
-// Hook gutter update into click/keyup
-document.getElementById('input-layer').addEventListener('keyup', () => Editor.highlightActiveLine());
-document.getElementById('input-layer').addEventListener('click', () => Editor.highlightActiveLine());
 
 const FileSys = {
     async initOPFS() {
@@ -710,8 +469,7 @@ const FileSys = {
             if (!navigator.storage?.getDirectory) throw 1;
             Store.state.opfsRoot = await navigator.storage.getDirectory();
             this.renderOPFS();
-            UI.toast('OPFS Mounted');
-        } catch (e) { document.getElementById('opfs-header').innerText = "MEMORY ONLY"; }
+        } catch (e) { document.getElementById('opfs-header').innerText = "LocalStorage Only"; }
     },
     async renderOPFS() {
         if (!Store.state.opfsRoot) return;
@@ -721,316 +479,224 @@ const FileSys = {
             if (handle.kind === 'file') {
                 const el = document.createElement('div');
                 el.className = 'tree-item';
-                el.innerHTML = `<svg class="icon" style="width:12px;" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> ${name}`;
-                el.onclick = async () => {
-                    const file = await handle.getFile();
-                    App.openBuffer(name, await file.text(), handle, 'opfs');
-                };
+                const label = document.createElement('span');
+                label.className = 'tree-item-label';
+                label.innerHTML = `<svg class="icon" style="width:12px;" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> ${name}`;
+                label.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+                
+                const actions = document.createElement('div');
+                actions.className = 'tree-actions';
+                
+                // Rename Btn
+                const renBtn = document.createElement('span');
+                renBtn.className = 'action-btn';
+                renBtn.title = "Rename";
+                renBtn.innerHTML = `<svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+                renBtn.onclick = (e) => { e.stopPropagation(); this.renameOPFSFile(name, handle); };
+
+                // Delete Btn
+                const delBtn = document.createElement('span');
+                delBtn.className = 'action-btn action-delete';
+                delBtn.title = "Delete";
+                delBtn.innerHTML = `<svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+                delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSFile(name); };
+
+                actions.append(renBtn, delBtn);
+                el.append(label, actions);
                 div.appendChild(el);
             }
         }
     },
     async createOPFSFile() {
-        if (!Store.state.opfsRoot) return;
-        Prompt.open("New OPFS File:", "script.js", async (name) => {
+        Prompt.open("New Local File:", "script.js", async (name) => {
+            if(!name) return;
             try {
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
-                FileSys.renderOPFS();
-                UI.toast(`Created ${name}`);
+                this.renderOPFS();
             } catch (e) { UI.toast('Error creating file'); }
         });
     },
-    async openDiskFile() {
-        try {
-            const [handle] = await window.showOpenFilePicker();
-            const file = await handle.getFile();
-            App.openBuffer(file.name, await file.text(), handle, 'disk');
-        } catch (e) {}
+    async renameOPFSFile(oldName, handle) {
+        Prompt.open(`Rename "${oldName}" to:`, oldName, async (newName) => {
+            if (!newName || newName === oldName) return;
+            try {
+                // OPFS rename polyfill: Copy -> Delete -> Create
+                const file = await handle.getFile();
+                const content = await file.text();
+                const newHandle = await Store.state.opfsRoot.getFileHandle(newName, { create: true });
+                const writable = await newHandle.createWritable();
+                await writable.write(content);
+                await writable.close();
+                await Store.state.opfsRoot.removeEntry(oldName);
+                
+                // Update open buffers
+                const buf = Store.state.buffers.find(b => b.name === oldName && b.kind === 'opfs');
+                if (buf) { buf.name = newName; buf.handle = newHandle; UI.renderTabs(); document.getElementById('bc-filename').innerText = newName; }
+                
+                this.renderOPFS();
+                UI.toast('Renamed');
+            } catch(e) { UI.toast('Rename Failed'); }
+        });
     },
-    async openFolder() {
-        try {
-            const handle = await window.showDirectoryPicker();
-            this.renderWorkspace(handle);
-        } catch(e) {}
-    },
-    async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0) {
-        if(level === 0) parentEl.innerHTML = '';
-        for await (const [name, handle] of dirHandle.entries()) {
-            const el = document.createElement('div');
-            el.className = 'tree-item';
-            el.style.paddingLeft = `${(level * 10) + 14}px`;
-            
-            const icon = handle.kind === 'directory' 
-                ? '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>' 
-                : '<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline>';
-            
-            el.innerHTML = `<svg class="icon" style="width:12px;opacity:0.7;" viewBox="0 0 24 24">${icon}</svg> ${name}`;
-            
-            if (handle.kind === 'file') {
-                el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
-            } else {
-                // Recursive render could go here, but avoiding complexity for single file
-                el.style.fontWeight = "bold";
-                el.style.color = "var(--accent)";
-            }
-            parentEl.appendChild(el);
-        }
+    async deleteOPFSFile(name) {
+        Confirm.open("Delete File", `Permanently delete "${name}"?`, async () => {
+            try {
+                await Store.state.opfsRoot.removeEntry(name);
+                const buf = Store.state.buffers.find(b => b.name === name && b.kind === 'opfs');
+                if (buf) App.closeBuffer(buf.id);
+                this.renderOPFS();
+                UI.toast('Deleted');
+            } catch (e) { UI.toast('Delete failed'); }
+        });
     },
     async saveBuffer(buf) {
-        if (buf.name === 'config.json' && buf.kind === 'config') return this.saveConfigBuffer(buf);
-        if (buf.kind === 'opfs') return this.saveToOPFS(buf);
-        
+        if (buf.name === 'config.json' && buf.kind === 'config') { Config.state = JSON.parse(buf.content); Config.save(); Store.markSaved(buf.id); return; }
         try {
-            if (!buf.handle) {
-                buf.handle = await window.showSaveFilePicker({ suggestedName: buf.name });
-                buf.name = buf.handle.name;
+            let handle = buf.handle;
+            if (!handle && buf.kind === 'memory') {
+                handle = await window.showSaveFilePicker({ suggestedName: buf.name });
+                buf.handle = handle; buf.kind = 'disk'; buf.name = handle.name;
             }
-            const writable = await buf.handle.createWritable();
+            const writable = await handle.createWritable();
             await writable.write(buf.content);
             await writable.close();
             Store.markSaved(buf.id);
-            UI.toast(`Saved "${buf.name}"`);
+            UI.toast(`Saved: ${buf.name}`);
         } catch (e) { UI.toast('Save Cancelled'); }
-    },
-    async saveToOPFS(buf) {
-         try {
-            const writable = await buf.handle.createWritable();
-            await writable.write(buf.content);
-            await writable.close();
-            Store.markSaved(buf.id);
-            UI.toast(`Saved to OPFS`);
-        } catch (e) { UI.toast('Write failed'); }
-    },
-    saveConfigBuffer(buf) {
-        try {
-            Config.state = JSON.parse(buf.content);
-            Config.save();
-            Store.markSaved(buf.id);
-            UI.toast("Config Updated");
-        } catch(e) { UI.toast("Invalid JSON"); }
     }
 };
 
 const App = {
     init() {
-        Config.init();
-        Editor.init(); 
-
-        Store.subscribe((event) => {
-            if (['buffer_added', 'buffer_closed', 'buffer_switched'].includes(event)) {
-                UI.renderTabs();
-                const buf = Store.activeBuffer;
-                Editor.load(buf?.content || '', buf?.name || 'txt');
-                document.getElementById('bc-filename').innerText = buf?.name || '[No Name]';
-                this.updateStats();
-            }
-            if (event === 'buffer_dirty' || event === 'buffer_saved') UI.renderTabs();
-        });
-        
+        Editor.init(); Config.init(); FileSys.initOPFS(); Resizer.init();
         const saved = JSON.parse(localStorage.getItem('aether_v3_session') || '[]');
         if (saved.length) saved.forEach(s => this.openBuffer(s.name, s.content, null, 'memory'));
-        else this.openBuffer('welcome.md', '# Aether v3.1\n\n- **Ctrl+P**: Command Palette\n- **Ctrl+/**: Toggle Comment\n- **Ctrl+O**: Open File\n- **Drag** right edge to resize preview.', null, 'memory');
-
-        FileSys.initOPFS();
+        else this.openBuffer('welcome.md', "# Aether v3 - Final\n\n- **Drag & Drop** files to open\n- **Renaming** for local files\n- **Shortcuts:**\n  - F1: Palette\n  - Alt+N: New File\n  - Alt+W: Close Tab", null, 'memory');
+        
+        // Drag & Drop
+        document.body.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drag-over'); });
+        document.body.addEventListener('dragleave', e => { if(e.relatedTarget === null) document.body.classList.remove('drag-over'); });
+        document.body.addEventListener('drop', async e => {
+            e.preventDefault(); document.body.classList.remove('drag-over');
+            for (const item of e.dataTransfer.items) {
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    this.openBuffer(file.name, await file.text(), null, 'memory');
+                }
+            }
+        });
+        
+        new ResizeObserver(() => Editor.instance.resize()).observe(document.querySelector('main'));
     },
     openBuffer(name, content, handle, kind) {
         const existing = Store.state.buffers.find(b => b.name === name);
         if (existing) return Store.setActive(existing.id);
         Store.addBuffer({ id: 'b'+Date.now(), name, content, handle, kind, dirty: false });
     },
-    closeBuffer(id, e) {
-        if(e) e.stopPropagation();
-        Store.closeBuffer(id);
-    },
     updateStats() {
-        const input = document.getElementById('input-layer');
-        const text = input.value.substring(0, input.selectionStart);
-        const lines = text.split('\n').length;
-        const cols = text.split('\n').pop().length + 1;
-        document.getElementById('stat-pos').innerText = `${lines}:${cols}`;
-        
+        if (!Editor.instance) return;
+        const pos = Editor.instance.getCursorPosition();
+        document.getElementById('stat-pos').innerText = `${pos.row + 1}:${pos.column + 1}`;
         const buf = Store.activeBuffer;
         if(buf) {
             document.getElementById('stat-file').innerText = buf.name;
             document.getElementById('stat-lang').innerText = buf.name.split('.').pop().toUpperCase();
         }
-        Editor.highlightActiveLine();
     },
     debouncePreview(immediate) {
         if (!Store.state.previewMode) return;
         clearTimeout(this.pvTimer);
         const run = () => {
-            const buf = Store.activeBuffer;
-            if (!buf) return;
+            const buf = Store.activeBuffer; if (!buf) return;
             const f = document.getElementById('preview-frame');
             const ext = buf.name.split('.').pop().toLowerCase();
-            
-            // Generate Theme-Aware CSS for Preview
-            const computedStyle = getComputedStyle(document.body);
-            const bg = computedStyle.getPropertyValue('--bg').trim();
-            const fg = computedStyle.getPropertyValue('--text').trim();
-            const accent = computedStyle.getPropertyValue('--accent').trim();
-            
-            const baseStyle = `<style>
-                body{background:${bg};color:${fg};font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:2rem;line-height:1.6;}
-                a { color: ${accent}; }
-                pre { background: rgba(0,0,0,0.2); padding:1rem; border-radius:4px; overflow:auto; }
-                code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
-                blockquote { border-left: 3px solid ${accent}; margin:0; padding-left:1rem; opacity:0.8; }
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid ${computedStyle.getPropertyValue('--border')}; padding: 8px; text-align: left; }
-            </style>`;
-            
-            if (ext === 'md') {
-                f.srcdoc = baseStyle + marked.parse(buf.content);
-            } else if (ext === 'html') {
-                f.srcdoc = buf.content;
-            } else {
-                f.srcdoc = baseStyle + `<pre>${buf.content}</pre>`;
-            }
+            const styles = getComputedStyle(document.body);
+            const baseCss = `body{background:${styles.getPropertyValue('--bg')};color:${styles.getPropertyValue('--text')};font-family:sans-serif;padding:20px;line-height:1.6;}a{color:${styles.getPropertyValue('--accent')}}pre{background:rgba(0,0,0,0.2);padding:10px;border-radius:4px;overflow:auto}code{font-family:'JetBrains Mono',monospace;font-size:0.9em}blockquote{border-left:3px solid ${styles.getPropertyValue('--accent')};padding-left:1em;color:${styles.getPropertyValue('--text-dim')}}`;
+            let html = "";
+            if (ext === 'md') html = `<style>${baseCss}</style>` + marked.parse(buf.content);
+            else if (ext === 'html') html = buf.content;
+            else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g,'&lt;')}</pre>`;
+            f.srcdoc = html;
         };
-        if(immediate) run(); else this.pvTimer = setTimeout(run, 600);
+        if(immediate) run(); else this.pvTimer = setTimeout(run, 500);
     },
     toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); },
-    saveSession() { 
-        const sessionData = Store.state.buffers.filter(b => b.kind !== 'config').map(b => ({name:b.name, content:b.content}));
-        localStorage.setItem('aether_v3_session', JSON.stringify(sessionData)); 
-    }
+    saveSession() { localStorage.setItem('aether_v3_session', JSON.stringify(Store.state.buffers.filter(b => b.kind !== 'config').map(b => ({name:b.name, content:b.content})))); }
 };
 
 const UI = {
     renderTabs() {
-        const con = document.getElementById('tabs-scroll');
-        con.innerHTML = '';
+        const con = document.getElementById('tabs-scroll'); con.innerHTML = '';
         Store.state.buffers.forEach(b => {
             const el = document.createElement('div');
             el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
-            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><div class="tab-close" onclick="App.closeBuffer('${b.id}', event)">×</div>`;
+            el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><div class="tab-close" onclick="event.stopPropagation(); Store.closeBuffer('${b.id}')">×</div>`;
             el.onclick = () => Store.setActive(b.id);
             con.appendChild(el);
+            if(b.id === Store.state.activeId) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     },
-    toast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg; t.classList.add('visible');
-        clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => t.classList.remove('visible'), 2500);
-    }
+    toast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('visible'); clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => t.classList.remove('visible'), 2500); }
 };
 
 const Commands = {
     list: [
-        { id: 'newFile', name: 'New File', hint: 'Ctrl+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
-        { id: 'openFile', name: 'Open File', hint: 'Ctrl+O', fn: () => FileSys.openDiskFile() },
+        { id: 'newFile', name: 'New File', hint: 'Alt+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
         { id: 'saveFile', name: 'Save File', hint: 'Ctrl+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-        { id: 'settings', name: 'Edit Config', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
-        { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => {
-            Store.state.previewMode = !Store.state.previewMode;
-            document.body.classList.toggle('preview-active', Store.state.previewMode);
-            App.debouncePreview(true);
-        }},
-        { id: 'wrap', name: 'Toggle Word Wrap', hint: 'VIEW', fn: () => Config.toggleWrap() },
-        { id: 'zoomIn', name: 'Zoom In', hint: 'VIEW', fn: () => Config.zoom(1) },
-        { id: 'zoomOut', name: 'Zoom Out', hint: 'VIEW', fn: () => Config.zoom(-1) },
-        { id: 'find', name: 'Find Text', hint: 'Search', fn: () => Prompt.open("Find:", "", (q) => {
-            const val = Editor.els.input.value;
-            const idx = val.indexOf(q);
-            if(idx > -1) {
-                 Editor.els.input.focus();
-                 Editor.els.input.setSelectionRange(idx, idx + q.length);
-                 UI.toast("Found match");
-            } else UI.toast("Not found");
-        })},
-        { id: 'replace', name: 'Replace Text', hint: 'Search', fn: () => Prompt.open("Find:", "", (f) => Prompt.open("Replace with:", "", (r) => {
-            const buf = Store.activeBuffer;
-            if(!buf) return;
-            const count = buf.content.split(f).length - 1;
-            Store.updateContent(buf.id, buf.content.replaceAll(f, r));
-            Editor.load(buf.content, buf.name);
-            UI.toast(`Replaced ${count} occurrences`);
-        }))}
+        { id: 'closeTab', name: 'Close Tab', hint: 'Alt+W', fn: () => Store.activeBuffer && Store.closeBuffer(Store.activeBuffer.id) },
+        { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => { Store.state.previewMode = !Store.state.previewMode; document.body.classList.toggle('preview-active', Store.state.previewMode); App.debouncePreview(true); setTimeout(() => Editor.instance.resize(), 300); }},
+        { id: 'settings', name: 'Edit Settings', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
+        { id: 'wrap', name: 'Toggle Word Wrap', hint: 'View', fn: () => Config.toggleWrap() },
+        { id: 'clear', name: 'Reset App', hint: 'Danger', fn: () => { localStorage.removeItem('aether_v3_session'); location.reload(); } }
     ],
-    trigger(id) { this.list.find(c => c.id === id).fn(); },
+    trigger(id) { const c = this.list.find(c => c.id === id); if(c) c.fn(); },
     showPalette() {
-        const mask = document.getElementById('palette-mask');
-        const list = document.getElementById('cmd-list');
-        list.innerHTML = '';
-        this.list.forEach((cmd, i) => {
-            const el = document.createElement('div');
-            el.className = 'cmd-item';
-            if(i===0) el.classList.add('selected');
-            el.innerHTML = `<span>${cmd.name}</span>${cmd.hint ? `<span class="cmd-shortcut">${cmd.hint}</span>` : ''}`;
-            el.onclick = () => { cmd.fn(); this.hidePalette(); };
-            list.appendChild(el);
+        const mask = document.getElementById('palette-mask'); const list = document.getElementById('cmd-list'); list.innerHTML = '';
+        this.list.forEach((cmd, idx) => {
+            const el = document.createElement('div'); el.className = 'cmd-item'; if(idx===0) el.classList.add('selected');
+            el.innerHTML = `<span>${cmd.name}</span><span class="cmd-shortcut">${cmd.hint}</span>`;
+            el.onclick = () => { cmd.fn(); this.hidePalette(); }; list.appendChild(el);
         });
-        mask.style.display = 'flex';
-        document.getElementById('cmd-input').focus();
+        mask.style.display = 'flex'; document.getElementById('cmd-input').value = ''; document.getElementById('cmd-input').focus();
     },
-    hidePalette() { document.getElementById('palette-mask').style.display = 'none'; }
+    hidePalette() { document.getElementById('palette-mask').style.display = 'none'; Editor.instance.focus(); }
 };
 
 const Prompt = {
     open(msg, def, cb) {
-        document.getElementById('prompt-mask').style.display = 'flex';
-        document.getElementById('prompt-msg').innerText = msg;
-        const inp = document.getElementById('prompt-input');
-        inp.value = def; inp.focus(); inp.select();
-        
-        const okBtn = document.getElementById('prompt-ok');
-        // Remove old listeners to prevent stacking
-        const newOk = okBtn.cloneNode(true);
-        okBtn.parentNode.replaceChild(newOk, okBtn);
-        
-        newOk.onclick = () => { if(inp.value) cb(inp.value); this.close(); };
-        
-        inp.onkeydown = (e) => { 
-            if(e.key === 'Enter') newOk.click(); 
-            if(e.key === 'Escape') this.close(); 
-        };
+        document.getElementById('prompt-mask').style.display = 'flex'; document.getElementById('prompt-msg').innerText = msg;
+        const inp = document.getElementById('prompt-input'); inp.value = def; inp.focus(); inp.select();
+        const sub = () => { if(inp.value) cb(inp.value); this.close(); };
+        document.getElementById('prompt-ok').onclick = sub; inp.onkeydown = (e) => { if(e.key==='Enter') sub(); if(e.key==='Escape') this.close(); };
     },
-    close() { document.getElementById('prompt-mask').style.display = 'none'; }
+    close() { document.getElementById('prompt-mask').style.display = 'none'; Editor.instance.focus(); }
+};
+
+const Confirm = {
+    open(title, msg, onYes) {
+        document.getElementById('confirm-mask').style.display = 'flex'; document.getElementById('confirm-title').innerText = title;
+        document.getElementById('confirm-msg').innerText = msg; document.getElementById('confirm-ok').onclick = () => { onYes(); this.close(); };
+        document.querySelector('#confirm-mask .btn').focus();
+    },
+    close() { document.getElementById('confirm-mask').style.display = 'none'; Editor.instance.focus(); }
 };
 
 const Resizer = {
     init() {
-        const r = document.getElementById('resizer');
-        const p = document.getElementById('preview-pane');
-        const shield = document.getElementById('iframe-shield');
-        let isResizing = false;
-
-        r.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            document.body.style.cursor = 'col-resize';
-            r.classList.add('dragging');
-            shield.style.display = 'block'; // Protect against iframe eating events
-            e.preventDefault();
-        });
-
-        window.addEventListener('mousemove', (e) => {
+        const r = document.getElementById('resizer'); const p = document.getElementById('preview-pane'); let isResizing = false;
+        r.onmousedown = (e) => { isResizing = true; r.classList.add('active'); document.body.classList.add('resizing'); e.preventDefault(); };
+        document.onmousemove = (e) => {
             if (!isResizing) return;
-            const pct = (1 - (e.clientX / window.innerWidth)) * 100;
-            p.style.width = Math.min(80, Math.max(10, pct)) + '%';
-        });
-
-        window.addEventListener('mouseup', () => {
-            if(isResizing) {
-                isResizing = false;
-                document.body.style.cursor = '';
-                r.classList.remove('dragging');
-                shield.style.display = 'none';
-            }
-        });
+            const w = document.getElementById('editor-split').offsetWidth;
+            const pW = 100 - ((e.clientX - document.getElementById('sidebar').offsetWidth) / w * 100);
+            if (pW > 10 && pW < 90) { p.style.width = pW + '%'; Editor.instance.resize(); }
+        };
+        document.onmouseup = () => { if(isResizing) { isResizing = false; r.classList.remove('active'); document.body.classList.remove('resizing'); Editor.instance.resize(); }};
     }
 };
 
-window.onload = () => { 
-    App.init(); 
-    Resizer.init(); 
-    window.onkeydown = (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); Commands.showPalette(); }
-    };
-};
+window.onload = () => App.init();
 </script>
 </body>
 </html>
