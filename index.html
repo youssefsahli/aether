@@ -8,6 +8,10 @@
     <meta name="theme-color" content="#1e1e2e">
     <title>Aether v3 - Ace Flux</title>
 
+    <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
+
     <!-- Ace Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
@@ -1617,7 +1621,25 @@
                 { id: 'settings', name: 'Edit Settings', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
                 { id: 'switchPreview', name: 'Switch Preview Type', hint: 'Split/Float', fn: () => Config.togglePreviewType() },
                 { id: 'wrap', name: 'Toggle Word Wrap', hint: 'View', fn: () => Config.toggleWrap() },
-                { id: 'clear', name: 'Reset App', hint: 'Danger', fn: () => { DB.clear('session'); location.reload(); } }
+                { id: 'clear', name: 'Reset App', hint: 'Danger', fn: () => { DB.clear('session'); location.reload(); } },
+                {
+                    id: 'format',
+                    name: 'Format Document',
+                    hint: 'Alt+Shift+F',
+                    fn: () => {
+                        const val = Editor.instance.getValue();
+                        const cursor = Editor.instance.getCursorPosition();
+                        try {
+                            const formatted = prettier.format(val, {
+                                parser: "babel", // dynamic based on file extension
+                                plugins: prettierPlugins
+                            });
+                            Editor.instance.setValue(formatted, -1);
+                            Editor.instance.moveCursorToPosition(cursor);
+                            UI.toast("Formatted!");
+                        } catch (e) { UI.toast("Format Error"); }
+                    }
+                }
             ],
             trigger(id) { const c = this.list.find(c => c.id === id); if (c) c.fn(); },
             showPalette() {
