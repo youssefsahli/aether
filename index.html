@@ -1524,7 +1524,7 @@
                     if (ext === 'md') html = `<style>${baseCss}</style>` + marked.parse(buf.content);
                     else if (ext === 'html') html = buf.content;
                     else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g, '&lt;')}</pre>`;
-                    f.srcdoc = html;
+    
                     const logInterceptor = `
 <script>
     (function(){
@@ -1545,6 +1545,7 @@
 <\/script>`;
 
                     html = logInterceptor + html;
+                    f.srcdoc = html;
                 };
                 if (immediate) run(); else this.pvTimer = setTimeout(run, 500);
             },
