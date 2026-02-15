@@ -981,6 +981,12 @@
                         </div>
                         <iframe id="preview-frame"
                             sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
+                        <div id="console-pane"
+                            style="height: 150px; border-top: 1px solid var(--border); background: var(--header-bg); display: flex; flex-direction: column;">
+                            <div id="console-logs"
+                                style="flex:1; overflow-y: auto; padding: 8px; font-family: var(--font-code); font-size: 11px;">
+                            </div>
+                        </div>
                         <div id="float-resizer"></div>
                     </div>
                 </div>
@@ -1524,7 +1530,7 @@
                     if (ext === 'md') html = `<style>${baseCss}</style>` + marked.parse(buf.content);
                     else if (ext === 'html') html = buf.content;
                     else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g, '&lt;')}</pre>`;
-    
+
                     const logInterceptor = `
 <script>
     (function(){
