@@ -1367,22 +1367,11 @@
                             });
 
                             this.instance.container.addEventListener('mouseleave', () => { if (this._hoverTip) this._hoverTip.style.display = 'none'; });
-                            // Keyboard chord: Ctrl/Cmd+K then Ctrl/Cmd+I => signature help
+                            // Single-key shortcut: Ctrl/Cmd+I => signature help
                             try {
-                                let chordActive = false;
-                                let chordTimer = null;
                                 document.addEventListener('keydown', (e) => {
                                     if (!(e.ctrlKey || e.metaKey)) return;
-                                    const k = e.key.toLowerCase();
-                                    if (k === 'k') {
-                                        chordActive = true; clearTimeout(chordTimer);
-                                        chordTimer = setTimeout(() => chordActive = false, 1500);
-                                        UI.toast('Signature: press Ctrl+I');
-                                        e.preventDefault();
-                                        return;
-                                    }
-                                    if (k === 'i' && chordActive) {
-                                        chordActive = false; clearTimeout(chordTimer);
+                                    if (e.key.toLowerCase() === 'i') {
                                         e.preventDefault();
                                         try { this.showSignatureHelp(); } catch (err) { console.warn(err); }
                                     }
