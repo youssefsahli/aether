@@ -1279,6 +1279,38 @@
                                 // currently we don't surface diagnostics, but could later
                                 this._lspSymbols = d.symbols || [];
                             }
+                            if (d.type === 'hover') {
+                                if (!this._hoverTip) return;
+                                const sig = d.signature;
+                                const doc = d.doc;
+                                const kind = d.kind || '';
+                                if (!sig && !doc) { this._hoverTip.style.display = 'none'; return; }
+
+                                // Build rich content safely
+                                this._hoverTip.innerHTML = '';
+                                const code = document.createElement('div');
+                                code.style.fontFamily = 'JetBrains Mono, monospace';
+                                code.style.fontSize = '12px';
+                                code.style.fontWeight = '700';
+                                code.style.marginBottom = '6px';
+                                code.textContent = sig || `${kind}`;
+                                this._hoverTip.appendChild(code);
+
+                                if (doc) {
+                                    const p = document.createElement('div');
+                                    p.style.fontSize = '11px';
+                                    p.style.opacity = '0.9';
+                                    p.style.whiteSpace = 'pre-wrap';
+                                    p.textContent = doc.replace(/^\s*\*\s?/mg, '').trim();
+                                    this._hoverTip.appendChild(p);
+                                }
+
+                                const x = (this._lastMouse && this._lastMouse.x) || (window.innerWidth/2);
+                                const y = (this._lastMouse && this._lastMouse.y) || (window.innerHeight/2);
+                                this._hoverTip.style.left = (x + 12) + 'px';
+                                this._hoverTip.style.top = (y + 12) + 'px';
+                                this._hoverTip.style.display = 'block';
+                            }
                         });
 
                         const completer = {
@@ -1298,6 +1330,44 @@
                             }
                         };
                         this.instance.completers = (this.instance.completers || []).concat([completer]);
+                        // Create hover tooltip element
+                        try {
+                            const tip = document.createElement('div');
+                            tip.id = 'hover-tip';
+                            const cs = getComputedStyle(document.body);
+                            tip.style.position = 'fixed';
+                            tip.style.display = 'none';
+                            tip.style.padding = '6px 8px';
+                            tip.style.background = cs.getPropertyValue('--header-bg') || '#222';
+                            tip.style.color = cs.getPropertyValue('--text') || '#fff';
+                            tip.style.border = `1px solid ${cs.getPropertyValue('--border') || '#333'}`;
+                            tip.style.borderRadius = '6px';
+                            tip.style.fontSize = '12px';
+                            tip.style.zIndex = 9999;
+                            tip.style.fontFamily = 'JetBrains Mono, monospace';
+                            document.body.appendChild(tip);
+                            this._hoverTip = tip;
+                            this._lastMouse = null;
+
+                            let hoverTimer = null;
+                            // Mouse move over editor, debounce and request hover info
+                            this.instance.container.addEventListener('mousemove', (e) => {
+                                clearTimeout(hoverTimer);
+                                hoverTimer = setTimeout(() => {
+                                    try {
+                                        const pos = this.instance.renderer.screenToTextCoordinates(e.clientX, e.clientY);
+                                        const token = this.instance.session.getTokenAt(pos.row, pos.column);
+                                        if (!token) { this._hoverTip.style.display = 'none'; return; }
+                                        const word = token.value;
+                                        if (!/^[A-Za-z$_][A-Za-z0-9$_]*$/.test(word)) { this._hoverTip.style.display = 'none'; return; }
+                                        this._lastMouse = { x: e.clientX, y: e.clientY };
+                                        if (this.lspWorker) this.lspWorker.postMessage({ type: 'hover', word, content: this.instance.getValue() });
+                                    } catch (err) { this._hoverTip.style.display = 'none'; }
+                                }, 180);
+                            });
+
+                            this.instance.container.addEventListener('mouseleave', () => { if (this._hoverTip) this._hoverTip.style.display = 'none'; });
+                        } catch (e) { /* ignore hover initialization errors */ }
                     } catch (e) { console.warn('LSP worker not available', e); }
                 },
                 load(content, filename) {
