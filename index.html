@@ -1521,6 +1521,26 @@
                     else if (ext === 'html') html = buf.content;
                     else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g, '&lt;')}</pre>`;
                     f.srcdoc = html;
+                    const logInterceptor = `
+<script>
+    (function(){
+        const _log = console.log;
+        const _error = console.error;
+        console.log = (...args) => { 
+            window.parent.postMessage({type: 'console', method: 'log', args: args}, '*'); 
+            _log(...args); 
+        };
+        console.error = (...args) => { 
+            window.parent.postMessage({type: 'console', method: 'error', args: args}, '*'); 
+            _error(...args); 
+        };
+        window.onerror = (msg, url, line) => {
+            window.parent.postMessage({type: 'console', method: 'error', args: ["Uncaught Error: " + msg + " (" + line + ")"]}, '*');
+        };
+    })();
+<\/script>`;
+
+                    html = logInterceptor + html;
                 };
                 if (immediate) run(); else this.pvTimer = setTimeout(run, 500);
             },
@@ -1736,6 +1756,12 @@
         };
 
         window.onload = () => App.init();
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'console') {
+                // Append e.data.args to a visual <div> in your UI
+                UI.appendLog(e.data.method, e.data.args);
+            }
+        });
     </script>
 </body>
 
