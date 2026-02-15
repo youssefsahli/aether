@@ -1367,6 +1367,27 @@
                             });
 
                             this.instance.container.addEventListener('mouseleave', () => { if (this._hoverTip) this._hoverTip.style.display = 'none'; });
+                            // Keyboard chord: Ctrl/Cmd+K then Ctrl/Cmd+I => signature help
+                            try {
+                                let chordActive = false;
+                                let chordTimer = null;
+                                document.addEventListener('keydown', (e) => {
+                                    if (!(e.ctrlKey || e.metaKey)) return;
+                                    const k = e.key.toLowerCase();
+                                    if (k === 'k') {
+                                        chordActive = true; clearTimeout(chordTimer);
+                                        chordTimer = setTimeout(() => chordActive = false, 1500);
+                                        UI.toast('Signature: press Ctrl+I');
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    if (k === 'i' && chordActive) {
+                                        chordActive = false; clearTimeout(chordTimer);
+                                        e.preventDefault();
+                                        try { this.showSignatureHelp(); } catch (err) { console.warn(err); }
+                                    }
+                                });
+                            } catch (e) {}
                         } catch (e) { /* ignore hover initialization errors */ }
                     } catch (e) { console.warn('LSP worker not available', e); }
                 },
@@ -1378,6 +1399,19 @@
                     this.instance.session.getUndoManager().reset();
                     App.updateStats(); App.debouncePreview(true);
                     Symbols.parse();
+                },
+                showSignatureHelp() {
+                    try {
+                        const pos = this.instance.getCursorPosition();
+                        const token = this.instance.session.getTokenAt(pos.row, pos.column);
+                        if (!token || !/^[A-Za-z$_][A-Za-z0-9$_]*$/.test(token.value)) return UI.toast('No symbol at cursor');
+                        const word = token.value;
+                        // compute screen coordinates for tooltip placement
+                        let coords;
+                        try { coords = this.instance.renderer.textToScreenCoordinates(pos.row, pos.column); } catch (e) { coords = null; }
+                        if (coords) this._lastMouse = { x: coords.pageX || coords.left + window.pageXOffset, y: coords.pageY || coords.top + window.pageYOffset };
+                        if (this.lspWorker) this.lspWorker.postMessage({ type: 'hover', word, content: this.instance.getValue() });
+                    } catch (e) { console.warn('signature help failed', e); }
                 },
                 debounceSymbols() {
                     clearTimeout(this.symTimer);
