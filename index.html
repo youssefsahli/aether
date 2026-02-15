@@ -1785,10 +1785,24 @@
         };
 
         window.onload = () => App.init();
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'console') {
-                // Append e.data.args to a visual <div> in your UI
-                UI.appendLog(e.data.method, e.data.args);
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'console') {
+                const logBox = document.getElementById('console-logs');
+                const entry = document.createElement('div');
+
+                // Style based on method (log/error/warn)
+                const color = event.data.method === 'error' ? '#ff8888' :
+                    event.data.method === 'warn' ? '#ffd700' : 'var(--text)';
+
+                entry.style.color = color;
+                entry.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                entry.style.padding = '2px 0';
+
+                // Join arguments with a space
+                entry.innerText = `> ${event.data.args.join(' ')}`;
+
+                logBox.appendChild(entry);
+                logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
             }
         });
     </script>
