@@ -211,11 +211,21 @@
                 transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
-            button:hover svg.icon {
+            button > svg {
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            button:hover svg.icon,
+            button:hover > svg {
                 transform: scale(1.1);
             }
 
-            button:active svg.icon {
+            button:active svg.icon,
+            button:active > svg {
                 transform: scale(0.95);
             }
 
@@ -395,8 +405,7 @@
                 color: rgb(255, 136, 136);
                 opacity: 1;
             }
-            }
-
+    
             .reconnect-btn {
                 margin: 10px 16px;
                 padding: 10px 12px;
@@ -1128,11 +1137,7 @@
     <body data-theme="mocha">
 
         <header>
-            <button class="btn" onclick="App.toggleSidebar('left')" title="Toggle Sidebar">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
-            </button>
+            <button class="btn" onclick="App.toggleSidebar('left')" title="Toggle Sidebar" data-icon="menu"></button>
             <div class="logo">
                 <span style="font-size: 20px; font-weight: 700; color: var(--accent); font-family: var(--font-code);">Æ</span>
                 <span>AETHER</span>
@@ -1147,41 +1152,16 @@
                     <div class="theme-swatch swatch-mocha" onclick="Config.setTheme('mocha')" title="Mocha"></div>
                 </div>
                 <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
-                <button class="btn" onclick="Commands.trigger('openFile')" title="Open File (Ctrl+O)">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path></svg>
-                </button>
-                <button class="btn" onclick="Commands.trigger('newFile')" title="New File (Alt+N)">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <path d="M12 5v14M5 12h14" />
-                    </svg>
-                </button>
-                <button class="btn" onclick="Commands.trigger('saveFile')" title="Save (Ctrl+S)">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                    </svg>
-                </button>
+                <button class="btn" onclick="Commands.trigger('openFile')" title="Open File (Ctrl+O)" data-icon="openFile"></button>
+                <button class="btn" onclick="Commands.trigger('newFile')" title="New File (Alt+N)" data-icon="newFile"></button>
+                <button class="btn" onclick="Commands.trigger('saveFile')" title="Save (Ctrl+S)" data-icon="save"></button>
                 <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
-                <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Preview">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z" />
-                        <path d="M12 13a1 1 0 100-2 1 1 0 000 2z" />
-                    </svg>
-                </button>
-                <button class="btn" onclick="App.toggleSidebar('right')" title="Outline">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <line x1="21" y1="10" x2="3" y2="10"></line>
-                        <line x1="21" y1="6" x2="3" y2="6"></line>
-                        <line x1="21" y1="14" x2="3" y2="14"></line>
-                        <line x1="21" y1="18" x2="3" y2="18"></line>
-                    </svg>
-                </button>
-                <button class="btn" onclick="Commands.showPalette()" title="Commands (F1)">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="19" cy="12" r="1" />
-                        <circle cx="5" cy="12" r="1" />
-                    </svg>
-                </button>
+                <button id="nav-back-btn" class="btn" onclick="App.goBack()" title="Back (Alt+Left)" disabled data-icon="back"></button>
+                <button id="nav-forward-btn" class="btn" onclick="App.goForward()" title="Forward (Alt+Right)" disabled data-icon="forward"></button>
+                <div style="width:1px; height:16px; background:var(--border); margin:0 8px;"></div>
+                <button class="btn primary" onclick="Commands.trigger('togglePreview')" title="Preview" data-icon="preview"></button>
+                <button class="btn" onclick="App.toggleSidebar('right')" title="Outline" data-icon="outline"></button>
+                <button class="btn" onclick="Commands.showPalette()" title="Commands (F1)" data-icon="commands"></button>
             </div>
         </header>
 
@@ -1189,25 +1169,22 @@
             <aside id="sidebar-left">
                 <div class="side-header" style="margin-top:8px;">
                     <span>Workspace</span>
-                    <button class="btn" onclick="FileSys.openFolder()" title="Open Folder">
-                        <svg class="icon" viewBox="0 0 24 24">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                        </svg>
-                    </button>
+                    <button class="btn" onclick="FileSys.openFolder()" title="Open Folder">≡</button>
                 </div>
                 <div id="file-tree" class="file-tree"></div>
 
                 <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
                     <span id="opfs-header">Local Storage</span>
                     <div style="display:flex;">
-                        <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg>
-                        </button>
+                        <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File">+</button>
                     </div>
                 </div>
                 <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
+
+                <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+                    <span>System Files</span>
+                </div>
+                <div id="system-tree" class="file-tree" style="max-height: 250px;"></div>
             </aside>
 
             <main>
@@ -1226,10 +1203,7 @@
                                 <span style="font-size:10px; font-weight:700; color:var(--text-dim);">PREVIEW</span>
                                 <button class="btn" style="width:20px; height:20px;"
                                     onclick="Commands.trigger('togglePreview')">
-                                    <svg class="icon" style="width:12px; height:12px;" viewBox="0 0 24 24">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
+                                    ✕
                                 </button>
                             </div>
                             <iframe id="preview-frame"
@@ -1240,13 +1214,13 @@
                                     <span style="font-size:11px; font-weight:700; color:var(--text-dim);">CONSOLE</span>
                                     <div style="display:flex; gap:6px;">
                                         <button id="console-toggle-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Collapse Console" onclick="UI.toggleConsole()">
-                                            <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+                                            ▼
                                         </button>
                                         <button id="console-run-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Run JS" onclick="App.runActiveJS()" hidden>
-                                            <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg>
+                                            ▶
                                         </button>
                                         <button id="console-clear-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Clear Console" onclick="UI.clearConsole()">
-                                            <svg class="icon" viewBox="0 0 24 24"><path d="M3 21l8-8"></path><path d="M21 3l-6 6"></path></svg>
+                                            ✕
                                         </button>
                                     </div>
                                 </div>
@@ -1318,10 +1292,7 @@
         </div>
 
         <div id="toast">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
+            ✓
             <span id="toast-msg">Initialized</span>
         </div>
 
@@ -1590,7 +1561,7 @@
             };
 
             const Store = {
-                state: { buffers: [], activeId: null, opfsRoot: null, previewMode: false, consoleCollapsed: false },
+                state: { buffers: [], activeId: null, opfsRoot: null, previewMode: false, consoleCollapsed: false, navHistory: [], navIndex: -1 },
                 get activeBuffer() { return this.state.buffers.find(b => b.id === this.state.activeId); },
                 addBuffer(b) { this.state.buffers.push(b); this.setActive(b.id); App.saveSession(); },
                 closeBuffer(id) {
@@ -1606,6 +1577,7 @@
                     try { UI.updateConsoleHeader(); } catch (e) {}
                 },
                 setActive(id) {
+                    if (this.state.activeId === id) return; // No change needed
                     this.state.activeId = id; UI.renderTabs();
                     const buf = this.activeBuffer;
                     if (buf) {
@@ -1613,11 +1585,18 @@
                         document.getElementById('bc-filename').innerText = buf.name;
                     }
                     else { Editor.load('', 'txt'); document.getElementById('bc-filename').innerText = '[No Selection]'; }
+                    // Track navigation history
+                    if (this.state.navIndex < this.state.navHistory.length - 1) {
+                        this.state.navHistory = this.state.navHistory.slice(0, this.state.navIndex + 1);
+                    }
+                    this.state.navHistory.push(id);
+                    this.state.navIndex = this.state.navHistory.length - 1;
+                    App.updateNavButtons();
                     App.saveSession();
                 },
                 updateContent(id, c) {
                     const b = this.state.buffers.find(b => b.id === id);
-                    if (b && b.content !== c) {
+                    if (b && !b.readonly && b.content !== c) {
                         b.content = c;
                         if (!b.dirty) { b.dirty = true; UI.renderTabs(); }
                         App.debounceSaveBuffer(b);
@@ -1989,7 +1968,12 @@
                             el.className = 'tree-item';
                             const label = document.createElement('span');
                             label.className = 'tree-item-label';
-                            label.innerHTML = `<svg class="icon" style="width:12px;" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg> ${name}`;
+                            const icon = document.createElement('span');
+                            icon.innerHTML = Icons.file;
+                            icon.style.marginRight = '6px';
+                            icon.style.display = 'inline-flex';
+                            label.appendChild(icon);
+                            label.appendChild(document.createTextNode(name));
                             label.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
 
                             const actions = document.createElement('div');
@@ -1997,12 +1981,12 @@
 
                             const renBtn = document.createElement('span');
                             renBtn.className = 'action-btn'; renBtn.title = "Rename";
-                            renBtn.innerHTML = `<svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+                            renBtn.innerHTML = Icons.edit;
                             renBtn.onclick = (e) => { e.stopPropagation(); this.renameOPFSFile(name, handle); };
 
                             const delBtn = document.createElement('span');
                             delBtn.className = 'action-btn action-delete'; delBtn.title = "Delete";
-                            delBtn.innerHTML = `<svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+                            delBtn.innerHTML = Icons.trash;
                             delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSFile(name); };
 
                             actions.append(renBtn, delBtn);
@@ -2102,12 +2086,133 @@
                         const el = document.createElement('div');
                         el.className = 'tree-item';
                         el.style.paddingLeft = `${(level * 10) + 12}px`;
-                        el.innerHTML = `${handle.kind === 'directory' ? '+ ' : '> '}${name}`;
+                        const icon = document.createElement('span');
+                        icon.innerHTML = handle.kind === 'directory' ? Icons.folder : Icons.file;
+                        icon.style.marginRight = '6px';
+                        icon.style.display = 'inline-flex';
+                        const text = document.createElement('span');
+                        text.textContent = name;
+                        el.appendChild(icon);
+                        el.appendChild(text);
                         if (handle.kind === 'file') {
                             el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
                         }
                         parentEl.appendChild(el);
                         if (handle.kind === 'directory') await this.renderWorkspace(handle, parentEl, level + 1);
+                    }
+                }
+            };
+
+            // System filesystem - read-only lazy loading from workspace
+            const SystemFS = {
+                fileCache: new Map(),
+                loadedFiles: new Set(),
+                async init() {
+                    await this.renderSystemTree();
+                },
+                async renderSystemTree() {
+                    const div = document.getElementById('system-tree');
+                    if (!div) return;
+                    div.innerHTML = '';
+                    
+                    // Get list of files from workspace (Exclude hidden and binary files)
+                    const excludePatterns = ['.git', '.vscode', '.svg', '.lock', 'node_modules', 'dist', 'build'];
+                    const textExtensions = ['md', 'js', 'ts', 'json', 'html', 'css', 'py', 'txt', 'yml', 'yaml', 'pas', 'pp'];
+                    
+                    try {
+                        const response = await fetch('.', { headers: { 'Accept': 'application/json' } }).then(r => r.ok ? null : Promise.reject()).catch(() => null);
+                        // Fallback: load from our known test files and workspace files
+                        const knownFiles = ['welcome.md', 'test-navigation.md', 'SCRIPTING.md', 'SCRIPT_QUICK_REF.md', 'EXAMPLE_SCRIPTS.js', 'manifest.json', 'MARKDOWN_NAVIGATION.md', 'LICENSE', 'CNAME', 'index.html'];
+                        
+                        for (const filename of knownFiles) {
+                            const el = document.createElement('div');
+                            el.className = 'tree-item';
+                            const label = document.createElement('span');
+                            label.className = 'tree-item-label';
+                            const icon = document.createElement('span');
+                            icon.innerHTML = Icons.file;
+                            icon.style.marginRight = '6px';
+                            icon.style.display = 'inline-flex';
+                            label.appendChild(icon);
+                            label.appendChild(document.createTextNode(filename));
+                            label.onclick = async () => this.loadFile(filename);
+                            el.appendChild(label);
+                            div.appendChild(el);
+                        }
+                    } catch (e) {
+                        console.warn('Could not load system files:', e);
+                    }
+                },
+                async loadFile(filename) {
+                    if (this.loadedFiles.has(filename)) {
+                        const existing = Store.state.buffers.find(b => b.name === filename && b.kind === 'system');
+                        if (existing) return Store.setActive(existing.id);
+                    }
+                    
+                    try {
+                        UI.toast(`Loading ${filename}...`);
+                        const response = await fetch(filename);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        const content = await response.text();
+                        
+                        this.fileCache.set(filename, content);
+                        this.loadedFiles.add(filename);
+                        
+                        // Add to buffers as system file (editable)
+                        const existing = Store.state.buffers.find(b => b.name === filename);
+                        if (existing) {
+                            Store.setActive(existing.id);
+                        } else {
+                            Store.addBuffer({ id: 'sys' + Date.now(), name: filename, content, handle: null, kind: 'system', dirty: false, readonly: false });
+                        }
+                    } catch (e) {
+                        UI.toast(`Failed to load ${filename}`);
+                        console.error('Load failed:', e);
+                    }
+                },
+                async lazyLoadFile(filename) {
+                    // Try to load file if referenced from markdown links
+                    return this.loadFile(filename);
+                }
+            };
+
+            // Configure marked for custom link rendering
+            // Icon definitions - centralized for easy modification
+            const Icons = {
+                menu: '<svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="5" width="18" height="1.5" rx="0.75" fill="currentColor"/><rect x="3" y="11.25" width="18" height="1.5" rx="0.75" fill="currentColor"/><rect x="3" y="17.5" width="18" height="1.5" rx="0.75" fill="currentColor"/></svg>',
+                openFile: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" fill="currentColor" opacity="0.2"/><path d="M13 2v7h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6 2h7v7h7v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+                newFile: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+                save: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="17 21 17 13 7 13 7 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="7 3 7 8 17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+                back: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 12H5M5 12l6-6M5 12l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                forward: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M19 12l-6-6M19 12l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                preview: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>',
+                outline: '<svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="9" y1="9" x2="15" y2="9" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><line x1="9" y1="17" x2="12" y2="17" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>',
+                commands: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 9l3-3 7 7-7 7-3-3m10-10l3-3 3 3-3 3m-3 8l3-3 3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+                close: '<svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+                chevronDown: '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                chevronRight: '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="9 6 15 12 9 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                playRight: '<svg viewBox="0 0 24 24" width="16" height="16"><polygon points="5 3 19 12 5 21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                folder: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                file: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="13 2 13 9 20 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+                plus: '<svg viewBox="0 0 24 24" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+                edit: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                trash: '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="3 6 5 6 21 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
+            };
+
+            const MarkedConfig = {
+                init() {
+                    try {
+                        const renderer = new marked.Renderer();
+                        renderer.link = (token) => {
+                            const href = token.href;
+                            // Check if this is an internal file link (no protocol or relative path)
+                            const isInternal = !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('www.');
+                            const dataAttr = isInternal ? ' data-aether-file="true"' : '';
+                            return `<a href="${href}"${dataAttr}>${token.text}</a>`;
+                        };
+                        marked.use({ renderer });
+                    } catch (e) {
+                        console.warn('Could not configure marked:', e);
                     }
                 }
             };
@@ -2163,6 +2268,8 @@
                     await FileSys.initOPFS();
                     Resizer.init();
                     Dragger.init();
+                    MarkedConfig.init();
+                    await SystemFS.init();
 
                     const rootHandle = await DB.get('handles', 'rootDir');
                     if (rootHandle) FileSys.restoreRoot(rootHandle);
@@ -2211,11 +2318,21 @@
                         }
                     });
 
-                    // Global shortcut: Ctrl/Cmd+O to open a file
+                    // Global shortcuts
                     document.addEventListener('keydown', (e) => {
                         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
                             e.preventDefault();
                             Commands.trigger('openFile');
+                        }
+                        // Alt+Left for back
+                        if (e.altKey && e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            App.goBack();
+                        }
+                        // Alt+Right for forward
+                        if (e.altKey && e.key === 'ArrowRight') {
+                            e.preventDefault();
+                            App.goForward();
                         }
                     });
 
@@ -2238,7 +2355,7 @@
                         if (pane && Store.state.consoleCollapsed) pane.classList.add('collapsed');
                         if (btn) {
                             const collapsed = pane && pane.classList.contains('collapsed');
-                            btn.innerHTML = collapsed ? '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>' : '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" /></svg>';
+                            btn.innerHTML = collapsed ? '▼' : '▶';
                         }
                     } catch (e) {}
                 },
@@ -2257,6 +2374,46 @@
                         document.getElementById('stat-lang').innerText = buf.name.split('.').pop().toUpperCase();
                     }
                 },
+                goBack() {
+                    if (Store.state.navIndex > 0) {
+                        Store.state.navIndex--;
+                        const targetId = Store.state.navHistory[Store.state.navIndex];
+                        if (targetId) {
+                            Store.state.activeId = targetId;
+                            UI.renderTabs();
+                            const buf = Store.activeBuffer;
+                            if (buf) {
+                                Editor.load(buf.content, buf.name);
+                                document.getElementById('bc-filename').innerText = buf.name;
+                            }
+                            this.updateNavButtons();
+                            this.debouncePreview(true);
+                        }
+                    }
+                },
+                goForward() {
+                    if (Store.state.navIndex < Store.state.navHistory.length - 1) {
+                        Store.state.navIndex++;
+                        const targetId = Store.state.navHistory[Store.state.navIndex];
+                        if (targetId) {
+                            Store.state.activeId = targetId;
+                            UI.renderTabs();
+                            const buf = Store.activeBuffer;
+                            if (buf) {
+                                Editor.load(buf.content, buf.name);
+                                document.getElementById('bc-filename').innerText = buf.name;
+                            }
+                            this.updateNavButtons();
+                            this.debouncePreview(true);
+                        }
+                    }
+                },
+                updateNavButtons() {
+                    const backBtn = document.getElementById('nav-back-btn');
+                    const forwardBtn = document.getElementById('nav-forward-btn');
+                    if (backBtn) backBtn.disabled = Store.state.navIndex <= 0;
+                    if (forwardBtn) forwardBtn.disabled = Store.state.navIndex >= Store.state.navHistory.length - 1;
+                },
                 debouncePreview(immediate) {
                     if (!Store.state.previewMode) return;
                     clearTimeout(this.pvTimer);
@@ -2272,7 +2429,7 @@
                         else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g, '&lt;')}</pre>`;
 
                             // Use a persistent preview shell and postMessage updates to avoid flashing
-                            const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.head.appendChild(ns); s.parentNode.removeChild(s); }); }});})();<\/script></html>`;
+                            const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});function attachLinkHandlers(){const links=document.querySelectorAll('a[data-aether-file]');links.forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();const filename=this.href.split('/').pop()||this.href;parent.postMessage({type:'aether-open-file',filename},'*');});});}window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.head.appendChild(ns); s.parentNode.removeChild(s); }); attachLinkHandlers(); }});setTimeout(attachLinkHandlers,100);})();<\/script></html>`;
 
                             const htmlContent = `<style>${baseCss}</style>` + (ext === 'md' ? marked.parse(buf.content) : (ext === 'html' ? buf.content : `<pre>${buf.content.replace(/</g, '&lt;')}</pre>`));
 
@@ -2426,9 +2583,9 @@ ${buf.content}
                     const collapsed = pane.classList.contains('collapsed');
                     Store.state.consoleCollapsed = collapsed;
                     if (collapsed) {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>';
+                        btn.innerHTML = '▼';
                     } else {
-                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" /></svg>';
+                        btn.innerHTML = '▶';
                     }
                 }
             };
@@ -2695,6 +2852,13 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
 
             window.onload = () => {
                 App.init();
+                // Populate icons from Icons object
+                document.querySelectorAll('[data-icon]').forEach(btn => {
+                    const iconName = btn.getAttribute('data-icon');
+                    if (Icons[iconName]) {
+                        btn.innerHTML = Icons[iconName];
+                    }
+                });
                 // Register service worker for PWA functionality
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW registration failed:', e));
@@ -2704,6 +2868,31 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
                 if (!event.data) return;
                 const previewFrame = document.getElementById('preview-frame');
                 if (!previewFrame || event.source !== previewFrame.contentWindow) return;
+
+                // Handle file opening requests from markdown preview
+                if (event.data.type === 'aether-open-file') {
+                    const filename = event.data.filename;
+                    if (filename) {
+                        // Try to find existing buffer first
+                        const existing = Store.state.buffers.find(b => b.name === filename);
+                        if (existing) {
+                            Store.setActive(existing.id);
+                            App.debouncePreview(true);
+                        } else {
+                            // Try to lazy load from system filesystem
+                            SystemFS.lazyLoadFile(filename).then(() => {
+                                const loaded = Store.state.buffers.find(b => b.name === filename);
+                                if (loaded) {
+                                    Store.setActive(loaded.id);
+                                    App.debouncePreview(true);
+                                }
+                            }).catch(() => {
+                                UI.toast('File not found: ' + filename);
+                            });
+                        }
+                    }
+                    return;
+                }
 
                 // Handle Aether API calls from preview frame
                 if (event.data.type === 'aether-call') {
