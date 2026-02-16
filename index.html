@@ -6,7 +6,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="theme-color" content="#1e1e2e">
+        <meta name="description" content="A powerful, modern code editor with live preview, themes, and OPFS storage">
         <title>Aether v3 - Ace Flux</title>
+
+        <!-- PWA Manifest & Icon -->
+        <link rel="manifest" href="/manifest.json">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link rel="apple-touch-icon" href="/favicon.svg">
 
         <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
         <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
@@ -1944,9 +1950,12 @@
                     }
                 },
                 async getDefaultWelcome() {
-                    // Fetch welcome.md from workspace or use fallback
+                    // Fetch welcome.md from workspace with cache-busting
                     try {
-                        const response = await fetch('welcome.md');
+                        const response = await fetch('welcome.md?t=' + Date.now(), {
+                            cache: 'no-store',
+                            headers: { 'Cache-Control': 'no-cache' }
+                        });
                         if (response.ok) return await response.text();
                     } catch (e) {
                         console.warn('Could not fetch welcome.md:', e);
@@ -2491,7 +2500,13 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
                 }
             };
 
-            window.onload = () => App.init();
+            window.onload = () => {
+                App.init();
+                // Register service worker for PWA functionality
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW registration failed:', e));
+                }
+            };
             window.addEventListener('message', (event) => {
                 if (!event.data) return;
                 const previewFrame = document.getElementById('preview-frame');
