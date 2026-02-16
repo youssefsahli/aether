@@ -1915,25 +1915,32 @@
 
             const App = {
                 async loadWelcome() {
-                    // Try to load welcome.md from OPFS, create if missing
+                    // Always fetch latest version from workspace first
+                    const workspaceWelcome = await this.getDefaultWelcome();
+                    if (workspaceWelcome) {
+                        // Update OPFS with the latest version
+                        try {
+                            if (Store.state.opfsRoot) {
+                                const handle = await Store.state.opfsRoot.getFileHandle('welcome.md', { create: true });
+                                const writable = await handle.createWritable();
+                                await writable.write(workspaceWelcome);
+                                await writable.close();
+                            }
+                        } catch (e) {
+                            console.warn('Could not update welcome.md in OPFS:', e);
+                        }
+                        return workspaceWelcome;
+                    }
+                    
+                    // Fallback: load from OPFS if workspace unavailable
                     try {
                         if (!Store.state.opfsRoot) return null;
-                        const handle = await Store.state.opfsRoot.getFileHandle('welcome.md', { create: true });
+                        const handle = await Store.state.opfsRoot.getFileHandle('welcome.md', { create: false });
                         const file = await handle.getFile();
-                        const content = await file.text();
-                        
-                        // If file is empty, populate it with default content
-                        if (!content || content.trim() === '') {
-                            const defaultWelcome = await this.getDefaultWelcome();
-                            const writable = await handle.createWritable();
-                            await writable.write(defaultWelcome);
-                            await writable.close();
-                            return defaultWelcome;
-                        }
-                        return content;
+                        return await file.text();
                     } catch (e) {
                         console.warn('Failed to load welcome from OPFS:', e);
-                        return await this.getDefaultWelcome();
+                        return "# Welcome to Aether\n\nA powerful, minimal code editor for the web.";
                     }
                 },
                 async getDefaultWelcome() {
@@ -1945,7 +1952,7 @@
                         console.warn('Could not fetch welcome.md:', e);
                     }
                     // Fallback content if file can't be fetched
-                    return "# 🌌 Welcome to Aether\n\n*A powerful, minimal code editor for the web*\n\nOpen welcome.md to see documentation and examples.";
+                    return "# Welcome to Aether\n\nA powerful, minimal code editor for the web.\n\nOpen welcome.md to see documentation and examples.";
                 },
                 async init() {
                     await DB.init();
