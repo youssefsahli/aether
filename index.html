@@ -1914,6 +1914,39 @@
             };
 
             const App = {
+                async loadWelcome() {
+                    // Try to load welcome.md from OPFS, create if missing
+                    try {
+                        if (!Store.state.opfsRoot) return null;
+                        const handle = await Store.state.opfsRoot.getFileHandle('welcome.md', { create: true });
+                        const file = await handle.getFile();
+                        const content = await file.text();
+                        
+                        // If file is empty, populate it with default content
+                        if (!content || content.trim() === '') {
+                            const defaultWelcome = await this.getDefaultWelcome();
+                            const writable = await handle.createWritable();
+                            await writable.write(defaultWelcome);
+                            await writable.close();
+                            return defaultWelcome;
+                        }
+                        return content;
+                    } catch (e) {
+                        console.warn('Failed to load welcome from OPFS:', e);
+                        return await this.getDefaultWelcome();
+                    }
+                },
+                async getDefaultWelcome() {
+                    // Fetch welcome.md from workspace or use fallback
+                    try {
+                        const response = await fetch('welcome.md');
+                        if (response.ok) return await response.text();
+                    } catch (e) {
+                        console.warn('Could not fetch welcome.md:', e);
+                    }
+                    // Fallback content if file can't be fetched
+                    return "# 🌌 Welcome to Aether\n\n*A powerful, minimal code editor for the web*\n\nOpen welcome.md to see documentation and examples.";
+                },
                 async init() {
                     await DB.init();
                     Editor.init();
@@ -1936,68 +1969,6 @@
                     // Run initialization script from OPFS if available
                     try { await Script.runInitScript(); } catch (e) { /* ignore */ }
 
-                    const welcomeText = "# AETHER v3 // TECHNICAL SPECIFICATION\n" +
-                        "> Kernel: Ace Flux 1.32.7\n" +
-                        "> Storage Engine: IndexedDB + OPFS (Origin Private File System)\n\n" +
-                        "Aether v3 is a browser-based IDE leveraging low-level Web APIs for a local-first development experience. It utilizes an asynchronous non-blocking architecture for file I/O and buffer management.\n\n" +
-                        "--- \n\n" +
-                        "### SYSTEM ARCHITECTURE & DATA FLOW\n\n" +
-                        "The editor handles state persistence through a dual-layer strategy. Buffers are mirrored in IndexedDB to survive page lifecycle events, while the file tree interfaces directly with the host filesystem via the File System Access API.\n\n" +
-                        "```text\n" +
-                        "    [ UI LAYER ] <--- Event Bus ---> [ COMMAND PALETTE ]\n" +
-                        "          |                                |\n" +
-                        "    [ ACE ENGINE ] <--- Buffer Sync ---> [ MEMORY CACHE ]\n" +
-                        "          |                                |\n" +
-                        "    [ VIRTUAL DOM ]                  [ SERIALIZATION ]\n" +
-                        "          |                         ________|________\n" +
-                        "          |                        |                 |\n" +
-                        "    [ WEB WORKERS ]        [ INDEXED DB ]      [ OPFS / DISK ]\n" +
-                        "     (Highlighting)         (Session State)     (Persistent I/O)\n" +
-                        "```\n\n" +
-                        "--- \n\n" +
-                        "### CORE FEATURES FOR POWER USERS\n\n" +
-                        "| Feature | Implementation Detail |\n" +
-                        "| :--- | :--- |\n" +
-                        "| Live Preview | Debounced (500ms) iframe injection with srcdoc manipulation |\n" +
-                        "| Multi-Cursor | Native Ace implementation; supports Alt+Click or Ctrl+Alt+Up/Down |\n" +
-                        "| Theme Engine | CSS Variable injection scoped to data-theme attributes |\n" +
-                        "| Persistence | Auto-syncing buffer state to IDB on 'change' events |\n" +
-                        "| OPFS | Uses StorageManager.getDirectory() for high-performance sandboxed I/O |\n\n" +
-                        "--- \n\n" +
-                        "### KEYMAP & MACROS\n\n" +
-                        "| Command | Action | Keybinding |\n" +
-                        "| :--- | :--- | :--- |\n" +
-                        "| palette | Trigger Command Palette | F1 / Ctrl+P |\n" +
-                        "| newFile | Initialize Memory Buffer | Alt+N |\n" +
-                        "| saveFile | Flush Buffer to Disk/OPFS | Ctrl+S |\n" +
-                        "| closeTab | Destroy Active Buffer | Alt+W |\n" +
-                        "| toggleWrap | Update Editor Wrap Mode | Internal Only |\n\n" +
-                        "--- \n\n" +
-                        "### COMPONENT LAYOUT\n\n" +
-                        "```text\n" +
-                        " ___________________________________________________________________\n" +
-                        "| [=] AETHER v3 [v]     [L][F][M][D]  [New][Save][View][Cmd]        |\n" +
-                        "|___________________________________________________________________|\n" +
-                        "| WORKSPACE [O] |                                                   |\n" +
-                        "|---------------| main.js [dirty]  config.json [x]  index.html [x]  |\n" +
-                        "| /root         |___________________________________________________|\n" +
-                        "|  |_ src/      |                                         |         |\n" +
-                        "|  |_ tests/    |        CODE EDITING SURFACE             | LIVE    |\n" +
-                        "|               |                                         | PREVIEW |\n" +
-                        "| LOCAL STORAGE |        - Syntax Highlighting            |         |\n" +
-                        "|  |_ cache.log |        - Emmet Support                  | (MD/    |\n" +
-                        "|  |_ dev.env   |        - Code Folding                   |  HTML)  |\n" +
-                        "|               |                                         |         |\n" +
-                        "|_______________|_________________________________________|_________|\n" +
-                        "| ACE | utf-8             Line 1, Col 1 | Indent: 4 | Lang: JS      |\n" +
-                        "|___________________________________________________________________|\n" +
-                        "```\n\n" +
-                        "--- \n\n" +
-                        "### ADVANCED CONFIGURATION\n\n" +
-                        "You can modify the internal state by opening 'config.json' through the Command Palette. This grants direct access to the `Config.state` object, allowing you to override font scaling, sidebar constants, and Catppuccin flavor variants. \n\n" +
-                        "Current Build: 3.1.0-stable\n" +
-                        "Render Engine: Tomorrow Night Eighties / Chrome High-Contrast";
-
                     const savedEntries = await DB.getAll('session');
                     const meta = (savedEntries || []).find(e => e && e.id === 'meta');
                     const savedBuffers = (savedEntries || []).filter(e => e && e.id && e.id !== 'meta');
@@ -2012,7 +1983,8 @@
                         const active = savedBuffers.find(b => b.active);
                         if (active) Store.setActive(active.id); else Store.setActive(savedBuffers[0].id);
                     } else {
-                        // Ensure dirty is false explicitly
+                        // Load welcome.md from OPFS or use default
+                        const welcomeText = await this.loadWelcome();
                         this.openBuffer('welcome.md', welcomeText, null, 'memory');
                         Store.state.buffers[0].dirty = false;
                         UI.renderTabs();
