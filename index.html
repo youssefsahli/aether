@@ -17,6 +17,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-javascript.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-pascal.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-html.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-css.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-markdown.min.js"></script>
@@ -57,6 +58,10 @@
                 --outline-w: 200px;
                 /* Width of symbol bar */
                 --tab-h: 32px;
+                /* Console log semantic colors (can be overridden per theme) */
+                --log-error: #ff8888;
+                --log-warn: #ffd700;
+                --log-info: #8fd3ff;
             }
 
             [data-theme="macchiato"] {
@@ -868,6 +873,52 @@
             .ace_gutter-active-line {
                 background: rgba(255, 255, 255, 0.03) !important;
             }
+
+            /* Outline styles */
+            .outline-search {
+                display: flex;
+                gap: 8px;
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--border);
+                background: var(--sidebar-bg);
+            }
+
+            .outline-search input {
+                flex: 1;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text);
+                padding: 6px 8px;
+                border-radius: 6px;
+                font-size: 12px;
+            }
+
+            .symbol-group {
+                border-top: 1px solid transparent;
+            }
+
+            .symbol-group .group-header {
+                display:flex; align-items:center; justify-content:space-between; padding:6px 12px; cursor: pointer; color:var(--text-dim); font-weight:700; font-size:12px;
+            }
+
+            .symbol-group.collapsed .group-items { display: none; }
+
+            .symbol-item { padding: 6px 12px; font-size:12px; color:var(--text-dim); display:flex; gap:8px; align-items:center; }
+
+            .symbol-item:hover { background: var(--highlight); color: var(--text); }
+
+            .symbol-kind { width:18px; text-align:center; opacity:0.8; font-size:11px; }
+
+            .symbol-line { margin-left:auto; opacity:0.6; font-size:11px; }
+
+            /* Console collapse styles */
+            #console-pane {
+                transition: height 0.18s ease, opacity 0.18s ease;
+            }
+
+            #console-pane.collapsed {
+                height: 34px !important;
+            }
         </style>
     </head>
 
@@ -986,9 +1037,12 @@
                                 sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
                             <div id="console-pane"
                                 style="height: 150px; border-top: 1px solid var(--border); background: var(--header-bg); display: flex; flex-direction: column;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border-bottom:1px solid var(--border);">
+                                <div class="console-header" style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border-bottom:1px solid var(--border);">
                                     <span style="font-size:11px; font-weight:700; color:var(--text-dim);">CONSOLE</span>
                                     <div style="display:flex; gap:6px;">
+                                        <button id="console-toggle-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Collapse Console" onclick="UI.toggleConsole()">
+                                            <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+                                        </button>
                                         <button id="console-run-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Run JS" onclick="App.runActiveJS()" hidden>
                                             <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21"></polygon></svg>
                                         </button>
@@ -998,7 +1052,7 @@
                                     </div>
                                 </div>
                                 <div id="console-logs"
-                                    style="flex:1; overflow-y: auto; padding: 8px; font-family: var(--font-code); font-size: 11px;">
+                                    style="flex:1; overflow-y: auto; padding: 8px; font-family: var(--font-code); font-size: 11px; color:var(--text);">
                                 </div>
                             </div>
                             <div id="float-resizer"></div>
@@ -1007,6 +1061,9 @@
 
                     <aside id="sidebar-right" class="collapsed">
                         <div class="side-header" style="margin-top:8px;"><span>Outline</span></div>
+                        <div class="outline-search">
+                            <input id="outline-filter" placeholder="Filter symbols..." aria-label="Outline filter">
+                        </div>
                         <div id="symbol-tree" class="file-tree"></div>
                     </aside>
                 </div>
@@ -1156,7 +1213,7 @@
             };
 
             const Store = {
-                state: { buffers: [], activeId: null, opfsRoot: null, previewMode: false },
+                state: { buffers: [], activeId: null, opfsRoot: null, previewMode: false, consoleCollapsed: false },
                 get activeBuffer() { return this.state.buffers.find(b => b.id === this.state.activeId); },
                 addBuffer(b) { this.state.buffers.push(b); this.setActive(b.id); App.saveSession(); },
                 closeBuffer(id) {
@@ -1202,6 +1259,11 @@
                         { r: /class\s+([a-zA-Z0-9_$]+)/g, icon: 'c', k: 'class' },
                         { r: /(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?(?:function|\(.*?\)\s*=>)/g, icon: 'v', k: 'var' }
                     ],
+                    pas: [
+                        { r: /(?:procedure|function)\s+([A-Za-z0-9_]+)/ig, icon: 'f', k: 'func' },
+                        { r: /type\s+([A-Za-z0-9_]+)/ig, icon: 't', k: 'type' },
+                        { r: /\bvar\s+([A-Za-z0-9_]+)/ig, icon: 'v', k: 'var' }
+                    ],
                     py: [
                         { r: /def\s+([a-zA-Z0-9_]+)/g, icon: 'f', k: 'func' },
                         { r: /class\s+([a-zA-Z0-9_]+)/g, icon: 'c', k: 'class' }
@@ -1215,34 +1277,137 @@
                 },
                 parse() {
                     const buf = Store.activeBuffer;
+                    const tree = document.getElementById('symbol-tree');
+                    if (!tree) return;
+                    tree.innerHTML = '';
                     if (!buf) return;
+
                     const ext = buf.name.split('.').pop().toLowerCase();
-                    let lang = 'js';
-                    if (['ts', 'jsx'].includes(ext)) lang = 'js';
+                    let lang = null;
+                    if (['js', 'ts', 'jsx'].includes(ext)) lang = 'js';
                     else if (ext === 'py') lang = 'py';
                     else if (ext === 'css') lang = 'css';
                     else if (ext === 'md') lang = 'md';
-                    else return;
+                    else if (ext === 'html' || ext === 'htm') lang = 'html';
+                    else if (ext === 'pas' || ext === 'pp') lang = 'pas';
+                    // If we don't know the lang but LSP provided symbols, continue; otherwise bail
+                    if (!lang && !(window.Editor && Editor._lspSymbols && Editor._lspSymbols.length)) return;
 
-                    const lines = buf.content.split('\n');
-                    const tree = document.getElementById('symbol-tree');
-                    tree.innerHTML = '';
                     const rules = this.patterns[lang] || [];
+                    const groups = {}; // k -> {title, items:[]}
 
-                    lines.forEach((line, i) => {
-                        rules.forEach(rule => {
-                            let match;
-                            // Reset regex if global
-                            rule.r.lastIndex = 0;
-                            while ((match = rule.r.exec(line)) !== null) {
-                                const name = lang === 'md' ? match[2] : match[1];
-                                const el = document.createElement('div');
-                                el.className = 'symbol-item';
-                                el.innerHTML = `<span class="symbol-kind">${lang === 'md' ? match[1].length : rule.icon}</span><span class="symbol-name">${name}</span>`;
-                                el.onclick = () => { Editor.instance.gotoLine(i + 1); Editor.instance.focus(); };
-                                tree.appendChild(el);
-                            }
+                    // Prefer LSP-provided symbols when available for any language
+                    if (window.Editor && Editor._lspSymbols && Editor._lspSymbols.length) {
+                        const seen = new Set();
+                        Editor._lspSymbols.forEach(s => {
+                            const kind = (s.kind || 'unknown');
+                            let key = 'other'; let icon = '·';
+                            if (/function|method|constructor|func/i.test(kind)) { key = 'func'; icon = 'f'; }
+                            else if (/class/i.test(kind)) { key = 'class'; icon = 'c'; }
+                            else if (/var|variable/i.test(kind)) { key = 'var'; icon = 'v'; }
+                            else if (/import/i.test(kind)) { key = 'import'; icon = 'i'; }
+                            else if (/heading/i.test(kind)) { key = 'head'; icon = 'H'; }
+                            else if (/^id$/i.test(kind)) { key = 'id'; icon = '#'; }
+                            else if (/^class$/i.test(kind)) { key = 'class'; icon = '.'; }
+                            else if (/tag/i.test(kind)) { key = 'tag'; icon = 't'; }
+                            if (!groups[key]) groups[key] = { title: key, items: [] };
+                            const id = `${s.name}@${s.line||1}`;
+                            if (!seen.has(id)) { groups[key].items.push({ name: s.name, line: s.line || 1, icon }); seen.add(id); }
                         });
+
+                        // Merge regex fallback for JS to catch var-assigned functions or other patterns LSP might miss
+                        if (lang === 'js') {
+                            const lines = buf.content.split('\n');
+                            lines.forEach((line, i) => {
+                                rules.forEach(rule => {
+                                    let match;
+                                    rule.r.lastIndex = 0;
+                                    while ((match = rule.r.exec(line)) !== null) {
+                                        const name = match[1] || (rule.k === 'md' ? match[2] : '');
+                                        const icon = rule.icon;
+                                        const key = rule.k || String(icon);
+                                        const id = `${name}@${i+1}`;
+                                        if (!name || seen.has(id)) continue;
+                                        if (!groups[key]) groups[key] = { title: key, items: [] };
+                                        groups[key].items.push({ name, line: i + 1, icon });
+                                        seen.add(id);
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        if (lang === 'html') {
+                            const txt = buf.content || '';
+                            // headings
+                            const reHeading = /<(h[1-6])\b[^>]*>([\s\S]*?)<\/\1>/ig;
+                            let m;
+                            while((m = reHeading.exec(txt)) !== null){
+                                const idx = m.index || 0;
+                                const line = txt.slice(0, idx).split('\n').length;
+                                const title = (m[2] || '').replace(/\s+/g,' ').trim();
+                                const key = 'head'; if (!groups[key]) groups[key] = { title: key, items: [] };
+                                groups[key].items.push({ name: title || `<${m[1]}>`, line, icon: 'H' });
+                            }
+                            const reTag = /<([a-zA-Z0-9\-]+)([^>]*)>/g;
+                            while((m = reTag.exec(txt)) !== null){
+                                const tag = m[1]; const attrs = m[2] || ''; const idx = m.index || 0; const line = txt.slice(0, idx).split('\n').length;
+                                const idMatch = /id\s*=\s*["']([^"']+)["']/i.exec(attrs);
+                                if (idMatch){ const key='id'; if (!groups[key]) groups[key] = { title: key, items: [] }; groups[key].items.push({ name: `${tag}#${idMatch[1]}`, line, icon: '#' }); }
+                                const classMatch = /class\s*=\s*["']([^"']+)["']/i.exec(attrs);
+                                if (classMatch){ const classes = classMatch[1].split(/\s+/).filter(Boolean); for (const c of classes){ const key='class'; if (!groups[key]) groups[key] = { title: key, items: [] }; groups[key].items.push({ name: `${tag}.${c}`, line, icon: '.' }); } }
+                                const srcMatch = /src\s*=\s*["']([^"']+)["']/i.exec(attrs);
+                                if (srcMatch){ const key='import'; if (!groups[key]) groups[key] = { title: key, items: [] }; groups[key].items.push({ name: `${tag} src=${srcMatch[1]}`, line, icon: 'i' }); }
+                            }
+                        } else {
+                            const lines = buf.content.split('\n');
+                            lines.forEach((line, i) => {
+                                rules.forEach(rule => {
+                                    let match;
+                                    rule.r.lastIndex = 0;
+                                    while ((match = rule.r.exec(line)) !== null) {
+                                        const name = lang === 'md' ? match[2] : match[1];
+                                        const icon = lang === 'md' ? (match[1].length) : rule.icon;
+                                        const key = rule.k || String(icon);
+                                        if (!groups[key]) groups[key] = { title: key, items: [] };
+                                        groups[key].items.push({ name, line: i + 1, icon });
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    // Apply filter
+                    const filterEl = document.getElementById('outline-filter');
+                    const filter = filterEl && filterEl.value ? filterEl.value.trim().toLowerCase() : '';
+
+                    Object.keys(groups).forEach((k) => {
+                        const grp = groups[k];
+                        const gEl = document.createElement('div'); gEl.className = 'symbol-group';
+
+                        const header = document.createElement('div'); header.className = 'group-header';
+                        header.innerHTML = `<span>${grp.title.toUpperCase()} (${grp.items.length})</span><span style="opacity:0.7">▾</span>`;
+                        header.onclick = () => {
+                            gEl.classList.toggle('collapsed');
+                            const collapsed = gEl.classList.contains('collapsed');
+                            Store.state.outlineCollapsed = Store.state.outlineCollapsed || {};
+                            Store.state.outlineCollapsed[k] = collapsed;
+                            App.debounceSaveSession();
+                        };
+                        gEl.appendChild(header);
+
+                        const itemsWrap = document.createElement('div'); itemsWrap.className = 'group-items';
+                        grp.items.forEach(it => {
+                            if (filter && !it.name.toLowerCase().includes(filter)) return;
+                            const itEl = document.createElement('div'); itEl.className = 'symbol-item';
+                            itEl.innerHTML = `<span class="symbol-kind">${it.icon}</span><span class="symbol-name">${it.name}</span><span class="symbol-line">${it.line}</span>`;
+                            itEl.onclick = () => { try { Editor.instance.gotoLine(it.line); Editor.instance.focus(); } catch (e) {} };
+                            itemsWrap.appendChild(itEl);
+                        });
+
+                        gEl.appendChild(itemsWrap);
+                        // Apply collapsed state if present
+                        if (Store.state.outlineCollapsed && Store.state.outlineCollapsed[k]) gEl.classList.add('collapsed');
+                        tree.appendChild(gEl);
                     });
                 }
             };
@@ -1268,6 +1433,8 @@
                     this.instance.commands.addCommand({ name: 'save', bindKey: { win: 'Ctrl-S', mac: 'Command-S' }, exec: () => Commands.trigger('saveFile') });
                     this.instance.commands.addCommand({ name: 'palette', bindKey: { win: 'F1|Ctrl-P', mac: 'F1|Command-P' }, exec: () => Commands.showPalette() });
                     this.instance.commands.addCommand({ name: 'new', bindKey: { win: 'Alt-N', mac: 'Option-N' }, exec: () => Commands.trigger('newFile') });
+                    // Signature help command integrated with Ace so editor handles the shortcut
+                    this.instance.commands.addCommand({ name: 'signatureHelp', bindKey: { win: 'Ctrl-I', mac: 'Command-I' }, exec: () => { try { this.showSignatureHelp(); } catch (e){} } });
 
                     // Initialize lightweight LSP worker and completer
                     try {
@@ -1276,8 +1443,9 @@
                             const d = e.data;
                             if (!d) return;
                             if (d.type === 'analyze') {
-                                // currently we don't surface diagnostics, but could later
+                                // store symbols with locations and update outline
                                 this._lspSymbols = d.symbols || [];
+                                try { Symbols.parse(); } catch (e) {}
                             }
                             if (d.type === 'hover') {
                                 if (!this._hoverTip) return;
@@ -1344,6 +1512,7 @@
                             tip.style.borderRadius = '6px';
                             tip.style.fontSize = '12px';
                             tip.style.zIndex = 9999;
+                            tip.style.pointerEvents = 'none';
                             tip.style.fontFamily = 'JetBrains Mono, monospace';
                             document.body.appendChild(tip);
                             this._hoverTip = tip;
@@ -1383,22 +1552,38 @@
                 load(content, filename) {
                     if (this.instance.getValue() !== content) this.instance.setValue(content, -1);
                     const ext = filename ? filename.split('.').pop().toLowerCase() : 'txt';
-                    const modes = { js: 'javascript', ts: 'javascript', html: 'html', css: 'css', py: 'python', md: 'markdown', json: 'javascript' };
+                    const modes = { js: 'javascript', ts: 'javascript', html: 'html', css: 'css', py: 'python', md: 'markdown', json: 'javascript', pas: 'pascal', pp: 'pascal' };
                     this.instance.session.setMode(`ace/mode/${modes[ext] || 'text'}`);
                     this.instance.session.getUndoManager().reset();
                     App.updateStats(); App.debouncePreview(true);
+                    // trigger LSP analyze for immediate symbol extraction, then parse
+                    try { if (this.lspWorker) { clearTimeout(this._lspTimer); this._lspTimer = setTimeout(()=> this.lspWorker.postMessage({ type: 'analyze', content }), 150); } } catch(e){}
                     Symbols.parse();
                 },
                 showSignatureHelp() {
                     try {
                         const pos = this.instance.getCursorPosition();
-                        const token = this.instance.session.getTokenAt(pos.row, pos.column);
-                        if (!token || !/^[A-Za-z$_][A-Za-z0-9$_]*$/.test(token.value)) return UI.toast('No symbol at cursor');
-                        const word = token.value;
-                        // compute screen coordinates for tooltip placement
-                        let coords;
+                        // try to get a word range at the cursor (works even on whitespace near word)
+                        const range = this.instance.session.getWordRange(pos.row, pos.column);
+                        let word = null;
+                        if (range) word = this.instance.session.getTextRange(range).trim();
+                        if (!word) {
+                            // fallback to token at column-1
+                            const token = this.instance.session.getTokenAt(pos.row, Math.max(0, pos.column-1));
+                            if (token && /^[A-Za-z$_][A-Za-z0-9$_]*$/.test(token.value)) word = token.value;
+                        }
+                        if (!word) return UI.toast('No symbol at cursor');
+
+                        // compute screen coordinates for tooltip placement using renderer
+                        let coords = null;
                         try { coords = this.instance.renderer.textToScreenCoordinates(pos.row, pos.column); } catch (e) { coords = null; }
-                        if (coords) this._lastMouse = { x: coords.pageX || coords.left + window.pageXOffset, y: coords.pageY || coords.top + window.pageYOffset };
+                        if (coords) {
+                            // pageX/pageY exist in modern ace builds; fallback to client + scroll
+                            const x = ('pageX' in coords && coords.pageX) ? coords.pageX : (coords.left + window.pageXOffset);
+                            const y = ('pageY' in coords && coords.pageY) ? coords.pageY : (coords.top + window.pageYOffset);
+                            this._lastMouse = { x, y };
+                        }
+
                         if (this.lspWorker) this.lspWorker.postMessage({ type: 'hover', word, content: this.instance.getValue() });
                     } catch (e) { console.warn('signature help failed', e); }
                 },
@@ -1628,7 +1813,15 @@
                         "Current Build: 3.1.0-stable\n" +
                         "Render Engine: Tomorrow Night Eighties / Chrome High-Contrast";
 
-                    const savedBuffers = await DB.getAll('session');
+                    const savedEntries = await DB.getAll('session');
+                    const meta = (savedEntries || []).find(e => e && e.id === 'meta');
+                    const savedBuffers = (savedEntries || []).filter(e => e && e.id && e.id !== 'meta');
+
+                    if (typeof meta !== 'undefined' && meta) {
+                        if (typeof meta.consoleCollapsed !== 'undefined') Store.state.consoleCollapsed = !!meta.consoleCollapsed;
+                        if (typeof meta.outlineCollapsed !== 'undefined') Store.state.outlineCollapsed = meta.outlineCollapsed || {};
+                    }
+
                     if (savedBuffers.length) {
                         savedBuffers.forEach(b => Store.addBuffer(b));
                         const active = savedBuffers.find(b => b.active);
@@ -1661,6 +1854,27 @@
                     });
 
                     new ResizeObserver(() => Editor.instance.resize()).observe(document.querySelector('main'));
+
+                    // Outline filter input debounce
+                    try {
+                        const of = document.getElementById('outline-filter');
+                        if (of) {
+                            let ot = null;
+                            of.addEventListener('input', (e) => { clearTimeout(ot); ot = setTimeout(() => Symbols.parse(), 220); });
+                            of.addEventListener('keydown', (e) => { if (e.key === 'Escape') { of.value = ''; Symbols.parse(); } });
+                        }
+                    } catch (e) {}
+
+                    // Restore console collapsed state if present
+                    try {
+                        const pane = document.getElementById('console-pane');
+                        const btn = document.getElementById('console-toggle-btn');
+                        if (pane && Store.state.consoleCollapsed) pane.classList.add('collapsed');
+                        if (btn) {
+                            const collapsed = pane && pane.classList.contains('collapsed');
+                            btn.innerHTML = collapsed ? '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>' : '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" /></svg>';
+                        }
+                    } catch (e) {}
                 },
                 openBuffer(name, content, handle, kind) {
                     const existing = Store.state.buffers.find(b => b.name === name);
@@ -1762,6 +1976,10 @@
                             active: b.id === Store.state.activeId
                         });
                     }
+                    // persist UI meta (console collapsed state, etc.)
+                    try {
+                        await DB.set('session', null, { id: 'meta', consoleCollapsed: !!Store.state.consoleCollapsed, outlineCollapsed: Store.state.outlineCollapsed || {} });
+                    } catch (e) { /* ignore persistence errors */ }
                 },
                 async saveBuffer(b) {
                     if (!b || b.kind === 'config') return;
@@ -1813,6 +2031,20 @@
                     const buf = Store.activeBuffer;
                     const ext = buf && buf.name ? buf.name.split('.').pop().toLowerCase() : '';
                     runBtn.hidden = ext !== 'js';
+                }
+                ,
+                toggleConsole() {
+                    const pane = document.getElementById('console-pane');
+                    const btn = document.getElementById('console-toggle-btn');
+                    if (!pane || !btn) return;
+                    pane.classList.toggle('collapsed');
+                    const collapsed = pane.classList.contains('collapsed');
+                    Store.state.consoleCollapsed = collapsed;
+                    if (collapsed) {
+                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>';
+                    } else {
+                        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" /></svg>';
+                    }
                 }
             };
 
@@ -1991,9 +2223,9 @@
                 const logBox = document.getElementById('console-logs');
                 const entry = document.createElement('div');
 
-                const color = event.data.method === 'error' ? '#ff8888' :
-                    event.data.method === 'warn' ? '#ffd700' :
-                    event.data.method === 'info' ? '#8fd3ff' : 'var(--text)';
+                const color = event.data.method === 'error' ? 'var(--log-error)' :
+                    event.data.method === 'warn' ? 'var(--log-warn)' :
+                    event.data.method === 'info' ? 'var(--log-info)' : 'var(--text)';
 
                 entry.style.color = color;
                 entry.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
