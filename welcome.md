@@ -4,6 +4,12 @@ A powerful, minimal code editor for the web
 
 ---
 
+## What is Aether?
+
+Aether is a lightweight, browser-based code editor designed for quick scripting, learning, and experimentation. Write and execute code instantly with preview, access local storage via OPFS, and switch between multiple languages—all without leaving your browser. Whether you're a developer testing ideas or a student learning to code, Aether provides a frictionless environment for writing and running code.
+
+---
+
 ## Quick Navigation
 
 - `Ctrl+P` - Open Command Palette
@@ -13,6 +19,16 @@ A powerful, minimal code editor for the web
 - `Ctrl+/` - Toggle Comment
 - `Ctrl+F` - Find
 - `Ctrl+H` - Find & Replace
+
+---
+
+## Core Features
+
+- **Code Execution** - Write and run JavaScript, Python, HTML, CSS, Markdown, or Pascal instantly
+- **Live Preview** - See output in real-time with split view or floating preview pane
+- **OPFS Storage** - Persist files beyond your session using browser storage
+- **Multiple Themes** - Choose from 4 beautiful Catppuccin color schemes
+- **Auto-Save** - Your work is automatically saved to browser storage
 
 ---
 
@@ -46,26 +62,14 @@ Open Command Palette and search for "API Reference" to see all available functio
 
 ---
 
-## Pro Tips
-
-- Split View: Click and drag the divider between Editor and Preview to resize
-- Float Preview: Use Command Palette to toggle "Float Preview" mode
-- Persistence: All changes are auto-saved to browser storage
-- OPFS Storage: Use Aether API to persist files beyond session
-- Markdown Support: Write and preview Markdown files with proper formatting
-
----
-
 ## Themes
 
-Switch between four Catppuccin themes:
+Switch between four beautiful Catppuccin themes using the Command Palette:
 
-- Mocha (dark) - Default
-- Macchiato (dark gray)
-- Frappe (cool dark)
-- Latte (light)
-
-Use Command Palette to quickly change themes.
+- **Mocha** (dark) - Default, comfortable for extended use
+- **Macchiato** (dark gray) - Softer dark theme
+- **Frappe** (cool dark) - Deep, cool tones
+- **Latte** (light) - Bright, light theme for daytime coding
 
 ---
 
@@ -117,11 +121,46 @@ Access advanced settings via Command Palette:
 
 ---
 
-## Learn More
+## Resources & Documentation
 
-- Check SCRIPTING.md for advanced scripting
-- See SCRIPT_QUICK_REF.md for quick reference
-- Visit EXAMPLE_SCRIPTS.js for code samples
+- **[Technical Manual](manual.md)** - Comprehensive guide to all features and advanced usage
+- **[Scripting Guide](SCRIPTING.md)** - Deep dive into advanced scripting techniques
+- **[Quick Reference](SCRIPT_QUICK_REF.md)** - Handy reference for common tasks
+- **[Example Scripts](EXAMPLE_SCRIPTS.js)** - Copy and modify ready-to-use code examples
+
+---
+
+## Tips & Tricks
+
+### Workspace Management
+- Split View: Click and drag the divider between Editor and Preview to resize
+- Float Preview: Use Command Palette to toggle "Float Preview" mode
+- Multiple Files: Keep multiple files open and switch between them quickly
+
+### Data & Persistence
+- Persistence: All changes are auto-saved to browser storage
+- OPFS Storage: Use Aether API to persist files beyond your session
+- Export: Save your work locally at any time
+
+### Writing Code
+- Markdown Support: Write and preview Markdown files with proper formatting
+- Multi-language: Support for JavaScript, Python, HTML, CSS, Markdown, Pascal
+- Comments: Use `Ctrl+/` to toggle comments on selected lines
+
+---
+
+## Keyboard Shortcuts
+
+### Navigation & Files
+- `Ctrl+P` - Open Command Palette
+- `Ctrl+O` - Open File
+- `Ctrl+N` - New File
+
+### Editing
+- `Ctrl+S` - Save Buffer
+- `Ctrl+/` - Toggle Comment
+- `Ctrl+F` - Find
+- `Ctrl+H` - Find & Replace
 
 ---
 
