@@ -1183,12 +1183,42 @@
             const Config = {
                 defaults: { theme: 'mocha', fontSize: 13, sidebarWidth: 220, wordWrap: true, previewType: 'split' },
                 state: {},
-                init() {
-                    try { this.state = { ...this.defaults, ...JSON.parse(localStorage.getItem('aether_config') || '{}') }; }
+                async initFromOPFS() {
+                    // Try to load config defaults from OPFS if available
+                    try {
+                        if (!Store.state.opfsRoot) return null;
+                        const configHandle = await Store.state.opfsRoot.getFileHandle('.aether.json').catch(() => null);
+                        if (configHandle) {
+                            const file = await configHandle.getFile();
+                            const text = await file.text();
+                            return JSON.parse(text);
+                        }
+                    } catch (e) { /* ignore */ }
+                    return null;
+                },
+                async init() {
+                    try {
+                        // Load from OPFS first, then localStorage, then defaults
+                        const opfsConfig = await this.initFromOPFS();
+                        const localConfig = JSON.parse(localStorage.getItem('aether_config') || '{}');
+                        this.state = { ...this.defaults, ...opfsConfig, ...localConfig };
+                    }
                     catch (e) { this.state = { ...this.defaults }; }
                     this.apply();
                 },
                 save() { localStorage.setItem('aether_config', JSON.stringify(this.state)); this.apply(); },
+                async saveToOPFS() {
+                    // Save current config to OPFS as .aether.json
+                    try {
+                        if (!Store.state.opfsRoot) return false;
+                        const handle = await Store.state.opfsRoot.getFileHandle('.aether.json', { create: true });
+                        const writable = await handle.createWritable();
+                        await writable.write(JSON.stringify(this.state, null, 2));
+                        await writable.close();
+                        UI.toast('Config saved to OPFS');
+                        return true;
+                    } catch (e) { UI.toast('Failed to save config to OPFS'); return false; }
+                },
                 setTheme(name) { this.state.theme = name; this.save(); },
                 toggleWrap() { this.state.wordWrap = !this.state.wordWrap; this.save(); UI.toast(`Word Wrap: ${this.state.wordWrap ? 'ON' : 'OFF'}`); },
                 togglePreviewType() {
@@ -1209,6 +1239,154 @@
                         Editor.instance.setTheme(this.state.theme === 'latte' ? 'ace/theme/chrome' : 'ace/theme/tomorrow_night_eighties');
                         Editor.instance.resize();
                     }
+                }
+            };
+
+            const Script = {
+                // Global scripting API exposed to user scripts
+                context: {
+                    // File/Buffer operations
+                    openFile: (name, content) => {
+                        const handle = undefined;
+                        const kind = 'memory';
+                        const existing = Store.state.buffers.find(b => b.name === name);
+                        if (existing) return Store.setActive(existing.id);
+                        Store.addBuffer({ id: 'b' + Date.now(), name, content, handle, kind, dirty: false });
+                        return { name, id: Store.state.buffers[Store.state.buffers.length - 1].id };
+                    },
+                    newFile: (name = 'untitled.js', content = '') => Script.context.openFile(name, content),
+                    getBuffer: (id) => {
+                        if (!id && !Store.activeBuffer) return null;
+                        return id ? Store.state.buffers.find(b => b.id === id) : Store.activeBuffer;
+                    },
+                    closeBuffer: (id) => Store.closeBuffer(id || Store.state.activeId),
+                    setActiveBuffer: (id) => Store.setActive(id),
+                    getActiveBuffer: () => Store.activeBuffer,
+                    getAllBuffers: () => [...Store.state.buffers],
+                    
+                    // Editor operations
+                    getEditorContent: () => Editor.instance ? Editor.instance.getValue() : '',
+                    setEditorContent: (content) => { if (Editor.instance) Editor.instance.setValue(content, -1); },
+                    getEditorLanguage: () => {
+                        const buf = Store.activeBuffer;
+                        return buf ? buf.name.split('.').pop().toLowerCase() : 'text';
+                    },
+                    getCursorPosition: () => Editor.instance ? Editor.instance.getCursorPosition() : { row: 0, column: 0 },
+                    setCursorPosition: (row, column) => {
+                        if (Editor.instance) Editor.instance.getSession().setScrollTop(0);
+                        if (Editor.instance) Editor.instance.moveCursorToPosition({ row, column });
+                    },
+                    getSelectedText: () => Editor.instance ? Editor.instance.getSelectedText() : '',
+                    insertText: (text) => { if (Editor.instance) Editor.instance.insert(text); },
+                    
+                    // Configuration
+                    getConfig: () => ({ ...Config.state }),
+                    setConfig: (key, value) => {
+                        if (key && value !== undefined) {
+                            Config.state[key] = value;
+                            Config.save();
+                            return true;
+                        }
+                        return false;
+                    },
+                    updateTheme: (name) => Config.setTheme(name),
+                    updateZoom: (delta) => Config.zoom(delta),
+                    
+                    // UI operations
+                    toast: (msg, duration = 2000) => UI.toast(msg),
+                    log: (msg) => console.log(msg),
+                    warn: (msg) => console.warn(msg),
+                    error: (msg) => console.error(msg),
+                    
+                    // OPFS operations
+                    saveOPFSFile: async (filename, content) => {
+                        try {
+                            if (!Store.state.opfsRoot) throw new Error('OPFS not available');
+                            const handle = await Store.state.opfsRoot.getFileHandle(filename, { create: true });
+                            const writable = await handle.createWritable();
+                            await writable.write(content);
+                            await writable.close();
+                            Script.context.toast(`Saved: ${filename}`);
+                            return true;
+                        } catch (e) {
+                            Script.context.error(`OPFS save failed: ${e.message}`);
+                            return false;
+                        }
+                    },
+                    readOPFSFile: async (filename) => {
+                        try {
+                            if (!Store.state.opfsRoot) throw new Error('OPFS not available');
+                            const handle = await Store.state.opfsRoot.getFileHandle(filename);
+                            const file = await handle.getFile();
+                            return await file.text();
+                        } catch (e) {
+                            Script.context.error(`OPFS read failed: ${e.message}`);
+                            return null;
+                        }
+                    },
+                    listOPFSFiles: async () => {
+                        try {
+                            if (!Store.state.opfsRoot) return [];
+                            const files = [];
+                            for await (const [name, handle] of Store.state.opfsRoot.entries()) {
+                                if (handle.kind === 'file') files.push(name);
+                            }
+                            return files;
+                        } catch (e) { return []; }
+                    },
+                    deleteOPFSFile: async (filename) => {
+                        try {
+                            if (!Store.state.opfsRoot) throw new Error('OPFS not available');
+                            await Store.state.opfsRoot.removeEntry(filename);
+                            Script.context.toast(`Deleted: ${filename}`);
+                            return true;
+                        } catch (e) {
+                            Script.context.error(`OPFS delete failed: ${e.message}`);
+                            return false;
+                        }
+                    }
+                },
+                
+                async loadScript(filename) {
+                    try {
+                        if (!Store.state.opfsRoot) return false;
+                        const handle = await Store.state.opfsRoot.getFileHandle(filename).catch(() => null);
+                        if (!handle) return false;
+                        const file = await handle.getFile();
+                        const code = await file.text();
+                        return { code, handle };
+                    } catch (e) { return false; }
+                },
+                
+                async executeScript(code, context = this.context) {
+                    try {
+                        // Use AsyncFunction constructor - true async function with top-level await
+                        const AsyncFunc = (async function(){}).constructor;
+                        const fn = new AsyncFunc('Aether', code);
+                        // Execute with context as both 'this' and as Aether parameter
+                        await fn.apply(context, [context]);
+                        return true;
+                    } catch (e) {
+                        console.error('Script full error:', e);
+                        const msg = (e && e.message) ? String(e.message).slice(0, 200) : String(e).slice(0, 200);
+                        try { 
+                            UI.toast(`Script error: ${msg}`); 
+                        } catch (err) { 
+                            console.error('Toast error:', err);
+                        }
+                        return false;
+                    }
+                },
+                
+                async runInitScript() {
+                    // Try to load and execute .aether.js from OPFS if available
+                    try {
+                        const script = await this.loadScript('.aether.js');
+                        if (script && script.code) {
+                            await this.executeScript(script.code);
+                            UI.toast('Init script executed');
+                        }
+                    } catch (e) { /* silently ignore if no init script */ }
                 }
             };
 
@@ -1738,7 +1916,11 @@
             const App = {
                 async init() {
                     await DB.init();
-                    Editor.init(); Config.init(); FileSys.initOPFS(); Resizer.init(); Dragger.init();
+                    Editor.init();
+                    await Config.init();
+                    await FileSys.initOPFS();
+                    Resizer.init();
+                    Dragger.init();
 
                     const rootHandle = await DB.get('handles', 'rootDir');
                     if (rootHandle) FileSys.restoreRoot(rootHandle);
@@ -1750,6 +1932,9 @@
                             tabScroll.scrollLeft += e.deltaY;
                         }
                     }, { passive: false });
+                    
+                    // Run initialization script from OPFS if available
+                    try { await Script.runInitScript(); } catch (e) { /* ignore */ }
 
                     const welcomeText = "# AETHER v3 // TECHNICAL SPECIFICATION\n" +
                         "> Kernel: Ace Flux 1.32.7\n" +
@@ -1945,12 +2130,31 @@
                     const styles = getComputedStyle(document.body);
                     const baseCss = `body{background:${styles.getPropertyValue('--bg')};color:${styles.getPropertyValue('--text')};font-family:sans-serif;padding:20px;line-height:1.6;}a{color:${styles.getPropertyValue('--accent')}}pre{background:rgba(0,0,0,0.2);padding:10px;border-radius:4px;overflow:auto}code{font-family:'JetBrains Mono',monospace;font-size:0.9em}`;
 
-                    const safeCode = buf.content.replace(/<\/script>/g, '<\\/script>');
+                    // Wrap code in async IIFE to support top-level await
+                    // Also inject Aether API via postMessage bridge
+                    const wrappedCode = `(async () => {
+                        // Bridge to parent's Aether API
+                        const Aether = {
+                            log: (msg) => parent.postMessage({type:'aether-call',method:'log',msg},'*'),
+                            warn: (msg) => parent.postMessage({type:'aether-call',method:'warn',msg},'*'),
+                            error: (msg) => parent.postMessage({type:'aether-call',method:'error',msg},'*'),
+                            toast: (msg, duration) => parent.postMessage({type:'aether-call',method:'toast',msg,duration},'*'),
+                            openFile: (name, content) => parent.postMessage({type:'aether-call',method:'openFile',name,content},'*'),
+                            newFile: (name, content) => parent.postMessage({type:'aether-call',method:'newFile',name,content},'*'),
+                            getConfig: () => 'Use Script API instead',
+                            setConfig: (k,v) => parent.postMessage({type:'aether-call',method:'setConfig',k,v},'*'),
+                            updateTheme: (name) => parent.postMessage({type:'aether-call',method:'updateTheme',name},'*'),
+                            updateZoom: (delta) => parent.postMessage({type:'aether-call',method:'updateZoom',delta},'*'),
+                        };
+${buf.content}
+                    })();`;
+
+                    const safeCode = wrappedCode.replace(/<\/script>/g, '<\\/script>');
 
                     const htmlContent = `<style>${baseCss}</style><script>${safeCode}<\/script>`;
                     const f = document.getElementById('preview-frame');
 
-                    // Ensure the persistent shell is loaded (same shell as debouncePreview)
+                    // Shell with postMessage handler to relay Aether calls
                     const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.head.appendChild(ns); s.parentNode.removeChild(s); }); }});})();<\/script></html>`;
 
                     if (!f.dataset.shellReady) {
@@ -2075,6 +2279,100 @@
                                 Editor.instance.moveCursorToPosition(cursor);
                                 UI.toast("Formatted!");
                             } catch (e) { UI.toast("Format Error"); }
+                        }
+                    },
+                    {
+                        id: 'runScript',
+                        name: 'Run Active Script',
+                        hint: 'Scripting',
+                        fn: async () => {
+                            const buf = Store.activeBuffer;
+                            if (!buf) return UI.toast('No active buffer');
+                            const ext = buf.name.split('.').pop().toLowerCase();
+                            if (ext !== 'js') return UI.toast('Script must be a .js file');
+                            await Script.executeScript(buf.content);
+                        }
+                    },
+                    {
+                        id: 'executeOPFSScript',
+                        name: 'Execute OPFS Script',
+                        hint: 'Scripting',
+                        fn: () => {
+                            if (!Store.state.opfsRoot) return UI.toast('OPFS not available');
+                            Prompt.open("Script filename:", ".aether.js", async (filename) => {
+                                if (!filename) return;
+                                const script = await Script.loadScript(filename);
+                                if (!script) return UI.toast('Script not found');
+                                await Script.executeScript(script.code);
+                            });
+                        }
+                    },
+                    {
+                        id: 'saveConfigToOPFS',
+                        name: 'Save Config to OPFS',
+                        hint: 'Settings',
+                        fn: () => Config.saveToOPFS()
+                    },
+                    {
+                        id: 'showScriptAPI',
+                        name: 'Show Script API',
+                        hint: 'Documentation',
+                        fn: () => {
+                            const apiDoc = `# Aether Script API Reference
+
+## File/Buffer Operations
+- \`Aether.openFile(name, content)\` - Open or create a file buffer
+- \`Aether.newFile(name, content)\` - Alias for openFile
+- \`Aether.getBuffer(id)\` - Get a buffer by ID
+- \`Aether.closeBuffer(id)\` - Close a buffer
+- \`Aether.setActiveBuffer(id)\` - Set active buffer
+- \`Aether.getActiveBuffer()\` - Get the active buffer
+- \`Aether.getAllBuffers()\` - Get all buffers
+
+## Editor Operations
+- \`Aether.getEditorContent()\` - Get current editor content
+- \`Aether.setEditorContent(content)\` - Set editor content
+- \`Aether.getEditorLanguage()\` - Get file extension/language
+- \`Aether.getCursorPosition()\` - Get cursor {row, column}
+- \`Aether.setCursorPosition(row, column)\` - Set cursor position
+- \`Aether.getSelectedText()\` - Get selected text
+- \`Aether.insertText(text)\` - Insert text at cursor
+
+## Configuration
+- \`Aether.getConfig()\` - Get current config state
+- \`Aether.setConfig(key, value)\` - Set config value
+- \`Aether.updateTheme(name)\` - Change theme
+- \`Aether.updateZoom(delta)\` - Adjust zoom level
+
+## UI Operations
+- \`Aether.toast(msg, duration)\` - Show notification
+- \`Aether.log(msg)\` - Log to console
+- \`Aether.warn(msg)\` - Warn to console
+- \`Aether.error(msg)\` - Error to console
+
+## OPFS Operations (Async)
+- \`await Aether.saveOPFSFile(filename, content)\` - Save to OPFS
+- \`await Aether.readOPFSFile(filename)\` - Read from OPFS
+- \`await Aether.listOPFSFiles()\` - List OPFS files
+- \`await Aether.deleteOPFSFile(filename)\` - Delete from OPFS
+
+## Example Script
+\`\`\`javascript
+// Use 'await' for async operations
+const files = await Aether.listOPFSFiles();
+for (const file of files) {
+  Aether.log('Found: ' + file);
+}
+
+Aether.openFile('generated.js', 'console.log("Hello!");');
+Aether.toast('Script completed!');
+\`\`\`
+
+## Init Script
+Place a \`.aether.js\` file in your OPFS to auto-run on startup!
+`;
+                            App.openBuffer('_script_api_docs.md', apiDoc, null, 'memory');
+                            UI.toast('API reference opened');
                         }
                     }
                 ],
@@ -2216,9 +2514,29 @@
 
             window.onload = () => App.init();
             window.addEventListener('message', (event) => {
-                if (!event.data || event.data.type !== 'console') return;
+                if (!event.data) return;
                 const previewFrame = document.getElementById('preview-frame');
                 if (!previewFrame || event.source !== previewFrame.contentWindow) return;
+
+                // Handle Aether API calls from preview frame
+                if (event.data.type === 'aether-call') {
+                    const method = event.data.method;
+                    try {
+                        if (method === 'log') console.log(event.data.msg);
+                        else if (method === 'warn') console.warn(event.data.msg);
+                        else if (method === 'error') console.error(event.data.msg);
+                        else if (method === 'toast') UI.toast(event.data.msg, event.data.duration);
+                        else if (method === 'openFile') Script.context.openFile(event.data.name, event.data.content);
+                        else if (method === 'newFile') Script.context.newFile(event.data.name, event.data.content);
+                        else if (method === 'setConfig') Script.context.setConfig(event.data.k, event.data.v);
+                        else if (method === 'updateTheme') Script.context.updateTheme(event.data.name);
+                        else if (method === 'updateZoom') Script.context.updateZoom(event.data.delta);
+                    } catch (e) { console.error('Aether API error:', e); }
+                    return;
+                }
+
+                // Handle console logs (existing logic)
+                if (event.data.type !== 'console') return;
 
                 const logBox = document.getElementById('console-logs');
                 const entry = document.createElement('div');
