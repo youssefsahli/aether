@@ -1,21 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <style>
+      .ae-text { font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace; font-weight: 700; font-size: 120px; }
+    </style>
+  </defs>
+  
   <!-- Background -->
   <rect width="192" height="192" fill="#1e1e2e"/>
   
-  <!-- Code editor frame -->
-  <rect x="24" y="24" width="144" height="144" rx="8" fill="#11111b" stroke="#89b4fa" stroke-width="2"/>
+  <!-- Accent circle -->
+  <circle cx="96" cy="96" r="85" fill="none" stroke="#89b4fa" stroke-width="2" opacity="0.3"/>
   
-  <!-- Header bar -->
-  <rect x="24" y="24" width="144" height="32" rx="8" fill="#89b4fa"/>
-  
-  <!-- Code lines (curves representing code) -->
-  <line x1="40" y1="72" x2="100" y2="72" stroke="#8aadf4" stroke-width="3" stroke-linecap="round"/>
-  <line x1="40" y1="92" x2="150" y2="92" stroke="#8aadf4" stroke-width="3" stroke-linecap="round"/>
-  <line x1="40" y1="112" x2="140" y2="112" stroke="#8aadf4" stroke-width="3" stroke-linecap="round"/>
-  <line x1="40" y1="132" x2="120" y2="132" stroke="#8aadf4" stroke-width="3" stroke-linecap="round"/>
-  
-  <!-- Accent dots -->
-  <circle cx="156" cy="40" r="4" fill="#cdd6f4"/>
-  <circle cx="170" cy="40" r="4" fill="#cdd6f4"/>
-  <circle cx="184" cy="40" r="4" fill="#cdd6f4"/>
+  <!-- Ae ligature text -->
+  <text class="ae-text" x="96" y="140" text-anchor="middle" fill="#89b4fa">Æ</text>
 </svg>
