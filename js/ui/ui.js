@@ -47,7 +47,7 @@ const UI = {
                 }
             });
         }
-    }
+    },
     toast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('visible'); clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => t.classList.remove('visible'), 2500); },
     clearConsole() { const logBox = document.getElementById('console-logs'); if (logBox) { logBox.innerHTML = ''; this.toast('Console cleared'); } },
     updateConsoleHeader() {
