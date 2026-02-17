@@ -105,7 +105,7 @@ const App = {
             }
         });
 
-        // Global shortcuts
+        // Global shortcuts - use single listener with explicit keyboard handling
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
                 e.preventDefault();
@@ -130,8 +130,16 @@ const App = {
             const of = document.getElementById('outline-filter');
             if (of) {
                 let ot = null;
-                of.addEventListener('input', (e) => { clearTimeout(ot); ot = setTimeout(() => Symbols.parse(), 220); });
-                of.addEventListener('keydown', (e) => { if (e.key === 'Escape') { of.value = ''; Symbols.parse(); } });
+                of.addEventListener('input', (e) => { 
+                    clearTimeout(ot); 
+                    ot = setTimeout(() => Symbols.parse(), 220); 
+                });
+                of.addEventListener('keydown', (e) => { 
+                    if (e.key === 'Escape') { 
+                        of.value = ''; 
+                        Symbols.parse(); 
+                    } 
+                });
             }
         } catch (e) {}
 

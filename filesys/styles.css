@@ -299,6 +299,7 @@ aside {
     margin: 0 8px;
     border-radius: 6px;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    contain: layout style paint;
 }
 
 .tree-item-content {
@@ -404,6 +405,7 @@ aside {
     text-overflow: ellipsis;
     border-left: 2px solid transparent;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    contain: layout style paint;
 }
 
 .symbol-item:hover {
@@ -530,6 +532,7 @@ main {
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: var(--font-ui);
     border-top: 2px solid transparent;
+    contain: layout style paint;
 }
 
 .tab::after {

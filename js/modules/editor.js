@@ -5,6 +5,7 @@
 
 const Editor = {
     instance: null,
+    _timers: {}, // Centralized timer management
     init() {
         this.instance = ace.edit("code-stage");
         this.instance.setOptions({
@@ -16,10 +17,21 @@ const Editor = {
             if (Store.state.activeId) Store.updateContent(Store.state.activeId, this.instance.getValue());
             App.debouncePreview();
             this.debounceSymbols();
-            // send content to worker for analysis
-            try { if (this.lspWorker) { clearTimeout(this._lspTimer); this._lspTimer = setTimeout(()=> this.lspWorker.postMessage({ type: 'analyze', content: this.instance.getValue() }), 600); } } catch(e){}
+            // send content to worker for analysis with centralized timer
+            try { 
+                if (this.lspWorker) { 
+                    clearTimeout(this._timers.lsp); 
+                    this._timers.lsp = setTimeout(() => {
+                        this.lspWorker.postMessage({ type: 'analyze', content: this.instance.getValue() });
+                    }, 600); 
+                } 
+            } catch(e){}
         });
-        this.instance.on('changeSelection', () => App.updateStats());
+        this.instance.on('changeSelection', () => {
+            // Debounce stats updates to reduce DOM thrashing
+            clearTimeout(this._timers.stats);
+            this._timers.stats = setTimeout(() => App.updateStats(), 100);
+        });
         // Shortcuts
         this.instance.commands.addCommand({ name: 'save', bindKey: { win: 'Ctrl-S', mac: 'Command-S' }, exec: () => Commands.trigger('saveFile') });
         this.instance.commands.addCommand({ name: 'palette', bindKey: { win: 'F1|Ctrl-P', mac: 'F1|Command-P' }, exec: () => Commands.showPalette() });
@@ -112,8 +124,8 @@ const Editor = {
                 let hoverTimer = null;
                 // Mouse move over editor, debounce and request hover info
                 this.instance.container.addEventListener('mousemove', (e) => {
-                    clearTimeout(hoverTimer);
-                    hoverTimer = setTimeout(() => {
+                    clearTimeout(this._timers.hover);
+                    this._timers.hover = setTimeout(() => {
                         try {
                             const pos = this.instance.renderer.screenToTextCoordinates(e.clientX, e.clientY);
                             const token = this.instance.session.getTokenAt(pos.row, pos.column);
@@ -147,8 +159,15 @@ const Editor = {
         this.instance.session.setMode(`ace/mode/${modes[ext] || 'text'}`);
         this.instance.session.getUndoManager().reset();
         App.updateStats(); App.debouncePreview(true);
-        // trigger LSP analyze for immediate symbol extraction, then parse
-        try { if (this.lspWorker) { clearTimeout(this._lspTimer); this._lspTimer = setTimeout(()=> this.lspWorker.postMessage({ type: 'analyze', content }), 150); } } catch(e){}
+        // trigger LSP analyze for immediate symbol extraction with centralized timer
+        try { 
+            if (this.lspWorker) { 
+                clearTimeout(this._timers.lsp); 
+                this._timers.lsp = setTimeout(() => {
+                    this.lspWorker.postMessage({ type: 'analyze', content });
+                }, 150); 
+            } 
+        } catch(e){}
         Symbols.parse();
     },
     showSignatureHelp() {
@@ -179,7 +198,7 @@ const Editor = {
         } catch (e) { console.warn('signature help failed', e); }
     },
     debounceSymbols() {
-        clearTimeout(this.symTimer);
-        this.symTimer = setTimeout(() => Symbols.parse(), 1000);
+        clearTimeout(this._timers.symbols);
+        this._timers.symbols = setTimeout(() => Symbols.parse(), 1000);
     }
 };

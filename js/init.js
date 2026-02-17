@@ -65,12 +65,21 @@ window.addEventListener('message', (event) => {
         return;
     }
 
-    // Handle console logs (existing logic)
+    // Handle console logs (optimized with batching)
     if (event.data.type !== 'console') return;
 
     const logBox = document.getElementById('console-logs');
+    const MAX_LOGS = 200;
+    
+    // Batch cleanup if needed before adding entry
+    if (logBox.children.length >= MAX_LOGS) {
+        const toRemove = logBox.children.length - MAX_LOGS + 1;
+        for (let i = 0; i < toRemove; i++) {
+            logBox.removeChild(logBox.firstChild);
+        }
+    }
+    
     const entry = document.createElement('div');
-
     const color = event.data.method === 'error' ? 'var(--log-error)' :
         event.data.method === 'warn' ? 'var(--log-warn)' :
         event.data.method === 'info' ? 'var(--log-info)' : 'var(--text)';
@@ -88,9 +97,9 @@ window.addEventListener('message', (event) => {
     }).join(' ');
 
     entry.innerText = `> ${text}`;
-
     logBox.appendChild(entry);
-    const MAX_LOGS = 200;
-    while (logBox.children.length > MAX_LOGS) logBox.removeChild(logBox.firstChild);
-    logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
+    // Only scroll if not already at bottom (avoid layout thrashing)
+    if (logBox.scrollHeight - logBox.scrollTop <= logBox.clientHeight + 50) {
+        requestAnimationFrame(() => { logBox.scrollTop = logBox.scrollHeight; });
+    }
 });

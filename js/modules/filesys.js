@@ -5,12 +5,62 @@
 
 const FileSys = {
     rootDir: null,
+    _opfsHandles: {}, // Cache handles for event delegation
     async initOPFS() {
         try {
             if (!navigator.storage?.getDirectory) throw 1;
             Store.state.opfsRoot = await navigator.storage.getDirectory();
             this.renderOPFS();
+            // Use event delegation for OPFS tree
+            document.getElementById('opfs-tree').addEventListener('click', (e) => this._handleOPFSTreeClick(e));
         } catch (e) { document.getElementById('opfs-header').innerText = "LocalStorage Only"; }
+    },
+    async _handleOPFSTreeClick(e) {
+        if (e.target.classList.contains('tree-item-toggle')) {
+            e.stopPropagation();
+            const item = e.target.closest('.tree-item');
+            const isCollapsed = item.classList.toggle('collapsed');
+            const dirLevel = parseInt(item.getAttribute('data-tree-level') || 0);
+            const childLevel = dirLevel + 1;
+            let next = item.nextElementSibling;
+            while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
+                if (isCollapsed) {
+                    next.classList.add('hidden-by-parent');
+                } else if (parseInt(next.getAttribute('data-tree-level') || 0) === childLevel) {
+                    next.classList.remove('hidden-by-parent');
+                }
+                next = next.nextElementSibling;
+            }
+            return;
+        }
+        if (e.target.classList.contains('action-delete')) {
+            e.stopPropagation();
+            const item = e.target.closest('.tree-item');
+            const name = item.getAttribute('data-tree-name');
+            const type = item.getAttribute('data-tree-type');
+            if (type === 'directory') {
+                await this.deleteOPFSDir(name);
+            } else {
+                await this.deleteOPFSFile(name);
+            }
+            return;
+        }
+        if (e.target.classList.contains('action-btn') && !e.target.classList.contains('action-delete')) {
+            e.stopPropagation();
+            const item = e.target.closest('.tree-item');
+            const name = item.getAttribute('data-tree-name');
+            await this.renameOPFSFile(name, this._opfsHandles[name]);
+            return;
+        }
+        if (e.target.classList.contains('tree-item-content') && e.target.closest('.tree-item').classList.contains('is-file')) {
+            e.stopPropagation();
+            const item = e.target.closest('.tree-item');
+            const name = item.getAttribute('data-tree-name');
+            const handle = this._opfsHandles[name];
+            if (handle) {
+                App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+            }
+        }
     },
     async renderOPFS(dirHandle = null, parentEl = null, level = 0) {
         if (!Store.state.opfsRoot) return;
@@ -18,6 +68,7 @@ const FileSys = {
             parentEl = document.getElementById('opfs-tree');
             parentEl.innerHTML = '';
             dirHandle = Store.state.opfsRoot;
+            this._opfsHandles = {}; // Clear cache
         }
         
         for await (const [name, handle] of dirHandle.entries()) {
@@ -32,27 +83,10 @@ const FileSys = {
                 el.classList.add('is-directory');
                 el.setAttribute('data-tree-type', 'directory');
                 
-                // Add toggle
+                // Add toggle (use event delegation, not onclick)
                 const toggle = document.createElement('span');
                 toggle.className = 'tree-item-toggle';
                 toggle.innerHTML = Icons.chevronDown;
-                toggle.onclick = (e) => {
-                    e.stopPropagation();
-                    const isCollapsed = el.classList.toggle('collapsed');
-                    // Toggle visibility of children (only direct children when expanding)
-                    const dirLevel = level;
-                    const childLevel = level + 1;
-                    let next = el.nextElementSibling;
-                    while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
-                        if (isCollapsed) {
-                            next.classList.add('hidden-by-parent');
-                        } else if (parseInt(next.getAttribute('data-tree-level') || 0) === childLevel) {
-                            // Only show direct children when expanding
-                            next.classList.remove('hidden-by-parent');
-                        }
-                        next = next.nextElementSibling;
-                    }
-                };
                 el.appendChild(toggle);
                 
                 // Content
@@ -67,14 +101,13 @@ const FileSys = {
                 content.appendChild(text);
                 el.appendChild(content);
                 
-                // Delete button for directory
+                // Delete button for directory (use event delegation)
                 const actions = document.createElement('div');
                 actions.className = 'tree-actions';
                 const delBtn = document.createElement('span');
                 delBtn.className = 'action-btn action-delete';
                 delBtn.title = 'Delete';
                 delBtn.innerHTML = Icons.trash;
-                delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSDir(name); };
                 actions.appendChild(delBtn);
                 el.appendChild(actions);
                 
@@ -85,6 +118,8 @@ const FileSys = {
                 el.classList.add('is-file');
                 el.setAttribute('data-tree-type', 'file');
                 
+                this._opfsHandles[name] = handle; // Cache handle
+                
                 const content = document.createElement('span');
                 content.className = 'tree-item-content';
                 const icon = document.createElement('span');
@@ -94,23 +129,24 @@ const FileSys = {
                 fileText.textContent = name;
                 content.appendChild(icon);
                 content.appendChild(fileText);
-                content.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+                // Remove onclick, use event delegation instead
+                el.appendChild(content);
                 
                 const actions = document.createElement('div');
                 actions.className = 'tree-actions';
                 
                 const renBtn = document.createElement('span');
-                renBtn.className = 'action-btn'; renBtn.title = "Rename";
+                renBtn.className = 'action-btn'; 
+                renBtn.title = "Rename";
                 renBtn.innerHTML = Icons.edit;
-                renBtn.onclick = (e) => { e.stopPropagation(); this.renameOPFSFile(name, handle); };
                 
                 const delBtn = document.createElement('span');
-                delBtn.className = 'action-btn action-delete'; delBtn.title = "Delete";
+                delBtn.className = 'action-btn action-delete'; 
+                delBtn.title = "Delete";
                 delBtn.innerHTML = Icons.trash;
-                delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSFile(name); };
                 
                 actions.append(renBtn, delBtn);
-                el.append(content, actions);
+                el.append(actions);
                 parentEl.appendChild(el);
             }
         }

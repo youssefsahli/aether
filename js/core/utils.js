@@ -4,6 +4,7 @@
  */
 
 const TreeSearch = {
+    _filterTimers: {}, // Debounce timers for each tree
     // Fuzzy match algorithm - returns score (higher is better match)
     fuzzyScore(searchStr, targetStr) {
         if (!searchStr) return 100; // No search = perfect match
@@ -47,8 +48,16 @@ const TreeSearch = {
         });
     },
     
-    // Filter tree items based on search string
+    // Filter tree items based on search string with debouncing
     filterTree(treeId, searchStr) {
+        // Debounce filter operations to avoid excessive DOM thrashing
+        clearTimeout(this._filterTimers[treeId]);
+        this._filterTimers[treeId] = setTimeout(() => {
+            this._performFilter(treeId, searchStr);
+        }, 150);
+    },
+    
+    _performFilter(treeId, searchStr) {
         const container = document.getElementById(treeId);
         if (!container) return;
         

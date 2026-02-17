@@ -5,26 +5,49 @@
 
 const UI = {
     renderTabs() {
-        const con = document.getElementById('tabs-scroll'); con.innerHTML = '';
-        Store.state.buffers.forEach(b => {
-            const el = document.createElement('div');
-            el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
-            const closeBtn = document.createElement('div');
-            closeBtn.className = 'tab-close';
-            closeBtn.innerHTML = Icons.close;
-            closeBtn.onclick = (e) => { e.stopPropagation(); Store.closeBuffer(b.id); };
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = b.name;
-            const dotSpan = document.createElement('span');
-            dotSpan.className = 'unsaved-dot';
-            el.appendChild(nameSpan);
-            el.appendChild(dotSpan);
-            el.appendChild(closeBtn);
-            el.onclick = () => Store.setActive(b.id);
-            con.appendChild(el);
-            if (b.id === Store.state.activeId) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        });
-    },
+        const con = document.getElementById('tabs-scroll');
+        // Track existing tabs to avoid full re-render
+        const existingTabs = Array.from(con.querySelectorAll('.tab'));
+        const existingIds = new Set(existingTabs.map(t => t.dataset.bufferId));
+        const newIds = new Set(Store.state.buffers.map(b => b.id));
+        
+        // Only do full re-render if tab count changed or active tab changed
+        const needsFullRender = existingIds.size !== newIds.size || 
+            (con.querySelector('.tab.active')?.dataset.bufferId !== Store.state.activeId);
+        
+        if (needsFullRender) {
+            con.innerHTML = '';
+            Store.state.buffers.forEach(b => {
+                const el = document.createElement('div');
+                el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
+                el.dataset.bufferId = b.id;
+                const closeBtn = document.createElement('div');
+                closeBtn.className = 'tab-close';
+                closeBtn.innerHTML = Icons.close;
+                closeBtn.onclick = (e) => { e.stopPropagation(); Store.closeBuffer(b.id); };
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = b.name;
+                const dotSpan = document.createElement('span');
+                dotSpan.className = 'unsaved-dot';
+                el.appendChild(nameSpan);
+                el.appendChild(dotSpan);
+                el.appendChild(closeBtn);
+                el.onclick = () => Store.setActive(b.id);
+                con.appendChild(el);
+                if (b.id === Store.state.activeId) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        } else {
+            // Partial update: only refresh dirty/active state on existing tabs
+            Store.state.buffers.forEach(b => {
+                const tab = con.querySelector(`[data-buffer-id="${b.id}"]`);
+                if (tab) {
+                    tab.classList.toggle('active', b.id === Store.state.activeId);
+                    tab.classList.toggle('dirty', b.dirty);
+                    if (b.id === Store.state.activeId) tab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
+    }
     toast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('visible'); clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => t.classList.remove('visible'), 2500); },
     clearConsole() { const logBox = document.getElementById('console-logs'); if (logBox) { logBox.innerHTML = ''; this.toast('Console cleared'); } },
     updateConsoleHeader() {

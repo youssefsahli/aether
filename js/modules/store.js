@@ -21,13 +21,20 @@ const Store = {
     },
     setActive(id) {
         if (this.state.activeId === id) return; // No change needed
-        this.state.activeId = id; UI.renderTabs();
+        this.state.activeId = id;
         const buf = this.activeBuffer;
         if (buf) {
             Editor.load(buf.content, buf.name);
             document.getElementById('bc-filename').innerText = buf.name;
         }
-        else { Editor.load('', 'txt'); document.getElementById('bc-filename').innerText = '[No Selection]'; }
+        else { 
+            Editor.load('', 'txt'); 
+            document.getElementById('bc-filename').innerText = '[No Selection]'; 
+        }
+        
+        // Only re-render tabs if necessary (defer to next animation frame)
+        requestAnimationFrame(() => UI.renderTabs());
+        
         // Track navigation history
         if (this.state.navIndex < this.state.navHistory.length - 1) {
             this.state.navHistory = this.state.navHistory.slice(0, this.state.navIndex + 1);
@@ -35,7 +42,7 @@ const Store = {
         this.state.navHistory.push(id);
         this.state.navIndex = this.state.navHistory.length - 1;
         App.updateNavButtons();
-        App.saveSession();
+        App.debounceSaveSession();
     },
     updateContent(id, c) {
         const b = this.state.buffers.find(b => b.id === id);
