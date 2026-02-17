@@ -33,1105 +33,12 @@
         <!-- Markdown Parser -->
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        <style>
-            :root {
-                /* Catppuccin Mocha Defaults */
-                --bg: #1e1e2e;
-                --sidebar-bg: #181825;
-                --header-bg: #11111b;
-                --tab-bg: #11111b;
-                --tab-active-bg: #1e1e2e;
-
-                --text: #cdd6f4;
-                --text-dim: #9399b2;
-                --text-dark: #6c7086;
-
-                --accent: #89b4fa;
-                --accent-sec: #b4befe;
-                --border: #313244;
-                --highlight: #313244;
-
-                --cursor: #f5e0dc;
-                --status-bg: #89b4fa;
-                --status-fg: #1e1e2e;
-
-                --font-code: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
-                --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-                --header-h: 36px;
-                --footer-h: 28px;
-                --sidebar-w: 240px;
-                --outline-w: 200px;
-                /* Width of symbol bar */
-                --tab-h: 32px;
-                /* Console log semantic colors (can be overridden per theme) */
-                --log-error: #ff8888;
-                --log-warn: #ffd700;
-                --log-info: #8fd3ff;
-            }
-
-            [data-theme="macchiato"] {
-                --bg: #24273a;
-                --sidebar-bg: #1e2030;
-                --header-bg: #181926;
-                --tab-bg: #181926;
-                --tab-active-bg: #24273a;
-                --text: #cad3f5;
-                --text-dim: #939ab7;
-                --text-dark: #6e738d;
-                --accent: #8aadf4;
-                --accent-sec: #b7bdf8;
-                --border: #363a4f;
-                --highlight: #363a4f;
-                --cursor: #f4dbd6;
-                --status-bg: #8aadf4;
-                --status-fg: #24273a;
-            }
-
-            [data-theme="frappe"] {
-                --bg: #303446;
-                --sidebar-bg: #292c3c;
-                --header-bg: #232634;
-                --tab-bg: #232634;
-                --tab-active-bg: #303446;
-                --text: #c6d0f5;
-                --text-dim: #949cbb;
-                --text-dark: #737994;
-                --accent: #8caaee;
-                --accent-sec: #babbf1;
-                --border: #414559;
-                --highlight: #414559;
-                --cursor: #f2d5cf;
-                --status-bg: #8caaee;
-                --status-fg: #303446;
-            }
-
-            [data-theme="latte"] {
-                --bg: #eff1f5;
-                --sidebar-bg: #e6e9ef;
-                --header-bg: #dce0e8;
-                --tab-bg: #dce0e8;
-                --tab-active-bg: #eff1f5;
-                --text: #4c4f69;
-                --text-dim: #9ca0b0;
-                --text-dark: #acb0be;
-                --accent: #1e66f5;
-                --accent-sec: #7287fd;
-                --border: #bcc0cc;
-                --highlight: #ccd0da;
-                --cursor: #dc8a78;
-                --status-bg: #1e66f5;
-                --status-fg: #eff1f5;
-            }
-
-            *:focus-visible {
-                outline: 2px solid var(--accent);
-                outline-offset: -1px;
-            }
-
-            * {
-                box-sizing: border-box;
-                /* outline: none; */
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            body {
-                margin: 0;
-                background: var(--bg);
-                color: var(--text);
-                height: 100dvh;
-                width: 100vw;
-                overflow: hidden;
-                font-family: var(--font-ui);
-                display: flex;
-                flex-direction: column;
-                font-size: 13px;
-                letter-spacing: -0.01em;
-                transition: background 0.2s, color 0.2s;
-            }
-
-            ::selection {
-                background: rgba(137, 180, 250, 0.3);
-                color: var(--text);
-            }
-
-            ::-moz-selection {
-                background: rgba(137, 180, 250, 0.3);
-                color: var(--text);
-            }
-
-            * {
-                scrollbar-width: thin;
-                scrollbar-color: var(--highlight) transparent;
-            }
-
-            /* Dragging state */
-            body.resizing {
-                cursor: col-resize !important;
-                user-select: none;
-            }
-
-            body.resizing iframe {
-                pointer-events: none;
-            }
-
-            body.dragging-preview {
-                cursor: move !important;
-                user-select: none;
-            }
-
-            body.dragging-preview iframe {
-                pointer-events: none;
-            }
-
-            body.drag-over::after {
-                content: 'DROP FILE TO OPEN';
-                position: absolute;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.7);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--accent);
-                font-weight: 800;
-                font-size: 24px;
-                z-index: 999;
-                backdrop-filter: blur(4px);
-                pointer-events: none;
-            }
-
-            svg.icon {
-                width: 15px;
-                height: 15px;
-                stroke: currentColor;
-                fill: none;
-                stroke-width: 2;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            button > svg {
-                width: 16px;
-                height: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            button:hover svg.icon,
-            button:hover > svg {
-                transform: scale(1.1);
-            }
-
-            button:active svg.icon,
-            button:active > svg {
-                transform: scale(0.95);
-            }
-
-            /* --- Layout --- */
-            #app-shell {
-                display: flex;
-                flex: 1;
-                overflow: hidden;
-            }
-
-            aside {
-                background: var(--sidebar-bg);
-                border-right: 1px solid var(--border);
-                display: flex;
-                flex-direction: column;
-                z-index: 10;
-                flex-shrink: 0;
-                transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.2s;
-            }
-
-            #sidebar-left {
-                width: var(--sidebar-w);
-            }
-
-            #sidebar-left.collapsed {
-                margin-left: calc(var(--sidebar-w) * -1);
-            }
-
-            #sidebar-right {
-                width: var(--outline-w);
-                border-right: none;
-                border-left: 1px solid var(--border);
-                transition: margin-right 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            #sidebar-right.collapsed {
-                margin-right: calc(var(--outline-w) * -1);
-            }
-
-            .side-header {
-                padding: 0 16px;
-                font-weight: 700;
-                font-size: 11px;
-                color: var(--text-dim);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                height: 36px;
-                transition: color 0.15s;
-            }
-
-            .side-header:hover {
-                color: var(--text-dark);
-            }
-
-            .file-tree {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-
-            .tree-item {
-                padding: 4px 16px;
-                font-size: 13px;
-                color: var(--text-dim);
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                white-space: nowrap;
-                overflow: hidden;
-                height: 26px;
-                margin: 0 8px;
-                border-radius: 6px;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .tree-item-label {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                font-family: var(--font-ui);
-                transition: all 0.15s;
-            }
-
-            .tree-item:hover .tree-item-label {
-                transform: translateX(2px);
-            }
-
-            .tree-item:hover {
-                background: rgba(137, 180, 250, 0.12);
-                color: var(--text);
-                padding-left: 20px;
-            }
-
-            .tree-item.active {
-                background: rgba(137, 180, 250, 0.15);
-                border-left: 3px solid var(--accent);
-                color: var(--accent);
-                font-weight: 500;
-                padding-left: 15px;
-            }
-
-            /* Symbol List Styling */
-            .symbol-item {
-                padding: 6px 12px;
-                font-size: 12px;
-                color: var(--text-dim);
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                border-left: 2px solid transparent;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .symbol-item:hover {
-                color: var(--text);
-                background: rgba(137, 180, 250, 0.1);
-                border-left-color: var(--accent);
-                padding-left: 16px;
-            }
-
-            .symbol-kind {
-                opacity: 0.5;
-                font-size: 10px;
-                width: 14px;
-                text-align: center;
-            }
-
-            .symbol-name {
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .tree-actions {
-                display: flex;
-                gap: 4px;
-                opacity: 0;
-                transition: opacity 0.15s;
-            }
-
-            .tree-item:hover .tree-actions {
-                opacity: 1;
-            }
-
-            .action-btn {
-                padding: 4px;
-                border-radius: 5px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                opacity: 0.6;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .action-btn:hover {
-                background: rgba(255, 255, 255, 0.12);
-                color: var(--text);
-                opacity: 1;
-                transform: scale(1.1);
-            }
-
-            .action-btn:active {
-                transform: scale(0.95);
-            }
-
-            .action-delete:hover {
-                background: rgba(255, 100, 100, 0.2);
-                color: rgb(255, 136, 136);
-                opacity: 1;
-            }
-    
-            .reconnect-btn {
-                margin: 10px 16px;
-                padding: 10px 12px;
-                background: rgba(137, 180, 250, 0.12);
-                border: 1px solid rgba(137, 180, 250, 0.3);
-                color: var(--accent);
-                text-align: center;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 500;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .reconnect-btn:hover {
-                background: rgba(137, 180, 250, 0.2);
-                border-color: var(--accent);
-                color: var(--accent);
-                box-shadow: 0 0 12px rgba(137, 180, 250, 0.15);
-                transform: translateY(-1px);
-            }
-
-            .reconnect-btn:active {
-                transform: translateY(0);
-            }
-
-            main {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                min-width: 0;
-                position: relative;
-                background: var(--bg);
-            }
-
-            /* Tabs */
-            #tabs-scroll {
-                height: var(--tab-h);
-                background: var(--header-bg);
-                display: flex;
-                overflow-x: auto;
-                scrollbar-width: none;
-                gap: 1px;
-                padding: 0;
-            }
-
-            #tabs-scroll::-webkit-scrollbar {
-                display: none;
-            }
-
-            .tab {
-                height: 100%;
-                padding: 0 12px;
-                display: flex;
-                align-items: center;
-                color: var(--text-dim);
-                font-size: 12px;
-                cursor: pointer;
-                min-width: 100px;
-                max-width: 200px;
-                position: relative;
-                background: transparent;
-                justify-content: space-between;
-                border-right: 1px solid var(--border);
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-                font-family: var(--font-ui);
-                border-top: 2px solid transparent;
-            }
-
-            .tab::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 12px;
-                right: 12px;
-                height: 1px;
-                background: linear-gradient(90deg, transparent, currentColor, transparent);
-                opacity: 0;
-                transition: opacity 0.15s;
-            }
-
-            .tab:hover {
-                background: var(--highlight);
-                color: var(--text);
-                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            }
-
-            .tab.active {
-                background: var(--bg);
-                color: var(--accent);
-                border-top: 2px solid var(--accent);
-                font-weight: 500;
-                box-shadow: inset 0 -2px 0 rgba(137, 180, 250, 0.3);
-            }
-
-            .tab.active::after {
-                opacity: 1;
-            }
-
-            .tab-close {
-                opacity: 0;
-                padding: 2px;
-                font-size: 14px;
-                margin-left: 8px;
-                line-height: 1;
-                border-radius: 4px;
-                width: 16px;
-                height: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-                cursor: pointer;
-            }
-
-            .tab:hover .tab-close,
-            .tab.active .tab-close {
-                opacity: 0.6;
-            }
-
-            .tab-close:hover {
-                background: rgba(255, 100, 100, 0.2);
-                color: rgb(255, 136, 136);
-                opacity: 1 !important;
-                transform: scale(1.1);
-            }
-
-            .tab-close:active {
-                transform: scale(0.95);
-            }
-
-            .unsaved-dot {
-                width: 8px;
-                height: 8px;
-                background: var(--text-dim);
-                border-radius: 50%;
-                display: none;
-                margin-left: auto;
-                transform: scale(0.8);
-            }
-
-            .tab.dirty .unsaved-dot {
-                display: block;
-            }
-
-            .tab.dirty:hover .unsaved-dot {
-                display: none;
-            }
-
-            .tab.dirty:hover .tab-close {
-                display: flex;
-            }
-
-            .tab.active .unsaved-dot {
-                background: var(--accent);
-            }
-
-            .breadcrumbs {
-                height: 28px;
-                background: var(--bg);
-                border-bottom: 1px solid var(--border);
-                display: flex;
-                align-items: center;
-                padding: 0 16px;
-                gap: 8px;
-                font-size: 11px;
-                color: var(--text-dark);
-            }
-
-            #editor-row {
-                flex: 1;
-                display: flex;
-                overflow: hidden;
-                position: relative;
-            }
-
-            #editor-split {
-                flex: 1;
-                display: flex;
-                position: relative;
-                min-width: 0;
-            }
-
-            #code-stage {
-                flex: 1;
-                position: relative;
-            }
-
-            /* Preview Pane Styles */
-            #preview-pane {
-                background: var(--bg);
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                border-left: 1px solid var(--border);
-                /* Defaults for split mode handled by JS/CSS classes */
-            }
-
-            /* Split Mode (Default) */
-            #editor-split:not(.mode-float) #preview-pane {
-                width: 0;
-                transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            }
-
-            .preview-active #editor-split:not(.mode-float) #preview-pane {
-                width: 50%;
-            }
-
-            /* Float Mode */
-            #editor-split.mode-float #preview-pane {
-                position: absolute;
-                width: 400px;
-                height: 300px;
-                top: 20px;
-                right: 20px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-                border: 1px solid var(--border);
-                border-radius: 8px;
-                z-index: 100;
-                display: none;
-            }
-
-            .preview-active #editor-split.mode-float #preview-pane {
-                display: flex;
-            }
-
-            .preview-header {
-                height: 28px;
-                background: var(--header-bg);
-                border-bottom: 1px solid var(--border);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 8px;
-                cursor: default;
-            }
-
-            /* Only draggable header in float mode */
-            #editor-split.mode-float .preview-header {
-                cursor: move;
-            }
-
-            iframe {
-                width: 100%;
-                height: 100%;
-                border: none;
-                background: #fff;
-                flex: 1;
-            }
-
-            /* Resize Handles */
-            #resizer {
-                width: 4px;
-                background: transparent;
-                cursor: col-resize;
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                z-index: 50;
-                display: none;
-                transition: background 0.2s;
-            }
-
-            #resizer:hover,
-            #resizer.active {
-                background: var(--accent);
-            }
-
-            .preview-active #editor-split:not(.mode-float) #resizer {
-                display: block;
-            }
-
-            #float-resizer {
-                width: 14px;
-                height: 14px;
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                cursor: se-resize;
-                z-index: 101;
-                display: none;
-                background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
-                opacity: 0.6;
-                border-bottom-right-radius: 7px;
-            }
-
-            #editor-split.mode-float #float-resizer {
-                display: block;
-            }
-
-            #float-resizer:hover {
-                opacity: 1;
-            }
-
-            header {
-                height: var(--header-h);
-                background: var(--header-bg);
-                border-bottom: 1px solid var(--border);
-                display: flex;
-                align-items: center;
-                padding: 0 12px;
-                gap: 12px;
-            }
-
-            .logo {
-                font-weight: 800;
-                color: var(--accent);
-                font-size: 14px;
-                margin-right: 12px;
-                letter-spacing: -0.5px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .toolbar {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-left: auto;
-            }
-
-            .theme-swatches {
-                display: flex;
-                gap: 6px;
-                margin-right: 12px;
-            }
-
-            .theme-swatch {
-                width: 12px;
-                height: 12px;
-                cursor: pointer;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .theme-swatch:hover {
-                transform: scale(1.15);
-                border-color: var(--text);
-                box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
-            }
-
-            .swatch-latte {
-                background: #eff1f5;
-            }
-
-            .swatch-frappe {
-                background: #303446;
-            }
-
-            .swatch-macchiato {
-                background: #24273a;
-            }
-
-            .swatch-mocha {
-                background: #1e1e2e;
-            }
-
-            /* New Footer Style */
-            footer {
-                height: var(--footer-h);
-                background: var(--header-bg);
-                border-top: 2px solid var(--accent);
-                color: var(--text-dim);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 12px;
-                font-size: 11px;
-                font-weight: 500;
-                user-select: none;
-                z-index: 50;
-                position: relative;
-            }
-
-            .stat-group {
-                display: flex;
-                height: 100%;
-                gap: 16px;
-                align-items: center;
-            }
-
-            .stat-box {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                opacity: 0.8;
-                transition: all 0.15s;
-            }
-
-            .stat-box:hover {
-                opacity: 1;
-                color: var(--text);
-                transform: translateY(-1px);
-            }
-
-            .stat-highlight {
-                color: var(--accent);
-                font-weight: 700;
-                transition: color 0.15s;
-            }
-
-            .btn {
-                background: transparent;
-                border: 1px solid transparent;
-                color: var(--text-dim);
-                padding: 4px;
-                width: 28px;
-                height: 28px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 6px;
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
-                overflow: hidden;
-            }
-
-            .btn::before {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1), transparent 60%);
-                opacity: 0;
-                transition: opacity 0.15s;
-            }
-
-            .btn:hover {
-                background: var(--highlight);
-                color: var(--text);
-                box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.05);
-                transform: translateY(-1px);
-            }
-
-            .btn:active {
-                transform: translateY(0);
-                box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.03);
-            }
-
-            .btn.primary {
-                color: var(--accent);
-                background: rgba(137, 180, 250, 0.15);
-                border: 1px solid rgba(137, 180, 250, 0.25);
-            }
-
-            .btn.primary:hover {
-                background: rgba(137, 180, 250, 0.25);
-                border-color: var(--accent);
-                color: var(--accent);
-                box-shadow: 0 0 16px rgba(137, 180, 250, 0.2), inset 0 0 8px rgba(255, 255, 255, 0.05);
-                transform: translateY(-1px);
-            }
-
-            .btn.primary:active {
-                transform: translateY(0);
-            }
-
-            .overlay-mask {
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 100;
-                display: none;
-                align-items: flex-start;
-                justify-content: center;
-                padding-top: 80px;
-                backdrop-filter: blur(6px);
-                animation: fadeIn 0.3s; 
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    backdrop-filter: blur(0);
-                }
-                to {
-                    opacity: 1;
-                    backdrop-filter: blur(6px);
-                }
-            }
-
-            .dialog {
-                background: var(--bg);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                width: 480px;
-                box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.1);
-                display: flex;
-                flex-direction: column;
-                border-radius: 12px;
-                overflow: hidden;
-                animation: dialogSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-
-            @keyframes dialogSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px) scale(0.95);
-                    filter: blur(2px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0) scale(1);
-                    filter: blur(0);
-                }
-            }
-
-            .dialog input {
-                background: var(--header-bg);
-                border: 1px solid transparent;
-                color: var(--text);
-                padding: 14px 20px;
-                font-size: 14px;
-                width: 100%;
-                border-bottom: 1px solid var(--border);
-                font-family: var(--font-code);
-                transition: all 0.15s;
-            }
-
-            .dialog input:focus {
-                background: rgba(255, 255, 255, 0.05);
-                outline: none;
-                border-bottom-color: var(--accent);
-            }
-
-            .dialog input::placeholder {
-                color: var(--text-dark);
-            }
-
-            .cmd-item {
-                padding: 10px 20px;
-                cursor: pointer;
-                font-size: 13px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                color: var(--text-dim);
-                transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
-            }
-
-            .cmd-item::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                width: 3px;
-                background: var(--accent);
-                transform: scaleY(0);
-                transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-
-            .cmd-item:hover,
-            .cmd-item.selected {
-                background: var(--highlight);
-                color: var(--accent);
-                padding-left: 24px;
-            }
-
-            .cmd-item.selected::before {
-                transform: scaleY(1);
-            }
-
-            .cmd-shortcut {
-                font-size: 11px;
-                opacity: 0.5;
-                font-family: var(--font-ui);
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 3px 8px;
-                border-radius: 4px;
-                font-weight: 500;
-                transition: all 0.15s;
-            }
-
-            .cmd-item:hover .cmd-shortcut,
-            .cmd-item.selected .cmd-shortcut {
-                background: rgba(137, 180, 250, 0.15);
-                border-color: rgba(137, 180, 250, 0.3);
-                opacity: 0.8;
-            }
-
-            #toast {
-                position: fixed;
-                bottom: 36px;
-                right: 20px;
-                background: var(--sidebar-bg);
-                color: var(--text);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-left: 3px solid var(--accent);
-                padding: 10px 16px;
-                font-size: 12px;
-                font-weight: 500;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                transform: translateY(20px) scale(0.9);
-                opacity: 0;
-                pointer-events: none;
-                transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-                z-index: 200;
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1);
-            }
-
-            #toast.visible {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-                pointer-events: auto;
-            }
-
-            #toast svg {
-                color: var(--accent);
-                transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-
-            #toast.visible svg {
-                animation: toastIconBounce 0.5s;
-            }
-
-            @keyframes toastIconBounce {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.2); }
-            }
-
-            /* Custom Scrollbar */
-            ::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
-            }
-
-            ::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.15);
-                border-radius: 5px;
-                border: 2px solid var(--bg);
-                transition: background 0.2s;
-            }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255, 255, 255, 0.25);
-            }
-
-            ::-webkit-scrollbar-track {
-                background: transparent;
-            }
-
-            /* Ace Tweaks */
-            .ace_editor {
-                font-family: var(--font-code) !important;
-                line-height: 1.6 !important;
-            }
-
-            .ace_gutter {
-                background: var(--bg) !important;
-                color: var(--text-dark) !important;
-                border-right: 1px solid var(--border);
-            }
-
-            .ace_content {
-                background: var(--bg) !important;
-            }
-
-            .ace_active-line {
-                background: rgba(255, 255, 255, 0.03) !important;
-            }
-
-            .ace_gutter-active-line {
-                background: rgba(255, 255, 255, 0.03) !important;
-            }
-
-            /* Outline styles */
-            .outline-search {
-                display: flex;
-                gap: 8px;
-                padding: 8px 12px;
-                border-bottom: 1px solid var(--border);
-                background: var(--sidebar-bg);
-            }
-
-            .outline-search input {
-                flex: 1;
-                background: transparent;
-                border: 1px solid var(--border);
-                color: var(--text);
-                padding: 6px 8px;
-                border-radius: 6px;
-                font-size: 12px;
-                transition: all 0.15s;
-            }
-
-            .outline-search input:focus {
-                outline: none;
-                border-color: var(--accent);
-                background: rgba(137, 180, 250, 0.05);
-                box-shadow: 0 0 12px rgba(137, 180, 250, 0.1);
-            }
-
-            .symbol-group {
-                border-top: 1px solid transparent;
-            }
-
-            .symbol-group .group-header {
-                display:flex; align-items:center; justify-content:space-between; padding:6px 12px; cursor: pointer; color:var(--text-dim); font-weight:700; font-size:12px;
-            }
-
-            .symbol-group.collapsed .group-items { display: none; }
-
-            .symbol-item { padding: 6px 12px; font-size:12px; color:var(--text-dim); display:flex; gap:8px; align-items:center; }
-
-            .symbol-item:hover { background: var(--highlight); color: var(--text); }
-
-            .symbol-kind { width:18px; text-align:center; opacity:0.8; font-size:11px; }
-
-            .symbol-line { margin-left:auto; opacity:0.6; font-size:11px; }
-
-            /* Console collapse styles */
-            #console-pane {
-                transition: height 0.18s ease, opacity 0.18s ease;
-            }
-
-            #console-pane.collapsed {
-                height: 34px !important;
-            }
-        </style>
+        <!-- Commands List -->
+        <script src="filesys/commands.js"></script>
+
+        <!-- Icon Library -->
+        <script src="filesys/icons.js"></script>
+        <link rel="stylesheet" href="filesys/styles.css">
     </head>
 
     <body data-theme="mocha">
@@ -1169,20 +76,35 @@
             <aside id="sidebar-left">
                 <div class="side-header" style="margin-top:8px;">
                     <span>Workspace</span>
-                    <button class="btn" onclick="FileSys.openFolder()" title="Open Folder">≡</button>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn" onclick="TreeSearch.collapseAll('file-tree')" title="Collapse All"></button>
+                        <button class="btn" onclick="FileSys.createWorkspaceDir()" title="New Directory"></button>
+                        <button class="btn" onclick="FileSys.openFolder()" title="Open Folder"></button>
+                    </div>
+                </div>
+                <div class="tree-search-container">
+                    <input type="text" id="file-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('file-tree', this.value)">
                 </div>
                 <div id="file-tree" class="file-tree"></div>
 
                 <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
                     <span id="opfs-header">Local Storage</span>
-                    <div style="display:flex;">
-                        <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File">+</button>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn" onclick="TreeSearch.collapseAll('opfs-tree')" title="Collapse All"></button>
+                        <button class="btn" onclick="FileSys.createOPFSDir()" title="New Directory"></button>
+                        <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File"></button>
                     </div>
+                </div>
+                <div class="tree-search-container">
+                    <input type="text" id="opfs-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('opfs-tree', this.value)">
                 </div>
                 <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
 
                 <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
                     <span>System Files</span>
+                </div>
+                <div class="tree-search-container">
+                    <input type="text" id="system-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('system-tree', this.value)">
                 </div>
                 <div id="system-tree" class="file-tree" style="max-height: 250px;"></div>
             </aside>
@@ -1741,7 +663,13 @@
                         const gEl = document.createElement('div'); gEl.className = 'symbol-group';
 
                         const header = document.createElement('div'); header.className = 'group-header';
-                        header.innerHTML = `<span>${grp.title.toUpperCase()} (${grp.items.length})</span><span style="opacity:0.7">▾</span>`;
+                        const titleSpan = document.createElement('span');
+                        titleSpan.textContent = `${grp.title.toUpperCase()} (${grp.items.length})`;
+                        const chevronSpan = document.createElement('span');
+                        chevronSpan.innerHTML = Icons.chevronDown;
+                        chevronSpan.style.opacity = '0.7';
+                        header.appendChild(titleSpan);
+                        header.appendChild(chevronSpan);
                         header.onclick = () => {
                             gEl.classList.toggle('collapsed');
                             const collapsed = gEl.classList.contains('collapsed');
@@ -1949,6 +877,106 @@
                 }
             };
 
+            // Fuzzy search and tree filtering utility
+            const TreeSearch = {
+                // Fuzzy match algorithm - returns score (higher is better match)
+                fuzzyScore(searchStr, targetStr) {
+                    if (!searchStr) return 100; // No search = perfect match
+                    searchStr = searchStr.toLowerCase();
+                    targetStr = targetStr.toLowerCase();
+                    
+                    if (targetStr.includes(searchStr)) return 90; // Substring match is great
+                    
+                    let score = 0;
+                    let searchIdx = 0;
+                    let lastMatchIdx = -1;
+                    
+                    for (let i = 0; i < targetStr.length && searchIdx < searchStr.length; i++) {
+                        if (targetStr[i] === searchStr[searchIdx]) {
+                            // Consecutive matches get bonus
+                            const consecutiveBonus = (i === lastMatchIdx + 1) ? 10 : 0;
+                            score += 10 + consecutiveBonus;
+                            lastMatchIdx = i;
+                            searchIdx++;
+                        }
+                    }
+                    
+                    return searchIdx === searchStr.length ? score : 0; // Only return score if all chars matched
+                },
+                
+                // Collapse all directories in a tree (recursive - hides all descendants)
+                collapseAll(treeId) {
+                    const container = document.getElementById(treeId);
+                    if (!container) return;
+                    
+                    const directories = container.querySelectorAll('[data-tree-type="directory"]');
+                    directories.forEach(dir => {
+                        dir.classList.add('collapsed');
+                        // Hide all descendants recursively
+                        const dirLevel = parseInt(dir.getAttribute('data-tree-level') || 0);
+                        let next = dir.nextElementSibling;
+                        while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
+                            next.classList.add('hidden-by-parent');
+                            next = next.nextElementSibling;
+                        }
+                    });
+                },
+                
+                // Filter tree items based on search string
+                filterTree(treeId, searchStr) {
+                    const container = document.getElementById(treeId);
+                    if (!container) return;
+                    
+                    const items = container.querySelectorAll('[data-tree-name]');
+                    let hasVisibleItem = false;
+                    
+                    // First pass: score and filter items
+                    items.forEach(item => {
+                        const name = item.getAttribute('data-tree-name');
+                        const score = this.fuzzyScore(searchStr, name);
+                        
+                        if (score > 0) {
+                            item.classList.remove('hidden');
+                            hasVisibleItem = true;
+                            
+                            // Show all parent directories
+                            let parent = item.previousElementSibling;
+                            while (parent) {
+                                const parentLevel = parseInt(parent.getAttribute('data-tree-level') || 0);
+                                const itemLevel = parseInt(item.getAttribute('data-tree-level') || 0);
+                                
+                                if (parentLevel < itemLevel && parent.classList.contains('is-directory')) {
+                                    parent.classList.remove('hidden', 'collapsed', 'hidden-by-parent');
+                                }
+                                if (parentLevel === 0) break;
+                                parent = parent.previousElementSibling;
+                            }
+                        } else {
+                            item.classList.add('hidden');
+                        }
+                    });
+                    
+                    // Auto-expand relevant directories when searching
+                    if (searchStr.length > 0) {
+                        items.forEach(item => {
+                            if (!item.classList.contains('hidden')) {
+                                let prev = item.previousElementSibling;
+                                while (prev) {
+                                    const prevLevel = parseInt(prev.getAttribute('data-tree-level') || 0);
+                                    const itemLevel = parseInt(item.getAttribute('data-tree-level') || 0);
+                                    
+                                    if (prevLevel < itemLevel && prev.classList.contains('is-directory')) {
+                                        prev.classList.remove('collapsed', 'hidden-by-parent');
+                                    }
+                                    if (prevLevel === 0) break;
+                                    prev = prev.previousElementSibling;
+                                }
+                            }
+                        });
+                    }
+                }
+            };
+
             const FileSys = {
                 rootDir: null,
                 async initOPFS() {
@@ -1958,40 +986,106 @@
                         this.renderOPFS();
                     } catch (e) { document.getElementById('opfs-header').innerText = "LocalStorage Only"; }
                 },
-                async renderOPFS() {
+                async renderOPFS(dirHandle = null, parentEl = null, level = 0) {
                     if (!Store.state.opfsRoot) return;
-                    const div = document.getElementById('opfs-tree');
-                    div.innerHTML = '';
-                    for await (const [name, handle] of Store.state.opfsRoot.entries()) {
-                        if (handle.kind === 'file') {
-                            const el = document.createElement('div');
-                            el.className = 'tree-item';
-                            const label = document.createElement('span');
-                            label.className = 'tree-item-label';
+                    if (level === 0) {
+                        parentEl = document.getElementById('opfs-tree');
+                        parentEl.innerHTML = '';
+                        dirHandle = Store.state.opfsRoot;
+                    }
+                    
+                    for await (const [name, handle] of dirHandle.entries()) {
+                        const el = document.createElement('div');
+                        el.className = 'tree-item';
+                        el.setAttribute('data-tree-name', name);
+                        el.setAttribute('data-tree-level', level);
+                        el.style.paddingLeft = `${(level * 10) + 12}px`;
+                        
+                        if (handle.kind === 'directory') {
+                            // Directory
+                            el.classList.add('is-directory');
+                            el.setAttribute('data-tree-type', 'directory');
+                            
+                            // Add toggle
+                            const toggle = document.createElement('span');
+                            toggle.className = 'tree-item-toggle';
+                            toggle.innerHTML = Icons.chevronDown;
+                            toggle.onclick = (e) => {
+                                e.stopPropagation();
+                                const isCollapsed = el.classList.toggle('collapsed');
+                                // Toggle visibility of children (only direct children when expanding)
+                                const dirLevel = level;
+                                const childLevel = level + 1;
+                                let next = el.nextElementSibling;
+                                while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
+                                    if (isCollapsed) {
+                                        next.classList.add('hidden-by-parent');
+                                    } else if (parseInt(next.getAttribute('data-tree-level') || 0) === childLevel) {
+                                        // Only show direct children when expanding
+                                        next.classList.remove('hidden-by-parent');
+                                    }
+                                    next = next.nextElementSibling;
+                                }
+                            };
+                            el.appendChild(toggle);
+                            
+                            // Content
+                            const content = document.createElement('span');
+                            content.className = 'tree-item-content';
                             const icon = document.createElement('span');
-                            icon.innerHTML = Icons.file;
-                            icon.style.marginRight = '6px';
+                            icon.innerHTML = Icons.folder;
                             icon.style.display = 'inline-flex';
-                            label.appendChild(icon);
-                            label.appendChild(document.createTextNode(name));
-                            label.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
-
+                            const text = document.createElement('span');
+                            text.textContent = name;
+                            content.appendChild(icon);
+                            content.appendChild(text);
+                            el.appendChild(content);
+                            
+                            // Delete button for directory
                             const actions = document.createElement('div');
                             actions.className = 'tree-actions';
-
+                            const delBtn = document.createElement('span');
+                            delBtn.className = 'action-btn action-delete';
+                            delBtn.title = 'Delete';
+                            delBtn.innerHTML = Icons.trash;
+                            delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSDir(name); };
+                            actions.appendChild(delBtn);
+                            el.appendChild(actions);
+                            
+                            parentEl.appendChild(el);
+                            await this.renderOPFS(handle, parentEl, level + 1);
+                        } else if (handle.kind === 'file') {
+                            // File
+                            el.classList.add('is-file');
+                            el.setAttribute('data-tree-type', 'file');
+                            
+                            const content = document.createElement('span');
+                            content.className = 'tree-item-content';
+                            const icon = document.createElement('span');
+                            icon.innerHTML = Icons.file;
+                            icon.style.display = 'inline-flex';
+                            const fileText = document.createElement('span');
+                            fileText.textContent = name;
+                            content.appendChild(icon);
+                            content.appendChild(fileText);
+                            content.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+                            
+                            const actions = document.createElement('div');
+                            actions.className = 'tree-actions';
+                            
                             const renBtn = document.createElement('span');
                             renBtn.className = 'action-btn'; renBtn.title = "Rename";
                             renBtn.innerHTML = Icons.edit;
                             renBtn.onclick = (e) => { e.stopPropagation(); this.renameOPFSFile(name, handle); };
-
+                            
                             const delBtn = document.createElement('span');
                             delBtn.className = 'action-btn action-delete'; delBtn.title = "Delete";
                             delBtn.innerHTML = Icons.trash;
                             delBtn.onclick = (e) => { e.stopPropagation(); this.deleteOPFSFile(name); };
-
+                            
                             actions.append(renBtn, delBtn);
-                            el.append(label, actions);
-                            div.appendChild(el);
+                            el.append(content, actions);
+                            parentEl.appendChild(el);
                         }
                     }
                 },
@@ -2003,6 +1097,40 @@
                             App.openBuffer(name, "", handle, 'opfs');
                             this.renderOPFS();
                         } catch (e) { UI.toast('Error creating file'); }
+                    });
+                },
+                async createOPFSDir() {
+                    if (!Store.state.opfsRoot) {
+                        UI.toast('Local Storage not available.');
+                        return;
+                    }
+                    Prompt.open("New Directory Name:", "new-folder", async (name) => {
+                        if (!name || name.trim() === '') return;
+                        try {
+                            await Store.state.opfsRoot.getDirectoryHandle(name.trim(), { create: true });
+                            this.renderOPFS();
+                            UI.toast(`Directory created: ${name}`);
+                        } catch (e) { 
+                            console.error('Error creating directory:', e);
+                            UI.toast('Error: ' + (e.message || 'Could not create directory')); 
+                        }
+                    });
+                },
+                async createWorkspaceDir() {
+                    if (!this.rootDir) {
+                        UI.toast('No workspace open. Open a folder first.');
+                        return;
+                    }
+                    Prompt.open("New Directory Name:", "new-folder", async (name) => {
+                        if (!name || name.trim() === '') return;
+                        try {
+                            await this.rootDir.getDirectoryHandle(name.trim(), { create: true });
+                            await this.renderWorkspace(this.rootDir);
+                            UI.toast(`Directory created: ${name}`);
+                        } catch (e) { 
+                            console.error('Error creating directory:', e);
+                            UI.toast('Error: ' + (e.message || 'Could not create directory')); 
+                        }
                     });
                 },
                 async renameOPFSFile(oldName, handle) {
@@ -2032,6 +1160,35 @@
                             if (buf) App.closeBuffer(buf.id);
                             this.renderOPFS(); UI.toast('Deleted');
                         } catch (e) { UI.toast('Delete failed'); }
+                    });
+                },
+                async deleteWorkspaceDir(dirPath) {
+                    Confirm.open("Delete Folder", `Permanently delete "${dirPath}" and all contents?`, async () => {
+                        try {
+                            const parts = dirPath.split('/');
+                            let currentHandle = this.rootDir;
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                currentHandle = await currentHandle.getDirectoryHandle(parts[i]);
+                            }
+                            await currentHandle.removeEntry(parts[parts.length - 1], { recursive: true });
+                            await this.renderWorkspace(this.rootDir);
+                            UI.toast('Folder deleted');
+                        } catch (e) { 
+                            console.error('Delete failed:', e);
+                            UI.toast('Delete failed: ' + e.message); 
+                        }
+                    });
+                },
+                async deleteOPFSDir(name) {
+                    Confirm.open("Delete Folder", `Permanently delete "${name}" and all contents?`, async () => {
+                        try {
+                            await Store.state.opfsRoot.removeEntry(name, { recursive: true });
+                            this.renderOPFS();
+                            UI.toast('Folder deleted');
+                        } catch (e) { 
+                            console.error('Delete failed:', e);
+                            UI.toast('Delete failed: ' + e.message); 
+                        }
                     });
                 },
                 async saveBuffer(buf) {
@@ -2080,25 +1237,76 @@
                         this.renderWorkspace(this.rootDir);
                     }
                 },
-                async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0) {
+                async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0, parentPath = '') {
                     if (level === 0) parentEl.innerHTML = '';
                     for await (const [name, handle] of dirHandle.entries()) {
+                        const currentPath = parentPath ? `${parentPath}/${name}` : name;
                         const el = document.createElement('div');
                         el.className = 'tree-item';
+                        el.setAttribute('data-tree-name', name);
+                        el.setAttribute('data-tree-path', currentPath);
+                        el.setAttribute('data-tree-level', level);
                         el.style.paddingLeft = `${(level * 10) + 12}px`;
+                        
+                        if (handle.kind === 'directory') {
+                            el.classList.add('is-directory');
+                            el.setAttribute('data-tree-type', 'directory');
+                            
+                            // Add toggle for directory
+                            const toggle = document.createElement('span');
+                            toggle.className = 'tree-item-toggle';
+                            toggle.innerHTML = Icons.chevronDown;
+                            toggle.onclick = (e) => {
+                                e.stopPropagation();
+                                const isCollapsed = el.classList.toggle('collapsed');
+                                // Toggle visibility of children (only direct children when expanding)
+                                const dirLevel = level;
+                                const childLevel = level + 1;
+                                let next = el.nextElementSibling;
+                                while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
+                                    if (isCollapsed) {
+                                        next.classList.add('hidden-by-parent');
+                                    } else if (parseInt(next.getAttribute('data-tree-level') || 0) === childLevel) {
+                                        // Only show direct children when expanding
+                                        next.classList.remove('hidden-by-parent');
+                                    }
+                                    next = next.nextElementSibling;
+                                }
+                            };
+                            el.appendChild(toggle);
+                        } else {
+                            el.classList.add('is-file');
+                            el.setAttribute('data-tree-type', 'file');
+                        }
+                        
+                        const content = document.createElement('span');
+                        content.className = 'tree-item-content';
                         const icon = document.createElement('span');
                         icon.innerHTML = handle.kind === 'directory' ? Icons.folder : Icons.file;
-                        icon.style.marginRight = '6px';
                         icon.style.display = 'inline-flex';
                         const text = document.createElement('span');
                         text.textContent = name;
-                        el.appendChild(icon);
-                        el.appendChild(text);
+                        content.appendChild(icon);
+                        content.appendChild(text);
+                        el.appendChild(content);
+                        
                         if (handle.kind === 'file') {
                             el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
+                        } else if (handle.kind === 'directory') {
+                            // Add delete button for directories
+                            const actions = document.createElement('div');
+                            actions.className = 'tree-actions';
+                            const delBtn = document.createElement('span');
+                            delBtn.className = 'action-btn action-delete';
+                            delBtn.title = 'Delete';
+                            delBtn.innerHTML = Icons.trash;
+                            delBtn.onclick = (e) => { e.stopPropagation(); this.deleteWorkspaceDir(currentPath); };
+                            actions.appendChild(delBtn);
+                            el.appendChild(actions);
                         }
+                        
                         parentEl.appendChild(el);
-                        if (handle.kind === 'directory') await this.renderWorkspace(handle, parentEl, level + 1);
+                        if (handle.kind === 'directory') await this.renderWorkspace(handle, parentEl, level + 1, currentPath);
                     }
                 }
             };
@@ -2108,40 +1316,130 @@
                 fileCache: new Map(),
                 loadedFiles: new Set(),
                 async init() {
+                    await this.syncFromDocs();
                     await this.renderSystemTree();
+                },
+                async syncFromDocs() {
+                    // Check if we have internet connectivity
+                    try {
+                        const response = await fetch('filesys/docs/welcome.md', { method: 'HEAD', cache: 'no-store' });
+                        if (!response.ok) return; // No internet or filesys/docs not available
+                    } catch (e) {
+                        return; // No internet connection
+                    }
+                    
+                    // List of docs to sync from filesys/docs
+                    const docsToSync = ['welcome.md', 'manual.md', 'SCRIPTING.md', 'SCRIPT_QUICK_REF.md', 'MARKDOWN_NAVIGATION.md'];
+                    
+                    for (const filename of docsToSync) {
+                        try {
+                            const response = await fetch(`filesys/docs/${filename}`);
+                            if (response.ok) {
+                                const content = await response.text();
+                                this.fileCache.set(filename, content);
+                                this.loadedFiles.add(filename);
+                            }
+                        } catch (e) {
+                            console.warn(`Could not sync ${filename}:`, e);
+                        }
+                    }
                 },
                 async renderSystemTree() {
                     const div = document.getElementById('system-tree');
                     if (!div) return;
                     div.innerHTML = '';
                     
-                    // Get list of files from workspace (Exclude hidden and binary files)
-                    const excludePatterns = ['.git', '.vscode', '.svg', '.lock', 'node_modules', 'dist', 'build'];
-                    const textExtensions = ['md', 'js', 'ts', 'json', 'html', 'css', 'py', 'txt', 'yml', 'yaml', 'pas', 'pp'];
+                    // Organize files into folders
+                    const docFiles = ['welcome.md', 'manual.md', 'SCRIPTING.md', 'SCRIPT_QUICK_REF.md', 'MARKDOWN_NAVIGATION.md', 'test-navigation.md'];
+                    const configFiles = ['.aether.js', 'config.json', 'manifest.json'];
+                    const otherFiles = ['EXAMPLE_SCRIPTS.js', 'LICENSE', 'CNAME', 'index.html'];
                     
-                    try {
-                        const response = await fetch('.', { headers: { 'Accept': 'application/json' } }).then(r => r.ok ? null : Promise.reject()).catch(() => null);
-                        // Fallback: load from our known test files and workspace files
-                        const knownFiles = ['welcome.md', 'test-navigation.md', 'SCRIPTING.md', 'SCRIPT_QUICK_REF.md', 'EXAMPLE_SCRIPTS.js', 'manifest.json', 'MARKDOWN_NAVIGATION.md', 'LICENSE', 'CNAME', 'index.html'];
-                        
-                        for (const filename of knownFiles) {
-                            const el = document.createElement('div');
-                            el.className = 'tree-item';
-                            const label = document.createElement('span');
-                            label.className = 'tree-item-label';
-                            const icon = document.createElement('span');
-                            icon.innerHTML = Icons.file;
-                            icon.style.marginRight = '6px';
-                            icon.style.display = 'inline-flex';
-                            label.appendChild(icon);
-                            label.appendChild(document.createTextNode(filename));
-                            label.onclick = async () => this.loadFile(filename);
-                            el.appendChild(label);
-                            div.appendChild(el);
-                        }
-                    } catch (e) {
-                        console.warn('Could not load system files:', e);
+                    // Create docs folder
+                    const docsFolder = this.createSystemFolder('docs', div, 0);
+                    for (const filename of docFiles) {
+                        this.createSystemFile(filename, docsFolder, 1);
                     }
+                    
+                    // Create config folder
+                    const configFolder = this.createSystemFolder('config', div, 0);
+                    for (const filename of configFiles) {
+                        this.createSystemFile(filename, configFolder, 1);
+                    }
+                    
+                    // Add other files directly at root
+                    for (const filename of otherFiles) {
+                        this.createSystemFile(filename, div, 0);
+                    }
+                },
+                createSystemFolder(name, parentEl, level) {
+                    const el = document.createElement('div');
+                    el.className = 'tree-item is-directory';
+                    el.setAttribute('data-tree-name', name);
+                    el.setAttribute('data-tree-level', level);
+                    el.setAttribute('data-tree-type', 'directory');
+                    el.style.paddingLeft = `${(level * 10) + 12}px`;
+                    
+                    // Toggle
+                    const toggle = document.createElement('span');
+                    toggle.className = 'tree-item-toggle';
+                    toggle.innerHTML = Icons.chevronDown;
+                    toggle.onclick = (e) => {
+                        e.stopPropagation();
+                        const isCollapsed = el.classList.toggle('collapsed');
+                        // Toggle visibility of children (only direct children when expanding)
+                        const dirLevel = level;
+                        const childLevel = level + 1;
+                        let next = el.nextElementSibling;
+                        while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
+                            if (isCollapsed) {
+                                next.classList.add('hidden-by-parent');
+                            } else if (parseInt(next.getAttribute('data-tree-level') || 0) === childLevel) {
+                                // Only show direct children when expanding
+                                next.classList.remove('hidden-by-parent');
+                            }
+                            next = next.nextElementSibling;
+                        }
+                    };
+                    el.appendChild(toggle);
+                    
+                    // Content
+                    const content = document.createElement('span');
+                    content.className = 'tree-item-content';
+                    const icon = document.createElement('span');
+                    icon.innerHTML = Icons.folder;
+                    icon.style.display = 'inline-flex';
+                    const text = document.createElement('span');
+                    text.textContent = name;
+                    content.appendChild(icon);
+                    content.appendChild(text);
+                    el.appendChild(content);
+                    
+                    parentEl.appendChild(el);
+                    return parentEl;
+                },
+                createSystemFile(name, parentEl, level) {
+                    const el = document.createElement('div');
+                    el.className = 'tree-item is-file';
+                    el.setAttribute('data-tree-name', name);
+                    el.setAttribute('data-tree-level', level);
+                    el.setAttribute('data-tree-type', 'file');
+                    el.style.paddingLeft = `${(level * 10) + 32}px`;
+                    
+                    // Content
+                    const content = document.createElement('span');
+                    content.className = 'tree-item-content';
+                    content.style.cursor = 'pointer';
+                    const icon = document.createElement('span');
+                    icon.innerHTML = Icons.file;
+                    icon.style.display = 'inline-flex';
+                    const text = document.createElement('span');
+                    text.textContent = name;
+                    content.appendChild(icon);
+                    content.appendChild(text);
+                    el.appendChild(content);
+                    
+                    content.onclick = async () => this.loadFile(name);
+                    parentEl.appendChild(el);
                 },
                 async loadFile(filename) {
                     if (this.loadedFiles.has(filename)) {
@@ -2151,9 +1449,19 @@
                     
                     try {
                         UI.toast(`Loading ${filename}...`);
-                        const response = await fetch(filename);
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                        const content = await response.text();
+                        
+                        // Check if file was pre-cached from filesys/docs
+                        let content = this.fileCache.get(filename);
+                        if (!content) {
+                            const response = await fetch(filename);
+                            if (!response.ok) {
+                                // File doesn't exist - create new empty file instead of error
+                                content = '';
+                                UI.toast(`Created new file: ${filename}`);
+                            } else {
+                                content = await response.text();
+                            }
+                        }
                         
                         this.fileCache.set(filename, content);
                         this.loadedFiles.add(filename);
@@ -2166,7 +1474,7 @@
                             Store.addBuffer({ id: 'sys' + Date.now(), name: filename, content, handle: null, kind: 'system', dirty: false, readonly: false });
                         }
                     } catch (e) {
-                        UI.toast(`Failed to load ${filename}`);
+                        UI.toast(`Error loading ${filename}: ${e.message}`);
                         console.error('Load failed:', e);
                     }
                 },
@@ -2178,26 +1486,6 @@
 
             // Configure marked for custom link rendering
             // Icon definitions - centralized for easy modification
-            const Icons = {
-                menu: '<svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="5" width="18" height="1.5" rx="0.75" fill="currentColor"/><rect x="3" y="11.25" width="18" height="1.5" rx="0.75" fill="currentColor"/><rect x="3" y="17.5" width="18" height="1.5" rx="0.75" fill="currentColor"/></svg>',
-                openFile: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" fill="currentColor" opacity="0.2"/><path d="M13 2v7h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6 2h7v7h7v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
-                newFile: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-                save: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="17 21 17 13 7 13 7 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="7 3 7 8 17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
-                back: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 12H5M5 12l6-6M5 12l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                forward: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M19 12l-6-6M19 12l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                preview: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>',
-                outline: '<svg viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="9" y1="9" x2="15" y2="9" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><line x1="9" y1="17" x2="12" y2="17" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>',
-                commands: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 9l3-3 7 7-7 7-3-3m10-10l3-3 3 3-3 3m-3 8l3-3 3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
-                close: '<svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-                chevronDown: '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                chevronRight: '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="9 6 15 12 9 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                playRight: '<svg viewBox="0 0 24 24" width="16" height="16"><polygon points="5 3 19 12 5 21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                folder: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                file: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="13 2 13 9 20 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
-                plus: '<svg viewBox="0 0 24 24" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-                edit: '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                trash: '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="3 6 5 6 21 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
-            };
 
             const MarkedConfig = {
                 init() {
@@ -2269,6 +1557,7 @@
                     Resizer.init();
                     Dragger.init();
                     MarkedConfig.init();
+                    UI.initIconButtons();
                     await SystemFS.init();
 
                     const rootHandle = await DB.get('handles', 'rootDir');
@@ -2355,7 +1644,7 @@
                         if (pane && Store.state.consoleCollapsed) pane.classList.add('collapsed');
                         if (btn) {
                             const collapsed = pane && pane.classList.contains('collapsed');
-                            btn.innerHTML = collapsed ? '▼' : '▶';
+                            btn.innerHTML = collapsed ? Icons.chevronDown : Icons.chevronRight;
                         }
                     } catch (e) {}
                 },
@@ -2559,7 +1848,17 @@ ${buf.content}
                     Store.state.buffers.forEach(b => {
                         const el = document.createElement('div');
                         el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
-                        el.innerHTML = `<span>${b.name}</span><span class="unsaved-dot"></span><div class="tab-close" onclick="event.stopPropagation(); Store.closeBuffer('${b.id}')">×</div>`;
+                        const closeBtn = document.createElement('div');
+                        closeBtn.className = 'tab-close';
+                        closeBtn.innerHTML = Icons.close;
+                        closeBtn.onclick = (e) => { e.stopPropagation(); Store.closeBuffer(b.id); };
+                        const nameSpan = document.createElement('span');
+                        nameSpan.textContent = b.name;
+                        const dotSpan = document.createElement('span');
+                        dotSpan.className = 'unsaved-dot';
+                        el.appendChild(nameSpan);
+                        el.appendChild(dotSpan);
+                        el.appendChild(closeBtn);
                         el.onclick = () => Store.setActive(b.id);
                         con.appendChild(el);
                         if (b.id === Store.state.activeId) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2583,137 +1882,33 @@ ${buf.content}
                     const collapsed = pane.classList.contains('collapsed');
                     Store.state.consoleCollapsed = collapsed;
                     if (collapsed) {
-                        btn.innerHTML = '▼';
+                        btn.innerHTML = Icons.chevronDown;
                     } else {
-                        btn.innerHTML = '▶';
+                        btn.innerHTML = Icons.chevronRight;
                     }
+                },
+                initIconButtons() {
+                    // Replace text icons in header buttons with SVG icons from Icons.js
+                    const buttons = [
+                        { selector: 'button[onclick="TreeSearch.collapseAll(\'file-tree\')"]', icon: 'chevronDown' },
+                        { selector: 'button[onclick="FileSys.createWorkspaceDir()"]', icon: 'folder' },
+                        { selector: 'button[onclick="FileSys.openFolder()"]', icon: 'menu' },
+                        { selector: 'button[onclick="TreeSearch.collapseAll(\'opfs-tree\')"]', icon: 'chevronDown' },
+                        { selector: 'button[onclick="FileSys.createOPFSDir()"]', icon: 'folder' },
+                        { selector: 'button[onclick="FileSys.createOPFSFile()"]', icon: 'plus' }
+                    ];
+                    
+                    buttons.forEach(({ selector, icon }) => {
+                        const btn = document.querySelector(selector);
+                        if (btn && Icons && Icons[icon]) {
+                            btn.innerHTML = Icons[icon];
+                        }
+                    });
                 }
             };
 
             const Commands = {
-                list: [
-                    { id: 'newFile', name: 'New File', hint: 'Alt+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
-                    { id: 'saveFile', name: 'Save File', hint: 'Ctrl+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
-                    { id: 'openFile', name: 'Open File', hint: 'Ctrl+O', fn: () => FileSys.openFile() },
-                    { id: 'closeTab', name: 'Close Tab', hint: 'Alt+W', fn: () => Store.activeBuffer && Store.closeBuffer(Store.activeBuffer.id) },
-                    { id: 'togglePreview', name: 'Toggle Preview', hint: 'UI', fn: () => { Store.state.previewMode = !Store.state.previewMode; document.body.classList.toggle('preview-active', Store.state.previewMode); App.debouncePreview(true); setTimeout(() => Editor.instance.resize(), 300); } },
-                    { id: 'settings', name: 'Edit Settings', hint: 'JSON', fn: () => App.openBuffer('config.json', JSON.stringify(Config.state, null, 4), null, 'config') },
-                    { id: 'switchPreview', name: 'Switch Preview Type', hint: 'Split/Float', fn: () => Config.togglePreviewType() },
-                    { id: 'wrap', name: 'Toggle Word Wrap', hint: 'View', fn: () => Config.toggleWrap() },
-                    { id: 'clear', name: 'Reset App', hint: 'Danger', fn: () => { DB.clear('session'); location.reload(); } },
-                    {
-                        id: 'format',
-                        name: 'Format Document',
-                        hint: 'Alt+Shift+F',
-                        fn: () => {
-                            const val = Editor.instance.getValue();
-                            const cursor = Editor.instance.getCursorPosition();
-                            try {
-                                const formatted = prettier.format(val, {
-                                    parser: "babel", // dynamic based on file extension
-                                    plugins: prettierPlugins
-                                });
-                                Editor.instance.setValue(formatted, -1);
-                                Editor.instance.moveCursorToPosition(cursor);
-                                UI.toast("Formatted!");
-                            } catch (e) { UI.toast("Format Error"); }
-                        }
-                    },
-                    {
-                        id: 'runScript',
-                        name: 'Run Active Script',
-                        hint: 'Scripting',
-                        fn: async () => {
-                            const buf = Store.activeBuffer;
-                            if (!buf) return UI.toast('No active buffer');
-                            const ext = buf.name.split('.').pop().toLowerCase();
-                            if (ext !== 'js') return UI.toast('Script must be a .js file');
-                            await Script.executeScript(buf.content);
-                        }
-                    },
-                    {
-                        id: 'executeOPFSScript',
-                        name: 'Execute OPFS Script',
-                        hint: 'Scripting',
-                        fn: () => {
-                            if (!Store.state.opfsRoot) return UI.toast('OPFS not available');
-                            Prompt.open("Script filename:", ".aether.js", async (filename) => {
-                                if (!filename) return;
-                                const script = await Script.loadScript(filename);
-                                if (!script) return UI.toast('Script not found');
-                                await Script.executeScript(script.code);
-                            });
-                        }
-                    },
-                    {
-                        id: 'saveConfigToOPFS',
-                        name: 'Save Config to OPFS',
-                        hint: 'Settings',
-                        fn: () => Config.saveToOPFS()
-                    },
-                    {
-                        id: 'showScriptAPI',
-                        name: 'Show Script API',
-                        hint: 'Documentation',
-                        fn: () => {
-                            const apiDoc = `# Aether Script API Reference
-
-## File/Buffer Operations
-- \`Aether.openFile(name, content)\` - Open or create a file buffer
-- \`Aether.newFile(name, content)\` - Alias for openFile
-- \`Aether.getBuffer(id)\` - Get a buffer by ID
-- \`Aether.closeBuffer(id)\` - Close a buffer
-- \`Aether.setActiveBuffer(id)\` - Set active buffer
-- \`Aether.getActiveBuffer()\` - Get the active buffer
-- \`Aether.getAllBuffers()\` - Get all buffers
-
-## Editor Operations
-- \`Aether.getEditorContent()\` - Get current editor content
-- \`Aether.setEditorContent(content)\` - Set editor content
-- \`Aether.getEditorLanguage()\` - Get file extension/language
-- \`Aether.getCursorPosition()\` - Get cursor {row, column}
-- \`Aether.setCursorPosition(row, column)\` - Set cursor position
-- \`Aether.getSelectedText()\` - Get selected text
-- \`Aether.insertText(text)\` - Insert text at cursor
-
-## Configuration
-- \`Aether.getConfig()\` - Get current config state
-- \`Aether.setConfig(key, value)\` - Set config value
-- \`Aether.updateTheme(name)\` - Change theme
-- \`Aether.updateZoom(delta)\` - Adjust zoom level
-
-## UI Operations
-- \`Aether.toast(msg, duration)\` - Show notification
-- \`Aether.log(msg)\` - Log to console
-- \`Aether.warn(msg)\` - Warn to console
-- \`Aether.error(msg)\` - Error to console
-
-## OPFS Operations (Async)
-- \`await Aether.saveOPFSFile(filename, content)\` - Save to OPFS
-- \`await Aether.readOPFSFile(filename)\` - Read from OPFS
-- \`await Aether.listOPFSFiles()\` - List OPFS files
-- \`await Aether.deleteOPFSFile(filename)\` - Delete from OPFS
-
-## Example Script
-\`\`\`javascript
-// Use 'await' for async operations
-const files = await Aether.listOPFSFiles();
-for (const file of files) {
-  Aether.log('Found: ' + file);
-}
-
-Aether.openFile('generated.js', 'console.log("Hello!");');
-Aether.toast('Script completed!');
-\`\`\`
-
-## Init Script
-Place a \`.aether.js\` file in your OPFS to auto-run on startup!
-`;
-                            App.openBuffer('_script_api_docs.md', apiDoc, null, 'memory');
-                            UI.toast('API reference opened');
-                        }
-                    }
-                ],
+                list: typeof AETHER_COMMANDS !== 'undefined' ? AETHER_COMMANDS : [],
                 trigger(id) { const c = this.list.find(c => c.id === id); if (c) c.fn(); },
                 showPalette() {
                     const mask = document.getElementById('palette-mask');
