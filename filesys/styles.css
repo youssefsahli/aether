@@ -614,6 +614,31 @@ aside {
     opacity: 1;
 }
 
+/* Main file toggle */
+.action-main {
+    color: var(--text-dim);
+}
+
+.action-main:hover {
+    background: rgba(250, 200, 100, 0.2);
+    color: rgb(250, 200, 100);
+}
+
+.action-main.is-main {
+    color: rgb(250, 200, 100);
+    opacity: 1;
+}
+
+/* Always show the main file toggle when it's set */
+.tree-item.is-main-file .action-main {
+    opacity: 1;
+}
+
+.tree-item.is-main-file > .tree-item-content {
+    color: var(--accent);
+    font-weight: 500;
+}
+
 .reconnect-btn {
     margin: 10px 16px;
     padding: 10px 12px;

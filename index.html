@@ -145,6 +145,7 @@
                         </div>
                         <div class="section-actions" onclick="event.stopPropagation()">
                             <button class="btn" onclick="App.toggleSectionSearch('section-opfs')" title="Search"></button>
+                            <button class="btn" onclick="FileSys.createOPFSDir()" title="New Folder"></button>
                             <button class="btn" onclick="FileSys.createOPFSFile()" title="New File"></button>
                         </div>
                     </div>
@@ -196,10 +197,16 @@
                             <div id="resizer"></div>
                             <div class="preview-header" id="preview-header">
                                 <span style="font-size:10px; font-weight:700; color:var(--text-dim);">PREVIEW</span>
-                                <button class="btn" style="width:20px; height:20px;"
-                                    onclick="Commands.trigger('togglePreview')">
-                                    ✕
-                                </button>
+                                <div style="display:flex; gap:4px;">
+                                    <button class="btn" style="width:20px; height:20px;" title="Refresh Preview"
+                                        onclick="App.refreshPreview()">
+                                        ↻
+                                    </button>
+                                    <button class="btn" style="width:20px; height:20px;" title="Close Preview"
+                                        onclick="Commands.trigger('togglePreview')">
+                                        ✕
+                                    </button>
+                                </div>
                             </div>
                             <iframe id="preview-frame"
                                 sandbox="allow-scripts allow-modals allow-forms"></iframe>

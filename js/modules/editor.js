@@ -152,10 +152,10 @@ const Editor = {
             } catch (e) { /* ignore hover initialization errors */ }
         } catch (e) { console.warn('LSP worker not available', e); }
     },
-    load(content, filename) {
+    async load(content, filename) {
         if (this.instance.getValue() !== content) this.instance.setValue(content, -1);
         const ext = filename ? filename.split('.').pop().toLowerCase() : 'txt';
-        Languages.setEditorMode(this.instance, ext);
+        await Languages.setEditorMode(this.instance, ext);
         this.instance.session.getUndoManager().reset();
         App.updateStats(); App.debouncePreview(true);
         // trigger LSP analyze for immediate symbol extraction with centralized timer

@@ -62,5 +62,10 @@ const Config = {
             Editor.instance.setTheme(this.state.theme === 'latte' ? 'ace/theme/chrome' : 'ace/theme/tomorrow_night_eighties');
             Editor.instance.resize();
         }
+        
+        // Refresh preview to apply new theme colors
+        if (Store.state.previewMode && typeof App !== 'undefined') {
+            App.refreshPreview();
+        }
     }
 };

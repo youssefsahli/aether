@@ -160,10 +160,10 @@ const App = {
             }
         } catch (e) {}
     },
-    openBuffer(name, content, handle, kind) {
-        const existing = Store.state.buffers.find(b => b.name === name);
+    openBuffer(name, content, handle, kind, path = '') {
+        const existing = Store.state.buffers.find(b => b.name === name && (b.path || '') === path);
         if (existing) return Store.setActive(existing.id);
-        Store.addBuffer({ id: 'b' + Date.now(), name, content, handle, kind, dirty: false });
+        Store.addBuffer({ id: 'b' + Date.now(), name, content, handle, kind, path, dirty: false });
     },
     updateStats() {
         if (!Editor.instance) return;
@@ -218,35 +218,458 @@ const App = {
     debouncePreview(immediate) {
         if (!Store.state.previewMode) return;
         clearTimeout(this.pvTimer);
-        const run = () => {
-            const buf = Store.activeBuffer; if (!buf) return;
+        const run = async () => {
+            let buf = Store.activeBuffer; if (!buf) return;
             const f = document.getElementById('preview-frame');
-            const ext = buf.name.split('.').pop().toLowerCase();
             const styles = getComputedStyle(document.body);
             const baseCss = `body{background:${styles.getPropertyValue('--bg')};color:${styles.getPropertyValue('--text')};font-family:'Segoe UI',sans-serif;padding:24px;line-height:1.7;font-size:14px;}h1{font-size:2em;margin:1.2em 0 0.5em;font-weight:600;border-bottom:2px solid ${styles.getPropertyValue('--accent')};padding-bottom:0.3em;}h2{font-size:1.6em;margin:1.1em 0 0.4em;font-weight:600;color:${styles.getPropertyValue('--accent')}}h3{font-size:1.3em;margin:0.9em 0 0.3em;font-weight:600;}h4,h5,h6{font-size:1.1em;margin:0.8em 0 0.2em;font-weight:600;}p{margin:0.8em 0;}a{color:${styles.getPropertyValue('--accent')};text-decoration:none;}a:hover{text-decoration:underline;}pre{background:rgba(0,0,0,0.2);padding:12px;border-radius:4px;overflow:auto;font-size:12px;}code{font-family:'JetBrains Mono',monospace;font-size:0.9em;background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:3px;}pre code{background:none;padding:0;}blockquote{border-left:4px solid ${styles.getPropertyValue('--accent')};padding-left:1em;margin:1em 0;color:${styles.getPropertyValue('--text-dim')};font-style:italic;}li{margin:0.3em 0;}ul,ol{margin:0.8em 0;padding-left:2em;}table{border-collapse:collapse;margin:1em 0;width:100%;}th,td{border:1px solid ${styles.getPropertyValue('--border')};padding:8px 12px;text-align:left;}th{background:rgba(0,0,0,0.1);font-weight:600;}strong{font-weight:600;}`;
+            
+            // Check if project has a main file set - always preview that instead
+            let useMainFile = false;
+            if (buf.kind === 'opfs' && Project.current?.config?.mainFile) {
+                const mainFile = Project.current.config.mainFile;
+                const mainHandle = FileSys._opfsHandles[mainFile];
+                if (mainHandle) {
+                    try {
+                        const file = await mainHandle.getFile();
+                        const mainContent = await file.text();
+                        buf = { 
+                            name: mainFile, 
+                            content: mainContent, 
+                            kind: 'opfs',
+                            handle: mainHandle
+                        };
+                        useMainFile = true;
+                    } catch (e) {
+                        console.warn('Could not load main file:', mainFile, e);
+                    }
+                }
+            }
+            
+            const ext = buf.name.split('.').pop().toLowerCase();
+            let content = buf.content;
+            
+            // For HTML files from OPFS, inline local script and CSS references
+            if (ext === 'html' && buf.kind === 'opfs') {
+                content = await this._inlineOPFSResources(content);
+            }
+            
             let html = "";
-            if (ext === 'md') html = `<style>${baseCss}</style>` + marked.parse(buf.content);
-            else if (ext === 'html') html = buf.content;
-            else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g, '&lt;')}</pre>`;
+            if (ext === 'md') {
+                html = `<style>${baseCss}</style>` + marked.parse(content);
+            } else if (ext === 'html') {
+                html = content;
+            } else if ((ext === 'js' || ext === 'css') && buf.kind === 'opfs' && Project.current) {
+                // For JS/CSS in OPFS projects with an active preview, don't disrupt it
+                // User should click Refresh to see changes
+                if (f.dataset.shellReady) return;
+                // No preview running yet, show the code
+                html = `<style>${baseCss}</style><pre>${content.replace(/</g, '&lt;')}</pre>`;
+            } else {
+                html = `<style>${baseCss}</style><pre>${content.replace(/</g, '&lt;')}</pre>`;
+            }
 
                 // Use a persistent preview shell and postMessage updates to avoid flashing
-                const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});function attachLinkHandlers(){const links=document.querySelectorAll('a[data-aether-file]');links.forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();const filename=this.href.split('/').pop()||this.href;parent.postMessage({type:'aether-open-file',filename},'*');});});}window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.head.appendChild(ns); s.parentNode.removeChild(s); }); attachLinkHandlers(); } if(e.data.type==='scroll-to'){const id=e.data.id;const elem=document.getElementById(id);if(elem){elem.scrollIntoView({behavior:'smooth'});}} });setTimeout(attachLinkHandlers,100);})();<\/script></html>`;
-
-                const htmlContent = `<style>${baseCss}</style>` + (ext === 'md' ? marked.parse(buf.content) : (ext === 'html' ? buf.content : `<pre>${buf.content.replace(/</g, '&lt;')}</pre>`));
+                const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});function attachLinkHandlers(){const links=document.querySelectorAll('a[data-aether-file]');links.forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();const filename=this.href.split('/').pop()||this.href;parent.postMessage({type:'aether-open-file',filename},'*');});});}window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; if(s.type) ns.type = s.type; document.head.appendChild(ns); s.parentNode.removeChild(s); }); attachLinkHandlers(); } if(e.data.type==='scroll-to'){const id=e.data.id;const elem=document.getElementById(id);if(elem){elem.scrollIntoView({behavior:'smooth'});}} });setTimeout(attachLinkHandlers,100);})();<\/script></html>`;
 
                 // If the shell isn't loaded yet, set it and post the content after load
                 if (!f.dataset.shellReady) {
                     f.onload = () => {
-                        try { f.contentWindow.postMessage({ type: 'update', html: htmlContent }, '*'); } catch (e) {}
+                        try { f.contentWindow.postMessage({ type: 'update', html }, '*'); } catch (e) {}
                         f.dataset.shellReady = '1';
                         f.onload = null;
                     };
                     f.srcdoc = shell;
                 } else {
-                    try { f.contentWindow.postMessage({ type: 'update', html: htmlContent }, '*'); } catch (e) {}
+                    try { f.contentWindow.postMessage({ type: 'update', html }, '*'); } catch (e) {}
                 }
         };
         if (immediate) run(); else this.pvTimer = setTimeout(run, 500);
+    },
+    
+    /**
+     * Hard refresh the preview - resets iframe and reloads content
+     */
+    refreshPreview() {
+        const f = document.getElementById('preview-frame');
+        if (f) {
+            delete f.dataset.shellReady;
+            f.srcdoc = '';
+        }
+        this.debouncePreview(true);
+    },
+    
+    /**
+     * Inline local OPFS file references in HTML for preview
+     * Converts <script src="./file.js"> to inline scripts
+     * Converts <link href="./file.css"> to inline styles
+     * Recursively processes ES module imports
+     */
+    async _inlineOPFSResources(html) {
+        if (!Store.state.opfsRoot || !Project.current) return html;
+        
+        const projectRoot = Project.current.root 
+            ? await FileSys._getProjectDir(Project.current.root)
+            : Store.state.opfsRoot;
+        
+        if (!projectRoot) return html;
+        
+        // Cache for loaded files to avoid re-reading
+        const fileCache = new Map();
+        
+        // Helper to read file from OPFS with caching
+        const readFile = async (path, basePath = '') => {
+            // Resolve relative path from basePath
+            const resolvedPath = this._resolveModulePath(path, basePath);
+            
+            if (fileCache.has(resolvedPath)) return fileCache.get(resolvedPath);
+            
+            try {
+                const parts = resolvedPath.split('/').filter(p => p);
+                const filename = parts.pop();
+                let dir = projectRoot;
+                for (const part of parts) {
+                    dir = await dir.getDirectoryHandle(part, { create: false });
+                }
+                const handle = await dir.getFileHandle(filename, { create: false });
+                const file = await handle.getFile();
+                const content = await file.text();
+                fileCache.set(resolvedPath, content);
+                return content;
+            } catch (e) {
+                console.warn(`Could not load OPFS file: ${resolvedPath}`, e);
+                fileCache.set(resolvedPath, null);
+                return null;
+            }
+        };
+        
+        // Bundle a module and its dependencies
+        const bundledModules = new Map(); // path -> bundled code
+        const moduleOrder = []; // topological order
+        
+        const bundleModule = async (path, basePath = '') => {
+            const resolvedPath = this._resolveModulePath(path, basePath);
+            if (bundledModules.has(resolvedPath)) return;
+            
+            const content = await readFile(path, basePath);
+            if (content === null) {
+                bundledModules.set(resolvedPath, null);
+                return;
+            }
+            
+            // Mark as processing to detect circular deps
+            bundledModules.set(resolvedPath, '');
+            
+            // Find all imports in this module
+            const imports = this._parseModuleImports(content);
+            
+            // Recursively bundle dependencies first
+            for (const imp of imports) {
+                if (!imp.path.match(/^(https?:|data:|\/\/)/)) {
+                    await bundleModule(imp.path, resolvedPath);
+                }
+            }
+            
+            // Transform the module code
+            const transformed = this._transformModule(content, resolvedPath, imports);
+            bundledModules.set(resolvedPath, transformed);
+            moduleOrder.push(resolvedPath);
+        };
+        
+        // Parse HTML and find local script/link references
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Process scripts
+        const scripts = doc.querySelectorAll('script[src]');
+        for (const script of scripts) {
+            const src = script.getAttribute('src');
+            if (src && !src.match(/^(https?:|data:|\/\/)/)) {
+                const cleanPath = src.replace(/^\.\//, '');
+                const isModule = script.type === 'module';
+                
+                if (isModule) {
+                    // Bundle the module and all its dependencies
+                    await bundleModule(cleanPath);
+                    
+                    // Create bundled script
+                    const inline = doc.createElement('script');
+                    
+                    // Build the bundle: create module registry and execute in order
+                    let bundle = '(function(){\n';
+                    bundle += 'const __modules__ = {};\n';
+                    bundle += 'const __exports__ = {};\n\n';
+                    
+                    // Add each module as a function
+                    for (const modPath of moduleOrder) {
+                        const code = bundledModules.get(modPath);
+                        if (code) {
+                            const safeName = this._modulePathToId(modPath);
+                            bundle += `// Module: ${modPath}\n`;
+                            bundle += `__modules__["${modPath}"] = function(__exports) {\n${code}\nreturn __exports;\n};\n`;
+                            bundle += `__exports__["${modPath}"] = __modules__["${modPath}"]({});\n\n`;
+                        }
+                    }
+                    
+                    bundle += '})();';
+                    inline.textContent = bundle;
+                    script.parentNode.replaceChild(inline, script);
+                } else {
+                    // Regular script - just inline
+                    const content = await readFile(cleanPath);
+                    if (content !== null) {
+                        const inline = doc.createElement('script');
+                        inline.textContent = content;
+                        script.parentNode.replaceChild(inline, script);
+                    }
+                }
+            }
+        }
+        
+        // Process inline module scripts too
+        const inlineModules = doc.querySelectorAll('script[type="module"]:not([src])');
+        for (const script of inlineModules) {
+            const content = script.textContent;
+            const imports = this._parseModuleImports(content);
+            
+            // Bundle any local dependencies
+            for (const imp of imports) {
+                if (!imp.path.match(/^(https?:|data:|\/\/)/)) {
+                    await bundleModule(imp.path);
+                }
+            }
+            
+            if (moduleOrder.length > 0) {
+                // Transform the inline module and prepend dependencies
+                const transformed = this._transformModule(content, '__main__', imports);
+                
+                let bundle = '(function(){\n';
+                bundle += 'const __modules__ = {};\n';
+                bundle += 'const __exports__ = {};\n\n';
+                
+                for (const modPath of moduleOrder) {
+                    const code = bundledModules.get(modPath);
+                    if (code) {
+                        bundle += `// Module: ${modPath}\n`;
+                        bundle += `__modules__["${modPath}"] = function(__exports) {\n${code}\nreturn __exports;\n};\n`;
+                        bundle += `__exports__["${modPath}"] = __modules__["${modPath}"]({});\n\n`;
+                    }
+                }
+                
+                bundle += `// Main module\n${transformed}\n`;
+                bundle += '})();';
+                
+                const newScript = doc.createElement('script');
+                newScript.textContent = bundle;
+                script.parentNode.replaceChild(newScript, script);
+            }
+        }
+        
+        // Process stylesheets
+        const links = doc.querySelectorAll('link[rel="stylesheet"][href]');
+        for (const link of links) {
+            const href = link.getAttribute('href');
+            if (href && !href.match(/^(https?:|data:|\/\/)/)) {
+                const cleanPath = href.replace(/^\.\//, '');
+                const content = await readFile(cleanPath);
+                if (content !== null) {
+                    const style = doc.createElement('style');
+                    style.textContent = content;
+                    link.parentNode.replaceChild(style, link);
+                }
+            }
+        }
+        
+        // Return the modified HTML
+        return doc.documentElement.outerHTML;
+    },
+    
+    /**
+     * Resolve a module path relative to a base path
+     */
+    _resolveModulePath(path, basePath) {
+        const cleanPath = path.replace(/^\.\//, '');
+        if (!basePath || basePath === '__main__') return cleanPath;
+        
+        // Get directory of base path
+        const baseParts = basePath.split('/');
+        baseParts.pop(); // Remove filename
+        
+        const pathParts = cleanPath.split('/');
+        const result = [...baseParts];
+        
+        for (const part of pathParts) {
+            if (part === '..') {
+                result.pop();
+            } else if (part !== '.') {
+                result.push(part);
+            }
+        }
+        
+        return result.join('/') || cleanPath;
+    },
+    
+    /**
+     * Parse ES module imports from source code
+     */
+    _parseModuleImports(code) {
+        const imports = [];
+        
+        // Match: import X from 'path'
+        // Match: import { a, b } from 'path'
+        // Match: import * as X from 'path'
+        // Match: import 'path'
+        const importRegex = /import\s+(?:(\*\s+as\s+\w+|\{[^}]*\}|\w+)(?:\s*,\s*(\{[^}]*\}))?\s+from\s+)?['"]([^'"]+)['"]/g;
+        
+        let match;
+        while ((match = importRegex.exec(code)) !== null) {
+            const fullMatch = match[0];
+            const imports1 = match[1] || ''; // default or namespace or named
+            const imports2 = match[2] || ''; // additional named imports
+            const path = match[3];
+            
+            imports.push({
+                fullMatch,
+                imports: (imports1 + ' ' + imports2).trim(),
+                path,
+                isNamespace: imports1.includes('* as'),
+                isDefault: imports1 && !imports1.startsWith('{') && !imports1.includes('* as'),
+                namedImports: this._parseNamedImports(imports1, imports2)
+            });
+        }
+        
+        return imports;
+    },
+    
+    /**
+     * Parse named imports from import statement
+     */
+    _parseNamedImports(imports1, imports2) {
+        const named = [];
+        const combined = (imports1 || '') + ' ' + (imports2 || '');
+        const namedMatch = combined.match(/\{([^}]+)\}/g);
+        
+        if (namedMatch) {
+            for (const m of namedMatch) {
+                const inner = m.slice(1, -1);
+                const items = inner.split(',').map(s => s.trim()).filter(s => s);
+                for (const item of items) {
+                    const [name, alias] = item.split(/\s+as\s+/).map(s => s.trim());
+                    named.push({ name, alias: alias || name });
+                }
+            }
+        }
+        
+        return named;
+    },
+    
+    /**
+     * Transform module code: convert imports to registry lookups, exports to assignments
+     */
+    _transformModule(code, modulePath, imports) {
+        let transformed = code;
+        
+        // Replace imports with variable declarations from __exports__
+        for (const imp of imports) {
+            if (imp.path.match(/^(https?:|data:|\/\/)/)) continue;
+            
+            const resolvedPath = this._resolveModulePath(imp.path, modulePath);
+            let replacement = '';
+            
+            if (imp.isNamespace) {
+                // import * as X from 'path' -> const X = __exports__["path"]
+                const alias = imp.imports.match(/\*\s+as\s+(\w+)/)[1];
+                replacement = `const ${alias} = __exports__["${resolvedPath}"]`;
+            } else if (imp.isDefault && imp.namedImports.length === 0) {
+                // import X from 'path' -> const X = __exports__["path"].default
+                const name = imp.imports.trim();
+                replacement = `const ${name} = __exports__["${resolvedPath}"].default`;
+            } else if (imp.namedImports.length > 0) {
+                // import { a, b as c } from 'path' -> const { a, b: c } = __exports__["path"]
+                const destructure = imp.namedImports
+                    .map(n => n.name === n.alias ? n.name : `${n.name}: ${n.alias}`)
+                    .join(', ');
+                
+                if (imp.isDefault) {
+                    // import X, { a, b } from 'path'
+                    const defaultName = imp.imports.split(',')[0].trim().split(/\s/)[0];
+                    replacement = `const ${defaultName} = __exports__["${resolvedPath}"].default;\nconst { ${destructure} } = __exports__["${resolvedPath}"]`;
+                } else {
+                    replacement = `const { ${destructure} } = __exports__["${resolvedPath}"]`;
+                }
+            } else if (!imp.imports) {
+                // import 'path' -> side effect only, already executed
+                replacement = `/* import "${imp.path}" - side effect only */`;
+            }
+            
+            transformed = transformed.replace(imp.fullMatch, replacement);
+        }
+        
+        // Transform exports
+        // export default X -> __exports.default = X
+        transformed = transformed.replace(/export\s+default\s+/g, '__exports.default = ');
+        
+        // Track exported vars with their mutability
+        const exportedVars = [];
+        
+        // export const/let/var X = ... -> const/let/var X = ...; track if mutable
+        transformed = transformed.replace(/export\s+(const|let|var)\s+(\w+)\s*=/g, (match, keyword, name) => {
+            return `${keyword} ${name} =`;
+        });
+        const varExportRegex = /export\s+(const|let|var)\s+(\w+)/g;
+        let varMatch;
+        while ((varMatch = varExportRegex.exec(code)) !== null) {
+            exportedVars.push({ name: varMatch[2], mutable: varMatch[1] !== 'const' });
+        }
+        
+        // export function X() {} -> function X() {}; functions are reassignable
+        transformed = transformed.replace(/export\s+function\s+(\w+)/g, (match, name) => {
+            exportedVars.push({ name, mutable: false });
+            return `function ${name}`;
+        });
+        
+        // export class X {} -> class X {}; classes are not reassignable
+        transformed = transformed.replace(/export\s+class\s+(\w+)/g, (match, name) => {
+            exportedVars.push({ name, mutable: false });
+            return `class ${name}`;
+        });
+        
+        // export { a, b, c } - assume mutable since we don't know
+        transformed = transformed.replace(/export\s*\{([^}]+)\}/g, (match, inner) => {
+            const items = inner.split(',').map(s => s.trim()).filter(s => s);
+            for (const item of items) {
+                const [name, alias] = item.split(/\s+as\s+/).map(s => s.trim());
+                exportedVars.push({ name, alias: alias || name, mutable: true });
+            }
+            return '';
+        });
+        
+        // Add export accessors with getters and setters for live bindings
+        if (exportedVars.length > 0) {
+            transformed += '\n';
+            for (const v of exportedVars) {
+                const name = typeof v === 'string' ? v : v.name;
+                const alias = typeof v === 'string' ? v : (v.alias || v.name);
+                const mutable = typeof v === 'object' ? v.mutable : true;
+                
+                if (mutable) {
+                    // Use getter AND setter for mutable exports
+                    transformed += `Object.defineProperty(__exports, '${alias}', { get: () => ${name}, set: (v) => { ${name} = v; }, enumerable: true, configurable: true });\n`;
+                } else {
+                    // Use only getter for immutable exports
+                    transformed += `Object.defineProperty(__exports, '${alias}', { get: () => ${name}, enumerable: true, configurable: true });\n`;
+                }
+            }
+        }
+        
+        return transformed;
+    },
+    
+    /**
+     * Convert module path to safe identifier
+     */
+    _modulePathToId(path) {
+        return path.replace(/[^a-zA-Z0-9]/g, '_');
     },
     debounceSaveSession() {
         clearTimeout(this.saveTimer);
@@ -295,36 +718,157 @@ const App = {
             });
         });
     },
-    runActiveJSInConsole() {
+    async runActiveJSInConsole() {
         const buf = Store.activeBuffer;
         if (!buf) return UI.toast('No active buffer');
         const ext = buf.name.split('.').pop().toLowerCase();
         if (ext !== 'js') return UI.toast('Run is for .js files only');
 
         // Get content directly from editor (most current)
-        const code = Editor.instance ? Editor.instance.getValue() : buf.content;
+        let code = Editor.instance ? Editor.instance.getValue() : buf.content;
         
         if (!code || !code.trim()) {
             return UI.toast('No code to run');
         }
 
-        // Use async execution
-        (async () => {
-            try {
-                Console.displayInput(`// Running: ${buf.name}`);
-                
-                // Execute code in console context
-                const result = await Console.executeInContext(code);
-                
-                if (result.success) {
-                    Console.displayOutput(`✓ ${buf.name} executed`, 'log');
-                } else {
-                    Console.displayOutput(result.error || 'Execution failed', 'error');
-                }
-            } catch (err) {
-                Console.displayOutput(err.message || String(err), 'error');
+        try {
+            Console.displayInput(`// Running: ${buf.name}`);
+            
+            // Check if code has ES module imports and is from OPFS
+            if (buf.kind === 'opfs' && this._hasModuleImports(code)) {
+                Console.displayOutput('Bundling modules...', 'log');
+                code = await this._bundleModuleCode(code, buf.name);
             }
-        })();
+            
+            // Execute code in console context
+            const result = await Console.executeInContext(code);
+            
+            if (result.success) {
+                Console.displayOutput(`✓ ${buf.name} executed`, 'log');
+            } else {
+                Console.displayOutput(result.error || 'Execution failed', 'error');
+            }
+        } catch (err) {
+            Console.displayOutput(err.message || String(err), 'error');
+        }
+    },
+    
+    /**
+     * Check if code contains ES module import statements
+     */
+    _hasModuleImports(code) {
+        return /\bimport\s+(?:\*\s+as\s+\w+|\{[^}]*\}|\w+)(?:\s*,\s*\{[^}]*\})?\s+from\s+['"][^'"]+['"]/.test(code) ||
+               /\bimport\s+['"][^'"]+['"]/.test(code);
+    },
+    
+    /**
+     * Bundle module code with all its dependencies for console execution
+     */
+    async _bundleModuleCode(code, filename) {
+        if (!Store.state.opfsRoot || !Project.current) {
+            throw new Error('No OPFS project loaded');
+        }
+        
+        const projectRoot = Project.current.root 
+            ? await FileSys._getProjectDir(Project.current.root)
+            : Store.state.opfsRoot;
+        
+        if (!projectRoot) {
+            throw new Error('Could not access project root');
+        }
+        
+        // Cache for loaded files
+        const fileCache = new Map();
+        
+        // Helper to read file from OPFS with caching
+        const readFile = async (path, basePath = '') => {
+            const resolvedPath = this._resolveModulePath(path, basePath);
+            
+            if (fileCache.has(resolvedPath)) return fileCache.get(resolvedPath);
+            
+            try {
+                const parts = resolvedPath.split('/').filter(p => p);
+                const fname = parts.pop();
+                let dir = projectRoot;
+                for (const part of parts) {
+                    dir = await dir.getDirectoryHandle(part, { create: false });
+                }
+                const handle = await dir.getFileHandle(fname, { create: false });
+                const file = await handle.getFile();
+                const content = await file.text();
+                fileCache.set(resolvedPath, content);
+                return content;
+            } catch (e) {
+                console.warn(`Could not load OPFS file: ${resolvedPath}`, e);
+                fileCache.set(resolvedPath, null);
+                return null;
+            }
+        };
+        
+        // Bundle tracking
+        const bundledModules = new Map();
+        const moduleOrder = [];
+        
+        const bundleModule = async (path, basePath = '') => {
+            const resolvedPath = this._resolveModulePath(path, basePath);
+            if (bundledModules.has(resolvedPath)) return;
+            
+            const content = await readFile(path, basePath);
+            if (content === null) {
+                bundledModules.set(resolvedPath, null);
+                return;
+            }
+            
+            bundledModules.set(resolvedPath, '');
+            
+            const imports = this._parseModuleImports(content);
+            
+            for (const imp of imports) {
+                if (!imp.path.match(/^(https?:|data:|\/\/)/)) {
+                    await bundleModule(imp.path, resolvedPath);
+                }
+            }
+            
+            const transformed = this._transformModule(content, resolvedPath, imports);
+            bundledModules.set(resolvedPath, transformed);
+            moduleOrder.push(resolvedPath);
+        };
+        
+        // Parse imports in main code
+        const imports = this._parseModuleImports(code);
+        
+        // Bundle all dependencies
+        for (const imp of imports) {
+            if (!imp.path.match(/^(https?:|data:|\/\/)/)) {
+                await bundleModule(imp.path, filename);
+            }
+        }
+        
+        // Transform main code
+        const transformedMain = this._transformModule(code, filename, imports);
+        
+        // Build the bundle
+        let bundle = '(function(){\n';
+        bundle += '"use strict";\n';
+        bundle += 'const __modules__ = {};\n';
+        bundle += 'const __exports__ = {};\n\n';
+        
+        // Add each dependency module
+        for (const modPath of moduleOrder) {
+            const modCode = bundledModules.get(modPath);
+            if (modCode) {
+                bundle += `// Module: ${modPath}\n`;
+                bundle += `__modules__["${modPath}"] = function(__exports) {\n${modCode}\nreturn __exports;\n};\n`;
+                bundle += `__exports__["${modPath}"] = __modules__["${modPath}"]({});\n\n`;
+            }
+        }
+        
+        // Add main module
+        bundle += `// Main: ${filename}\n`;
+        bundle += transformedMain + '\n';
+        bundle += '})();';
+        
+        return bundle;
     },
     runActiveJS() {
         const buf = Store.activeBuffer;
@@ -385,7 +929,7 @@ ${buf.content}
             if (b.kind === 'config') continue;
             await DB.set('session', null, {
                 id: b.id, name: b.name, content: b.content,
-                handle: b.handle, kind: b.kind, dirty: b.dirty,
+                handle: b.handle, kind: b.kind, path: b.path || '', dirty: b.dirty,
                 active: b.id === Store.state.activeId
             });
         }
@@ -412,6 +956,7 @@ ${buf.content}
             content: b.content,
             handle: b.handle,
             kind: b.kind,
+            path: b.path || '',
             dirty: b.dirty,
             active: isActive
         });

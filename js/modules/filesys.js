@@ -16,18 +16,26 @@ const FileSys = {
         } catch (e) { document.getElementById('opfs-header').innerText = "OPFS Not Available"; }
     },
     async _handleOPFSTreeClick(e) {
-        if (e.target.classList.contains('tree-item-toggle')) {
+        // Handle toggle button (including clicks on SVG icon inside)
+        const toggleBtn = e.target.closest('.tree-item-toggle');
+        if (toggleBtn) {
             e.stopPropagation();
-            const item = e.target.closest('.tree-item');
+            const item = toggleBtn.closest('.tree-item');
             const isCollapsed = item.classList.toggle('collapsed');
             const dirLevel = parseInt(item.getAttribute('data-tree-level') || 0);
-            const childLevel = dirLevel + 1;
             let next = item.nextElementSibling;
             while (next && parseInt(next.getAttribute('data-tree-level') || 0) > dirLevel) {
                 if (isCollapsed) {
                     next.classList.add('hidden-by-parent');
-                } else if (parseInt(next.getAttribute('data-tree-level') || 0) === childLevel) {
-                    next.classList.remove('hidden-by-parent');
+                } else {
+                    // Only show direct children; nested items stay hidden if their parent is collapsed
+                    const nextLevel = parseInt(next.getAttribute('data-tree-level') || 0);
+                    if (nextLevel === dirLevel + 1) {
+                        next.classList.remove('hidden-by-parent');
+                    } else if (!next.classList.contains('collapsed')) {
+                        // Check if any ancestor between this and the toggled item is collapsed
+                        next.classList.remove('hidden-by-parent');
+                    }
                 }
                 next = next.nextElementSibling;
             }
@@ -49,9 +57,29 @@ const FileSys = {
             return;
         }
         
+        // Handle add file button on directories
+        const addBtn = e.target.closest('.action-add');
+        if (addBtn) {
+            e.stopPropagation();
+            const item = addBtn.closest('.tree-item');
+            const dirPath = item.getAttribute('data-tree-name');
+            await this.createOPFSFile(dirPath);
+            return;
+        }
+        
+        // Handle main file toggle button
+        const mainBtn = e.target.closest('.action-main');
+        if (mainBtn) {
+            e.stopPropagation();
+            const item = mainBtn.closest('.tree-item');
+            const fullPath = item.getAttribute('data-tree-name');
+            await this.toggleMainFile(fullPath);
+            return;
+        }
+        
         // Handle rename button (including clicks on SVG icon inside)
         const actionBtn = e.target.closest('.action-btn');
-        if (actionBtn && !actionBtn.classList.contains('action-delete')) {
+        if (actionBtn && !actionBtn.classList.contains('action-delete') && !actionBtn.classList.contains('action-add') && !actionBtn.classList.contains('action-main')) {
             e.stopPropagation();
             const item = actionBtn.closest('.tree-item');
             const name = item.getAttribute('data-tree-name');
@@ -68,9 +96,9 @@ const FileSys = {
             const fullPath = treeItem.getAttribute('data-tree-name');
             const handle = this._opfsHandles[fullPath];
             if (handle) {
-                // Use just the filename for the tab, but keep the handle for saving
+                // Use just the filename for the tab display, but store fullPath for project tracking
                 const fileName = fullPath.split('/').pop();
-                App.openBuffer(fileName, await (await handle.getFile()).text(), handle, 'opfs');
+                App.openBuffer(fileName, await (await handle.getFile()).text(), handle, 'opfs', fullPath);
             }
         }
     },
@@ -91,6 +119,13 @@ const FileSys = {
             return;
         }
         
+        // Get project root directory
+        const projectRoot = Project.current.root 
+            ? await this._getProjectDir(Project.current.root)
+            : Store.state.opfsRoot;
+        
+        if (!projectRoot) return;
+        
         const projectFiles = Project.current.files || [];
         
         // If project has no files, show hint
@@ -103,18 +138,132 @@ const FileSys = {
             return;
         }
         
-        // Render project files directly
-        for (const filename of projectFiles) {
-            try {
-                const handle = await Store.state.opfsRoot.getFileHandle(filename, { create: false });
-                this._opfsHandles[filename] = handle;
+        // Build a tree structure from project files
+        const fileTree = this._buildFileTree(projectFiles);
+        
+        // Render the tree
+        await this._renderProjectTree(projectRoot, fileTree, tree, 0, '');
+    },
+    
+    /**
+     * Build a nested tree structure from flat file paths
+     */
+    _buildFileTree(filePaths) {
+        const root = {};
+        
+        for (const filePath of filePaths) {
+            const parts = filePath.split('/').filter(p => p);
+            let current = root;
+            
+            for (let i = 0; i < parts.length; i++) {
+                const part = parts[i];
+                const isFile = i === parts.length - 1;
                 
+                if (!current[part]) {
+                    current[part] = isFile ? null : {}; // null = file, {} = directory
+                }
+                
+                if (!isFile) {
+                    current = current[part];
+                }
+            }
+        }
+        
+        return root;
+    },
+    
+    /**
+     * Render the project file tree (only project files and their parent directories)
+     */
+    async _renderProjectTree(dirHandle, treeNode, parentEl, level, parentPath) {
+        // Get sorted entries: directories first, then files
+        const entries = Object.entries(treeNode).sort((a, b) => {
+            const aIsDir = a[1] !== null;
+            const bIsDir = b[1] !== null;
+            if (aIsDir !== bIsDir) return aIsDir ? -1 : 1;
+            return a[0].localeCompare(b[0]);
+        });
+        
+        for (const [name, children] of entries) {
+            const fullPath = parentPath ? `${parentPath}/${name}` : name;
+            const isDirectory = children !== null;
+            
+            if (isDirectory) {
+                // Get directory handle
+                let childDirHandle;
+                try {
+                    childDirHandle = await dirHandle.getDirectoryHandle(name, { create: false });
+                } catch (e) {
+                    console.warn(`Directory not found: ${fullPath}`);
+                    continue;
+                }
+                
+                // Render directory
+                const el = document.createElement('div');
+                el.className = 'tree-item is-directory';
+                el.setAttribute('data-tree-name', fullPath);
+                el.setAttribute('data-tree-type', 'directory');
+                el.setAttribute('data-tree-level', level);
+                el.style.paddingLeft = `${12 + level * 16}px`;
+                
+                const toggle = document.createElement('span');
+                toggle.className = 'tree-item-toggle';
+                toggle.innerHTML = Icons.chevronRight;
+                
+                const content = document.createElement('span');
+                content.className = 'tree-item-content';
+                const icon = document.createElement('span');
+                icon.innerHTML = Icons.folder;
+                icon.style.display = 'inline-flex';
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = name;
+                content.appendChild(icon);
+                content.appendChild(nameSpan);
+                
+                el.appendChild(toggle);
+                el.appendChild(content);
+                
+                // Add actions for directories
+                const actions = document.createElement('div');
+                actions.className = 'tree-actions';
+                
+                const addBtn = document.createElement('span');
+                addBtn.className = 'action-btn action-add';
+                addBtn.title = 'New file in folder';
+                addBtn.innerHTML = Icons.plus;
+                actions.appendChild(addBtn);
+                
+                const delBtn = document.createElement('span');
+                delBtn.className = 'action-btn action-delete';
+                delBtn.title = 'Delete folder';
+                delBtn.innerHTML = Icons.trash;
+                actions.appendChild(delBtn);
+                el.appendChild(actions);
+                
+                parentEl.appendChild(el);
+                
+                // Recursively render children
+                await this._renderProjectTree(childDirHandle, children, parentEl, level + 1, fullPath);
+            } else {
+                // Get file handle
+                let fileHandle;
+                try {
+                    fileHandle = await dirHandle.getFileHandle(name, { create: false });
+                } catch (e) {
+                    console.warn(`File not found: ${fullPath}`);
+                    continue;
+                }
+                
+                // Cache handle
+                this._opfsHandles[fullPath] = fileHandle;
+                
+                // Render file
                 const el = document.createElement('div');
                 el.className = 'tree-item is-file';
-                el.setAttribute('data-tree-name', filename);
+                el.setAttribute('data-tree-name', fullPath);
                 el.setAttribute('data-tree-type', 'file');
-                el.setAttribute('data-tree-level', 0);
-                el.style.paddingLeft = '12px';
+                el.setAttribute('data-tree-level', level);
+                el.style.paddingLeft = `${12 + level * 16}px`;
                 
                 const content = document.createElement('span');
                 content.className = 'tree-item-content';
@@ -122,7 +271,7 @@ const FileSys = {
                 icon.innerHTML = Icons.file;
                 icon.style.display = 'inline-flex';
                 const fileText = document.createElement('span');
-                fileText.textContent = filename;
+                fileText.textContent = name;
                 content.appendChild(icon);
                 content.appendChild(fileText);
                 el.appendChild(content);
@@ -135,21 +284,42 @@ const FileSys = {
                 renBtn.title = "Rename";
                 renBtn.innerHTML = Icons.edit;
                 
+                const mainBtn = document.createElement('span');
+                mainBtn.className = 'action-btn action-main';
+                mainBtn.title = "Set as main preview file";
+                const isMain = Project.current?.config?.mainFile === fullPath;
+                mainBtn.innerHTML = isMain ? Icons.pinFilled : Icons.pin;
+                if (isMain) {
+                    mainBtn.classList.add('is-main');
+                    el.classList.add('is-main-file');
+                }
+                
                 const delBtn = document.createElement('span');
                 delBtn.className = 'action-btn action-delete'; 
                 delBtn.title = "Delete";
                 delBtn.innerHTML = Icons.trash;
                 
-                actions.append(renBtn, delBtn);
+                actions.append(mainBtn, renBtn, delBtn);
                 el.append(actions);
-                tree.appendChild(el);
-            } catch (e) {
-                // File doesn't exist in OPFS, skip it
-                console.warn(`Project file not found: ${filename}`);
+                parentEl.appendChild(el);
             }
         }
     },
-    async createOPFSFile() {
+    
+    async _getProjectDir(path) {
+        if (!path) return Store.state.opfsRoot;
+        const parts = path.split('/').filter(p => p);
+        let dir = Store.state.opfsRoot;
+        for (const part of parts) {
+            try {
+                dir = await dir.getDirectoryHandle(part, { create: false });
+            } catch (e) {
+                return null;
+            }
+        }
+        return dir;
+    },
+    async createOPFSFile(parentPath = '') {
         // Use NewFilePrompt for template support
         NewFilePrompt.open(async (name, content) => {
             if (!name) return;
@@ -157,7 +327,28 @@ const FileSys = {
                 // Ensure project exists (creates Untitled if none)
                 await Project.ensureProject();
                 
-                const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
+                // Get project root directory
+                const projectRoot = Project.current?.root 
+                    ? await this._getProjectDir(Project.current.root)
+                    : Store.state.opfsRoot;
+                
+                if (!projectRoot) {
+                    UI.toast('Could not access project directory');
+                    return;
+                }
+                
+                // Build full path (may include subdirectories from filename like "scripts/run.js")
+                const inputParts = name.split('/').filter(p => p);
+                const fileName = inputParts.pop();
+                const dirParts = parentPath ? parentPath.split('/').filter(p => p).concat(inputParts) : inputParts;
+                
+                // Navigate/create directories as needed
+                let currentDir = projectRoot;
+                for (const dir of dirParts) {
+                    currentDir = await currentDir.getDirectoryHandle(dir, { create: true });
+                }
+                
+                const handle = await currentDir.getFileHandle(fileName, { create: true });
                 
                 // Write initial content if provided (from template)
                 if (content) {
@@ -166,16 +357,22 @@ const FileSys = {
                     await writable.close();
                 }
                 
-                App.openBuffer(name, content || "", handle, 'opfs');
+                // Full path for project tracking
+                const fullPath = dirParts.length > 0 ? `${dirParts.join('/')}/${fileName}` : fileName;
                 
-                // Add file to project
-                if (Project.current && !Project.current.files.includes(name)) {
-                    Project.current.files.push(name);
-                    await Project.save();
+                App.openBuffer(fileName, content || "", handle, 'opfs', fullPath);
+                
+                // Add file to project files list
+                if (Project.current && !Project.current.files.includes(fullPath)) {
+                    Project.current.files.push(fullPath);
+                    await Project._saveWithoutFileListUpdate();
                 }
                 
                 this.renderOPFS();
-            } catch (e) { UI.toast('Error creating file'); }
+            } catch (e) { 
+                console.error('Error creating file:', e);
+                UI.toast('Error creating file'); 
+            }
         });
     },
     async createOPFSDir() {
@@ -183,12 +380,27 @@ const FileSys = {
             UI.toast('Local Storage not available.');
             return;
         }
+        
+        // Ensure project exists
+        await Project.ensureProject();
+        
+        // Get project root directory
+        const projectRoot = Project.current?.root 
+            ? await this._getProjectDir(Project.current.root)
+            : Store.state.opfsRoot;
+        
+        if (!projectRoot) {
+            UI.toast('Could not access project directory');
+            return;
+        }
+        
         Prompt.open("New Directory Name:", "new-folder", async (name) => {
             if (!name || name.trim() === '') return;
             try {
-                await Store.state.opfsRoot.getDirectoryHandle(name.trim(), { create: true });
-                this.renderOPFS();
-                UI.toast(`Directory created: ${name}`);
+                await projectRoot.getDirectoryHandle(name.trim(), { create: true });
+                UI.toast(`Directory created: ${name}. Add a file to see it in the tree.`);
+                // Prompt to create first file in the new directory
+                this.createOPFSFile(name.trim());
             } catch (e) { 
                 console.error('Error creating directory:', e);
                 UI.toast('Error: ' + (e.message || 'Could not create directory')); 
@@ -213,15 +425,19 @@ const FileSys = {
         });
     },
     async renameOPFSFile(fullPath, handle) {
-        const parts = fullPath.split('/');
+        const parts = fullPath.split('/').filter(p => p);
         const oldName = parts.pop();
         const dirParts = parts;
         
         Prompt.open(`Rename "${oldName}" to:`, oldName, async (newName) => {
             if (!newName || newName === oldName) return;
             try {
-                // Navigate to parent directory
-                let parentHandle = Store.state.opfsRoot;
+                // Get project root directory
+                let parentHandle = Project.current?.root 
+                    ? await this._getProjectDir(Project.current.root)
+                    : Store.state.opfsRoot;
+                
+                // Navigate to parent directory within project
                 for (const part of dirParts) {
                     parentHandle = await parentHandle.getDirectoryHandle(part);
                 }
@@ -261,14 +477,18 @@ const FileSys = {
         });
     },
     async deleteOPFSFile(path) {
-        const parts = path.split('/');
+        const parts = path.split('/').filter(p => p);
         const name = parts.pop();
         const displayName = path;
         
         Confirm.open("Delete File", `Permanently delete "${displayName}"?`, async () => {
             try {
-                // Navigate to parent directory
-                let parentHandle = Store.state.opfsRoot;
+                // Get project root directory
+                let parentHandle = Project.current?.root 
+                    ? await this._getProjectDir(Project.current.root)
+                    : Store.state.opfsRoot;
+                
+                // Navigate to parent directory within project
                 for (const part of parts) {
                     parentHandle = await parentHandle.getDirectoryHandle(part);
                 }
@@ -332,19 +552,41 @@ const FileSys = {
         });
     },
     async deleteOPFSDir(path) {
-        const parts = path.split('/');
+        const parts = path.split('/').filter(p => p);
         const name = parts.pop();
         const displayName = path;
         
         Confirm.open("Delete Folder", `Permanently delete "${displayName}" and all contents?`, async () => {
             try {
-                // Navigate to parent directory
-                let parentHandle = Store.state.opfsRoot;
+                // Get project root directory
+                let parentHandle = Project.current?.root 
+                    ? await this._getProjectDir(Project.current.root)
+                    : Store.state.opfsRoot;
+                
+                // Navigate to parent directory within project
                 for (const part of parts) {
                     parentHandle = await parentHandle.getDirectoryHandle(part);
                 }
                 
                 await parentHandle.removeEntry(name, { recursive: true });
+                
+                // Remove all tracked files that were inside this directory from project
+                if (Project.current && Project.current.files) {
+                    const dirPrefix = path + '/';
+                    Project.current.files = Project.current.files.filter(f => 
+                        f !== path && !f.startsWith(dirPrefix)
+                    );
+                    await Project._saveWithoutFileListUpdate();
+                }
+                
+                // Close any open buffers from this directory
+                const buffersToClose = Store.state.buffers.filter(b => 
+                    b.kind === 'opfs' && (b.name === name || this._opfsHandles[path + '/' + b.name])
+                );
+                for (const buf of buffersToClose) {
+                    Store.closeBuffer(buf.id);
+                }
+                
                 this.renderOPFS();
                 UI.toast('Folder deleted');
             } catch (e) { 
@@ -353,6 +595,77 @@ const FileSys = {
             }
         });
     },
+    
+    /**
+     * Toggle a file as the main preview file for the project
+     */
+    async toggleMainFile(filePath) {
+        if (!Project.current) {
+            UI.toast('No project loaded');
+            return;
+        }
+        
+        // Initialize config if needed
+        if (!Project.current.config) {
+            Project.current.config = { ...Project.defaultConfig };
+        }
+        
+        const previousMain = Project.current.config.mainFile;
+        
+        // Toggle: if current main file, unset it; otherwise set it
+        if (Project.current.config.mainFile === filePath) {
+            Project.current.config.mainFile = '';
+            UI.toast('Main file cleared');
+        } else {
+            Project.current.config.mainFile = filePath;
+            UI.toast(`Main file: ${filePath.split('/').pop()}`);
+        }
+        
+        // Save project config
+        await Project.save();
+        
+        // Update main file indicators without full re-render
+        this._updateMainFileIndicators(previousMain, Project.current.config.mainFile);
+        
+        // Refresh preview if active
+        if (Store.state.previewMode) {
+            App.refreshPreview();
+        }
+    },
+    
+    /**
+     * Update main file indicators in the tree without full re-render
+     */
+    _updateMainFileIndicators(oldMainPath, newMainPath) {
+        const tree = document.getElementById('opfs-tree');
+        
+        // Remove old main file indicator
+        if (oldMainPath) {
+            const oldItem = tree.querySelector(`.tree-item[data-tree-name="${oldMainPath}"]`);
+            if (oldItem) {
+                oldItem.classList.remove('is-main-file');
+                const mainBtn = oldItem.querySelector('.action-main');
+                if (mainBtn) {
+                    mainBtn.classList.remove('is-main');
+                    mainBtn.innerHTML = Icons.pin;
+                }
+            }
+        }
+        
+        // Add new main file indicator
+        if (newMainPath) {
+            const newItem = tree.querySelector(`.tree-item[data-tree-name="${newMainPath}"]`);
+            if (newItem) {
+                newItem.classList.add('is-main-file');
+                const mainBtn = newItem.querySelector('.action-main');
+                if (mainBtn) {
+                    mainBtn.classList.add('is-main');
+                    mainBtn.innerHTML = Icons.pinFilled;
+                }
+            }
+        }
+    },
+    
     async saveBuffer(buf) {
         if (buf.name === 'config.json' && buf.kind === 'config') { Config.state = JSON.parse(buf.content); Config.save(); Store.markSaved(buf.id); return; }
         // Handle project config saves

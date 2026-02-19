@@ -194,7 +194,7 @@ const Languages = {
      * Initialize - start preloading common modes
      */
     init() {
-        // Start preloading after a short delay to not block initial render
-        setTimeout(() => this.preload(), 1000);
+        // Start preloading immediately for faster first-file syntax highlighting
+        this.preload();
     }
 };

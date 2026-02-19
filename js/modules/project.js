@@ -117,7 +117,7 @@ const Project = {
                         const file = await handle.getFile();
                         const content = await file.text();
                         const fileName = filePath.split('/').pop();
-                        App.openBuffer(fileName, content, handle, 'opfs');
+                        App.openBuffer(fileName, content, handle, 'opfs', filePath);
                         openedCount++;
                     } catch (e) {
                         console.warn(`Could not open project file: ${filePath}`, e);
@@ -187,8 +187,9 @@ const Project = {
             if (!dir) return false;
             
             // Update files list from currently open OPFS buffers
+            // Use path if available (for nested files), otherwise use name
             const opfsBuffers = Store.state.buffers.filter(b => b.kind === 'opfs');
-            this.current.files = opfsBuffers.map(b => b.name);
+            this.current.files = opfsBuffers.map(b => b.path || b.name);
             this.current.modified = Date.now();
             
             const handle = await dir.getFileHandle('.aether-project.json', { create: true });
