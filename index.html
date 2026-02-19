@@ -149,7 +149,7 @@
                         </div>
                     </div>
                     <div id="opfs-project-bar" class="project-bar">
-                        <span id="opfs-project-name" class="project-name" title="Current Project">No Project</span>
+                        <span id="opfs-project-name" class="project-name" title="Click to rename" onclick="Project.showRenameDialog()">No Project</span>
                         <div class="project-actions">
                             <button class="btn" onclick="Project.showPicker()" title="Switch Project" data-icon="folderOpen"></button>
                             <button class="btn" id="btn-save-project" onclick="Project.save().then(ok => ok && UI.toast('Saved'))" title="Save Project" data-icon="save" style="display:none;"></button>

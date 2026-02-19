@@ -65,6 +65,14 @@ Aether.getProjectFiles()                    // Get project file list
 Aether.addFileToProject(filename)           // Add file to project
 ```
 
+### Project Configuration
+```javascript
+Aether.getProject()                         // Get current project info
+Aether.getProjectConfig()                   // Get project config object
+await Aether.updateProjectConfig(updates)   // Update project config
+await Aether.runProjectScript(name)         // Run a configured script
+```
+
 ---
 
 ## Detailed Method Reference

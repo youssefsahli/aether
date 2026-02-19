@@ -33,9 +33,12 @@ const FileSys = {
             }
             return;
         }
-        if (e.target.classList.contains('action-delete')) {
+        
+        // Handle delete button (including clicks on SVG icon inside)
+        const deleteBtn = e.target.closest('.action-delete');
+        if (deleteBtn) {
             e.stopPropagation();
-            const item = e.target.closest('.tree-item');
+            const item = deleteBtn.closest('.tree-item');
             const name = item.getAttribute('data-tree-name');
             const type = item.getAttribute('data-tree-type');
             if (type === 'directory') {
@@ -45,17 +48,24 @@ const FileSys = {
             }
             return;
         }
-        if (e.target.classList.contains('action-btn') && !e.target.classList.contains('action-delete')) {
+        
+        // Handle rename button (including clicks on SVG icon inside)
+        const actionBtn = e.target.closest('.action-btn');
+        if (actionBtn && !actionBtn.classList.contains('action-delete')) {
             e.stopPropagation();
-            const item = e.target.closest('.tree-item');
+            const item = actionBtn.closest('.tree-item');
             const name = item.getAttribute('data-tree-name');
             await this.renameOPFSFile(name, this._opfsHandles[name]);
             return;
         }
-        if (e.target.classList.contains('tree-item-content') && e.target.closest('.tree-item').classList.contains('is-file')) {
+        
+        // Handle clicking on file content (including icon or text inside)
+        const contentEl = e.target.closest('.tree-item-content');
+        const treeItem = e.target.closest('.tree-item');
+        if (contentEl && treeItem && treeItem.classList.contains('is-file')) {
             e.stopPropagation();
-            const item = e.target.closest('.tree-item');
-            const fullPath = item.getAttribute('data-tree-name');
+            e.preventDefault();
+            const fullPath = treeItem.getAttribute('data-tree-name');
             const handle = this._opfsHandles[fullPath];
             if (handle) {
                 // Use just the filename for the tab, but keep the handle for saving
@@ -140,14 +150,23 @@ const FileSys = {
         }
     },
     async createOPFSFile() {
-        Prompt.open("New Local File:", "script.js", async (name) => {
+        // Use NewFilePrompt for template support
+        NewFilePrompt.open(async (name, content) => {
             if (!name) return;
             try {
                 // Ensure project exists (creates Untitled if none)
                 await Project.ensureProject();
                 
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
-                App.openBuffer(name, "", handle, 'opfs');
+                
+                // Write initial content if provided (from template)
+                if (content) {
+                    const writable = await handle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                }
+                
+                App.openBuffer(name, content || "", handle, 'opfs');
                 
                 // Add file to project
                 if (Project.current && !Project.current.files.includes(name)) {
@@ -215,11 +234,30 @@ const FileSys = {
                 await writable.close();
                 await parentHandle.removeEntry(oldName);
 
-                const buf = Store.state.buffers.find(b => b.name === oldName && b.kind === 'opfs');
-                if (buf) { buf.name = newName; buf.handle = newHandle; UI.renderTabs(); document.getElementById('bc-filename').innerText = newName; }
+                // Update buffer if open - match by handle reference for accuracy
+                const buf = Store.state.buffers.find(b => b.handle === handle || (b.name === oldName && b.kind === 'opfs'));
+                if (buf) { 
+                    buf.name = newName; 
+                    buf.handle = newHandle; 
+                    UI.renderTabs(true); // Force full render to update tab name
+                    if (Store.activeBuffer && Store.activeBuffer.id === buf.id) {
+                        document.getElementById('bc-filename').innerText = newName;
+                    }
+                }
+
+                // Update project files list directly (don't rely on save() which only includes open buffers)
+                if (Project.current && Project.current.files) {
+                    const idx = Project.current.files.indexOf(fullPath);
+                    if (idx >= 0) {
+                        const newPath = dirParts.length > 0 ? `${dirParts.join('/')}/${newName}` : newName;
+                        Project.current.files[idx] = newPath;
+                    }
+                    // Save project without overwriting files list
+                    await Project._saveWithoutFileListUpdate();
+                }
 
                 this.renderOPFS(); UI.toast('Renamed');
-            } catch (e) { UI.toast('Rename Failed'); }
+            } catch (e) { UI.toast('Rename Failed'); console.error('Rename error:', e); }
         });
     },
     async deleteOPFSFile(path) {
@@ -239,12 +277,12 @@ const FileSys = {
                 const buf = Store.state.buffers.find(b => b.name === name && b.kind === 'opfs');
                 if (buf) Store.closeBuffer(buf.id);
                 
-                // Remove from project files
+                // Remove from project files list directly
                 if (Project.current && Project.current.files) {
-                    const idx = Project.current.files.indexOf(name);
+                    const idx = Project.current.files.indexOf(path);
                     if (idx >= 0) {
                         Project.current.files.splice(idx, 1);
-                        await Project.save();
+                        await Project._saveWithoutFileListUpdate();
                     }
                 }
                 
@@ -317,6 +355,12 @@ const FileSys = {
     },
     async saveBuffer(buf) {
         if (buf.name === 'config.json' && buf.kind === 'config') { Config.state = JSON.parse(buf.content); Config.save(); Store.markSaved(buf.id); return; }
+        // Handle project config saves
+        if (buf.kind === 'project-config') {
+            const success = await Project.saveConfigFromBuffer(buf.content);
+            if (success) Store.markSaved(buf.id);
+            return;
+        }
         try {
             let handle = buf.handle;
             if (!handle && buf.kind === 'memory') {

@@ -105,7 +105,18 @@ const Script = {
                 Script.context.error(`OPFS delete failed: ${e.message}`);
                 return false;
             }
-        }
+        },
+        
+        // Project operations
+        getProject: () => Project.current ? {
+            name: Project.current.name,
+            root: Project.current.root,
+            files: Project.current.files,
+            config: Project.current.config
+        } : null,
+        getProjectConfig: () => Project.getConfig(),
+        updateProjectConfig: async (updates) => Project.updateConfig(updates),
+        runProjectScript: async (scriptName) => Project.runScript(scriptName)
     },
     
     async loadScript(filename) {

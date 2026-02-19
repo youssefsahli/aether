@@ -189,6 +189,12 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
         fn: () => Project.close()
     },
     {
+        id: 'renameProject',
+        name: 'Rename Project',
+        hint: 'OPFS',
+        fn: () => Project.showRenameDialog()
+    },
+    {
         id: 'saveProject',
         name: 'Save Project',
         hint: 'OPFS',
@@ -212,6 +218,70 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
             if (confirm(`Delete project "${Project.current.name}"? Files will be kept.`)) {
                 await Project.delete(Project.current.root);
             }
+        }
+    },
+    // Project Config commands
+    {
+        id: 'runProject',
+        name: 'Run Project',
+        hint: 'Ctrl+F5',
+        fn: () => Project.runScript('run')
+    },
+    {
+        id: 'buildProject',
+        name: 'Build Project',
+        hint: 'Project',
+        fn: () => Project.runScript('build')
+    },
+    {
+        id: 'testProject',
+        name: 'Test Project',
+        hint: 'Project',
+        fn: () => Project.runScript('test')
+    },
+    {
+        id: 'runProjectScript',
+        name: 'Run Project Script...',
+        hint: 'Project',
+        fn: () => Project.showScriptPicker()
+    },
+    {
+        id: 'editProjectConfig',
+        name: 'Edit Project Config',
+        hint: 'Project',
+        fn: () => Project.editConfig()
+    },
+    {
+        id: 'setRunScript',
+        name: 'Set Run Script',
+        hint: 'Project',
+        fn: () => {
+            const currentScript = Project.current?.config?.scripts?.run || '';
+            Prompt.open('Run script file:', currentScript, async (path) => {
+                if (path !== null) await Project.setScript('run', path);
+            });
+        }
+    },
+    {
+        id: 'setBuildScript',
+        name: 'Set Build Script',
+        hint: 'Project',
+        fn: () => {
+            const currentScript = Project.current?.config?.scripts?.build || '';
+            Prompt.open('Build script file:', currentScript, async (path) => {
+                if (path !== null) await Project.setScript('build', path);
+            });
+        }
+    },
+    {
+        id: 'setTestScript',
+        name: 'Set Test Script',
+        hint: 'Project',
+        fn: () => {
+            const currentScript = Project.current?.config?.scripts?.test || '';
+            Prompt.open('Test script file:', currentScript, async (path) => {
+                if (path !== null) await Project.setScript('test', path);
+            });
         }
     }
 ];

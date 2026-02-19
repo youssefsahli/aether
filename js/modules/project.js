@@ -1,10 +1,24 @@
 /**
  * Project Module
- * OPFS multi-file project support
+ * OPFS multi-file project support with configurable settings
  */
 
 const Project = {
-    current: null, // { name: string, root: string, files: string[] }
+    current: null, // { name: string, root: string, files: string[], config: ProjectConfig }
+    
+    // Default project configuration
+    defaultConfig: {
+        scripts: {
+            run: '',      // Main run script (JS file in project)
+            build: '',    // Build script
+            test: '',     // Test script
+            custom: {}    // Custom named scripts: { name: scriptPath }
+        },
+        mainFile: '',     // Main entry file to open
+        autoOpen: [],     // Files to auto-open when project opens
+        language: '',     // Default language/type hint
+        env: {}           // Environment variables for scripts
+    },
     
     /**
      * Create a new project in the specified OPFS directory
@@ -24,7 +38,8 @@ const Project = {
             root: rootPath,
             files: [],
             created: Date.now(),
-            modified: Date.now()
+            modified: Date.now(),
+            config: JSON.parse(JSON.stringify(this.defaultConfig))
         };
         
         // Save project file to OPFS
@@ -83,13 +98,18 @@ const Project = {
                 return false;
             }
             
-            // Set current project
-            this.current = { ...projectData, root: projectPath };
+            // Set current project with merged config
+            const mergedConfig = { ...JSON.parse(JSON.stringify(this.defaultConfig)), ...(projectData.config || {}) };
+            this.current = { ...projectData, root: projectPath, config: mergedConfig };
             this._updateUI();
+            
+            // Auto-open configured files first, then project files
+            const autoOpenFiles = this.current.config.autoOpen || [];
+            const filesToOpen = [...new Set([...autoOpenFiles, ...(projectData.files || [])])];
             
             // Open all project files
             let openedCount = 0;
-            for (const filePath of projectData.files || []) {
+            for (const filePath of filesToOpen) {
                 const fullPath = projectPath ? `${projectPath}/${filePath}` : filePath;
                 const handle = await this._getFileHandle(fullPath);
                 if (handle) {
@@ -184,33 +204,125 @@ const Project = {
     },
     
     /**
+     * Save project without overwriting files list (for rename/delete operations)
+     */
+    async _saveWithoutFileListUpdate() {
+        if (!this.current) return false;
+        
+        try {
+            const dir = this.current.root 
+                ? await this._getDir(this.current.root) 
+                : Store.state.opfsRoot;
+            
+            if (!dir) return false;
+            
+            this.current.modified = Date.now();
+            
+            const handle = await dir.getFileHandle('.aether-project.json', { create: true });
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(this.current, null, 2));
+            await writable.close();
+            
+            return true;
+        } catch (e) {
+            console.error('Failed to save project:', e);
+            return false;
+        }
+    },
+    
+    /**
      * List available projects in OPFS (directories containing .aether-project.json)
+     * Recursively scans all subdirectories
      */
     async listProjects() {
         const projects = [];
         if (!Store.state.opfsRoot) return projects;
         
-        // Check root for project file
-        try {
-            const handle = await Store.state.opfsRoot.getFileHandle('.aether-project.json', { create: false });
-            const file = await handle.getFile();
-            const data = JSON.parse(await file.text());
-            projects.push({ name: data.name, path: '', data });
-        } catch (e) { /* no root project */ }
-        
-        // Check subdirectories
-        for await (const [name, handle] of Store.state.opfsRoot.entries()) {
-            if (handle.kind === 'directory' && name !== 'templates') {
-                try {
-                    const projHandle = await handle.getFileHandle('.aether-project.json', { create: false });
-                    const file = await projHandle.getFile();
-                    const data = JSON.parse(await file.text());
-                    projects.push({ name: data.name, path: name, data });
-                } catch (e) { /* not a project dir */ }
+        // Helper to scan a directory recursively
+        const scanDir = async (dirHandle, path = '') => {
+            // Check this directory for project file
+            try {
+                const handle = await dirHandle.getFileHandle('.aether-project.json', { create: false });
+                const file = await handle.getFile();
+                const data = JSON.parse(await file.text());
+                projects.push({ name: data.name, path: path, data });
+            } catch (e) { /* no project here */ }
+            
+            // Scan subdirectories (skip templates and hidden folders)
+            for await (const [name, handle] of dirHandle.entries()) {
+                if (handle.kind === 'directory' && name !== 'templates' && !name.startsWith('.')) {
+                    const subPath = path ? `${path}/${name}` : name;
+                    await scanDir(handle, subPath);
+                }
             }
-        }
+        };
+        
+        await scanDir(Store.state.opfsRoot);
+        
+        // Sort by name
+        projects.sort((a, b) => a.name.localeCompare(b.name));
         
         return projects;
+    },
+    
+    /**
+     * Rename current project
+     */
+    async rename(newName) {
+        if (!this.current) {
+            UI.toast('No project open');
+            return false;
+        }
+        
+        if (!newName || !newName.trim()) {
+            UI.toast('Project name required');
+            return false;
+        }
+        
+        const oldName = this.current.name;
+        this.current.name = newName.trim();
+        this.current.modified = Date.now();
+        
+        try {
+            const dir = this.current.root 
+                ? await this._getDir(this.current.root) 
+                : Store.state.opfsRoot;
+            
+            if (!dir) {
+                UI.toast('Could not access directory');
+                this.current.name = oldName;
+                return false;
+            }
+            
+            const handle = await dir.getFileHandle('.aether-project.json', { create: true });
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(this.current, null, 2));
+            await writable.close();
+            
+            this._updateUI();
+            UI.toast(`Renamed to "${newName}"`);
+            return true;
+        } catch (e) {
+            console.error('Failed to rename project:', e);
+            this.current.name = oldName;
+            UI.toast('Failed to rename project');
+            return false;
+        }
+    },
+    
+    /**
+     * Show rename dialog
+     */
+    showRenameDialog() {
+        if (!this.current) {
+            UI.toast('No project open');
+            return;
+        }
+        Prompt.open('Rename project:', this.current.name, async (name) => {
+            if (name && name !== this.current.name) {
+                await this.rename(name);
+            }
+        });
     },
     
     /**
@@ -481,5 +593,287 @@ const Project = {
             }
         });
         observer.observe(mask, { attributes: true, attributeFilter: ['style'] });
+    },
+    
+    // === Project Configuration Methods ===
+    
+    /**
+     * Get current project configuration
+     */
+    getConfig() {
+        if (!this.current) return null;
+        return this.current.config || JSON.parse(JSON.stringify(this.defaultConfig));
+    },
+    
+    /**
+     * Update project configuration
+     */
+    async updateConfig(updates) {
+        if (!this.current) {
+            UI.toast('No project open');
+            return false;
+        }
+        
+        // Merge updates into config
+        this.current.config = {
+            ...this.current.config,
+            ...updates,
+            scripts: {
+                ...this.current.config.scripts,
+                ...(updates.scripts || {})
+            }
+        };
+        
+        // Save updated project
+        return await this.save();
+    },
+    
+    /**
+     * Set a specific script command
+     */
+    async setScript(scriptName, scriptPath) {
+        if (!this.current) {
+            UI.toast('No project open');
+            return false;
+        }
+        
+        if (['run', 'build', 'test'].includes(scriptName)) {
+            this.current.config.scripts[scriptName] = scriptPath;
+        } else {
+            // Custom script
+            this.current.config.scripts.custom = this.current.config.scripts.custom || {};
+            this.current.config.scripts.custom[scriptName] = scriptPath;
+        }
+        
+        await this.save();
+        UI.toast(`Script "${scriptName}" set to "${scriptPath}"`);
+        return true;
+    },
+    
+    /**
+     * Run a project script by name (run, build, test, or custom)
+     */
+    async runScript(scriptName = 'run') {
+        if (!this.current) {
+            UI.toast('No project open');
+            return false;
+        }
+        
+        const config = this.current.config;
+        let scriptPath;
+        
+        // Find the script path
+        if (['run', 'build', 'test'].includes(scriptName)) {
+            scriptPath = config.scripts[scriptName];
+        } else if (config.scripts.custom && config.scripts.custom[scriptName]) {
+            scriptPath = config.scripts.custom[scriptName];
+        }
+        
+        if (!scriptPath) {
+            UI.toast(`No "${scriptName}" script configured`);
+            return false;
+        }
+        
+        // Load and execute the script
+        try {
+            const fullPath = this.current.root 
+                ? `${this.current.root}/${scriptPath}` 
+                : scriptPath;
+            
+            const handle = await this._getFileHandle(fullPath);
+            if (!handle) {
+                UI.toast(`Script not found: ${scriptPath}`);
+                return false;
+            }
+            
+            const file = await handle.getFile();
+            const code = await file.text();
+            
+            // Create enhanced context with project info
+            const projectContext = {
+                ...Script.context,
+                project: {
+                    name: this.current.name,
+                    root: this.current.root,
+                    config: this.current.config,
+                    env: config.env || {}
+                }
+            };
+            
+            UI.toast(`Running: ${scriptName}`);
+            const success = await Script.executeScript(code, projectContext);
+            
+            if (success) {
+                UI.toast(`Script "${scriptName}" completed`);
+            }
+            return success;
+        } catch (e) {
+            console.error(`Failed to run script "${scriptName}":`, e);
+            UI.toast(`Script error: ${e.message}`);
+            return false;
+        }
+    },
+    
+    /**
+     * Show script picker to run a configured script
+     */
+    async showScriptPicker() {
+        if (!this.current) {
+            UI.toast('No project open');
+            return;
+        }
+        
+        const config = this.current.config;
+        const items = [];
+        
+        // Add standard scripts
+        if (config.scripts.run) {
+            items.push({
+                label: 'Run',
+                hint: config.scripts.run,
+                fn: () => this.runScript('run')
+            });
+        }
+        if (config.scripts.build) {
+            items.push({
+                label: 'Build',
+                hint: config.scripts.build,
+                fn: () => this.runScript('build')
+            });
+        }
+        if (config.scripts.test) {
+            items.push({
+                label: 'Test',
+                hint: config.scripts.test,
+                fn: () => this.runScript('test')
+            });
+        }
+        
+        // Add custom scripts
+        if (config.scripts.custom) {
+            for (const [name, path] of Object.entries(config.scripts.custom)) {
+                items.push({
+                    label: name,
+                    hint: path,
+                    fn: () => this.runScript(name)
+                });
+            }
+        }
+        
+        if (items.length === 0) {
+            UI.toast('No scripts configured. Edit project config to add scripts.');
+            return;
+        }
+        
+        this._showPicker(items);
+    },
+    
+    /**
+     * Open project configuration for editing
+     */
+    async editConfig() {
+        if (!this.current) {
+            UI.toast('No project open');
+            return;
+        }
+        
+        // Create a formatted config representation
+        const configJson = JSON.stringify({
+            name: this.current.name,
+            config: this.current.config
+        }, null, 2);
+        
+        // Open as editable buffer
+        const bufferName = `.aether-project.json`;
+        App.openBuffer(bufferName, configJson, null, 'project-config');
+        UI.toast('Edit config and save (Ctrl+S) to apply');
+    },
+    
+    /**
+     * Save configuration from buffer (called when saving project-config buffer)
+     */
+    async saveConfigFromBuffer(content) {
+        if (!this.current) {
+            UI.toast('No project open');
+            return false;
+        }
+        
+        try {
+            const parsed = JSON.parse(content);
+            
+            // Update name if changed
+            if (parsed.name && parsed.name !== this.current.name) {
+                this.current.name = parsed.name;
+            }
+            
+            // Merge config
+            if (parsed.config) {
+                this.current.config = {
+                    ...this.current.config,
+                    ...parsed.config,
+                    scripts: {
+                        ...this.current.config.scripts,
+                        ...(parsed.config.scripts || {})
+                    }
+                };
+            }
+            
+            this.current.modified = Date.now();
+            
+            // Save to OPFS
+            const dir = this.current.root 
+                ? await this._getDir(this.current.root) 
+                : Store.state.opfsRoot;
+            
+            if (!dir) {
+                UI.toast('Could not access directory');
+                return false;
+            }
+            
+            // Build full project data for save
+            const projectData = {
+                name: this.current.name,
+                root: this.current.root,
+                files: this.current.files,
+                created: this.current.created,
+                modified: this.current.modified,
+                config: this.current.config
+            };
+            
+            const handle = await dir.getFileHandle('.aether-project.json', { create: true });
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(projectData, null, 2));
+            await writable.close();
+            
+            this._updateUI();
+            UI.toast('Project config saved');
+            return true;
+        } catch (e) {
+            console.error('Failed to save project config:', e);
+            UI.toast(`Invalid JSON: ${e.message}`);
+            return false;
+        }
+    },
+    
+    /**
+     * List all configured scripts
+     */
+    listScripts() {
+        if (!this.current) return [];
+        
+        const config = this.current.config;
+        const scripts = [];
+        
+        if (config.scripts.run) scripts.push({ name: 'run', path: config.scripts.run });
+        if (config.scripts.build) scripts.push({ name: 'build', path: config.scripts.build });
+        if (config.scripts.test) scripts.push({ name: 'test', path: config.scripts.test });
+        
+        if (config.scripts.custom) {
+            for (const [name, path] of Object.entries(config.scripts.custom)) {
+                scripts.push({ name, path });
+            }
+        }
+        
+        return scripts;
     }
 };

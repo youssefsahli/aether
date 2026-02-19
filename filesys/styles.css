@@ -400,12 +400,25 @@ aside {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 120px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+
+.project-bar .project-name:hover {
+    background: var(--highlight);
 }
 
 .project-bar .project-name.no-project {
     color: var(--text-dim);
     font-weight: 400;
     font-style: italic;
+    cursor: default;
+}
+
+.project-bar .project-name.no-project:hover {
+    background: transparent;
 }
 
 .project-bar .project-actions {
@@ -434,6 +447,8 @@ aside {
     border-radius: 6px;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     contain: layout style paint;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .tree-item-content {
@@ -776,6 +791,54 @@ main {
 /* Active tab: accent color for dot */
 .tab.active .unsaved-dot {
     background: var(--accent);
+}
+
+/* Tab type badges */
+.tab-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+
+.tab-badge-opfs {
+    background: #89b4fa20;
+    color: #89b4fa;
+}
+
+.tab-badge-disk {
+    background: #a6e3a120;
+    color: #a6e3a1;
+}
+
+.tab-badge-memory {
+    background: #f9e2af20;
+    color: #f9e2af;
+}
+
+.tab-badge-config {
+    background: #cba6f720;
+    color: #cba6f7;
+}
+
+.tab-badge-system {
+    background: #94e2d520;
+    color: #94e2d5;
+}
+
+.tab-lock {
+    font-size: 9px;
+    margin-left: 3px;
+    opacity: 0.6;
+}
+
+.tab-readonly .tab-name {
+    opacity: 0.7;
 }
 
 /* Make dirty tabs more noticeable */

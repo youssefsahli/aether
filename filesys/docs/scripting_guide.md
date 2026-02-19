@@ -538,6 +538,81 @@ Add an existing OPFS file to the current project.
 
 ## Special Configuration Files
 
+### `.aether-project.json` (Project Config)
+
+Each project stores its configuration in `.aether-project.json`. This file supports:
+
+```json
+{
+  "name": "My Project",
+  "files": ["index.js", "utils.js"],
+  "config": {
+    "scripts": {
+      "run": "run.js",
+      "build": "build.js",
+      "test": "test.js",
+      "custom": {
+        "deploy": "deploy.js",
+        "lint": "lint.js"
+      }
+    },
+    "mainFile": "index.js",
+    "autoOpen": ["index.js", "readme.md"],
+    "language": "javascript",
+    "env": {
+      "API_URL": "https://api.example.com"
+    }
+  }
+}
+```
+
+**Config Options:**
+- `scripts.run` - Main script to run with "Run Project" command (Ctrl+F5)
+- `scripts.build` - Build script
+- `scripts.test` - Test script
+- `scripts.custom` - Named custom scripts
+- `mainFile` - Primary entry file
+- `autoOpen` - Files to open automatically when project opens
+- `env` - Environment variables passed to scripts
+
+### Running Project Scripts
+
+Use the command palette or scripting API:
+
+```javascript
+// Run the main "run" script
+await Aether.runProjectScript('run');
+
+// Run build script
+await Aether.runProjectScript('build');
+
+// Run custom script
+await Aether.runProjectScript('deploy');
+```
+
+**Commands:**
+- `Run Project` (Ctrl+F5) - Runs the configured `run` script
+- `Build Project` - Runs the `build` script
+- `Test Project` - Runs the `test` script
+- `Run Project Script...` - Shows picker for all configured scripts
+- `Edit Project Config` - Opens the project config for editing
+
+### Project Script Context
+
+Scripts executed via project commands have access to project info:
+
+```javascript
+// Inside a project script (run.js, build.js, etc.)
+const project = Aether.project;  // Available in project scripts
+
+Aether.log('Project: ' + project.name);
+Aether.log('Root: ' + project.root);
+
+// Access environment variables
+const apiUrl = project.env.API_URL;
+Aether.log('API URL: ' + apiUrl);
+```
+
 ### `.aether.js` (Startup Script)
 Automatically runs when Aether loads. Use for initialization and setup:
 

@@ -4,7 +4,16 @@
  */
 
 const UI = {
-    renderTabs() {
+    // Tab badge configs: map kind to label & CSS class
+    _tabBadges: {
+        opfs: { label: 'local', cls: 'tab-badge-opfs' },
+        disk: { label: 'fs', cls: 'tab-badge-disk' },
+        memory: { label: 'mem', cls: 'tab-badge-memory' },
+        config: { label: 'cfg', cls: 'tab-badge-config' },
+        system: { label: 'sys', cls: 'tab-badge-system' }
+    },
+    
+    renderTabs(forceFullRender = false) {
         const con = document.getElementById('tabs-scroll');
         // Track existing tabs to avoid full re-render
         const existingTabs = Array.from(con.querySelectorAll('.tab'));
@@ -12,7 +21,7 @@ const UI = {
         const newIds = new Set(Store.state.buffers.map(b => b.id));
         
         // Only do full re-render if tab count changed or active tab changed
-        const needsFullRender = existingIds.size !== newIds.size || 
+        const needsFullRender = forceFullRender || existingIds.size !== newIds.size || 
             (con.querySelector('.tab.active')?.dataset.bufferId !== Store.state.activeId);
         
         if (needsFullRender) {
@@ -22,9 +31,32 @@ const UI = {
                 el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
                 el.dataset.bufferId = b.id;
                 
+                // Add kind-based class for styling
+                if (b.kind) el.classList.add(`tab-kind-${b.kind}`);
+                if (b.readonly) el.classList.add('tab-readonly');
+                
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'tab-name';
                 nameSpan.textContent = b.name;
+                
+                // Add badge for tab type
+                const badge = this._tabBadges[b.kind];
+                if (badge) {
+                    const badgeSpan = document.createElement('span');
+                    badgeSpan.className = `tab-badge ${badge.cls}`;
+                    badgeSpan.textContent = badge.label;
+                    badgeSpan.title = b.readonly ? `${b.kind} (read-only)` : b.kind;
+                    nameSpan.appendChild(badgeSpan);
+                }
+                
+                // Readonly indicator
+                if (b.readonly) {
+                    const lockSpan = document.createElement('span');
+                    lockSpan.className = 'tab-lock';
+                    lockSpan.innerHTML = '🔒';
+                    lockSpan.title = 'Read-only';
+                    nameSpan.appendChild(lockSpan);
+                }
                 
                 const dotSpan = document.createElement('span');
                 dotSpan.className = 'unsaved-dot';
