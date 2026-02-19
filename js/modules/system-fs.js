@@ -7,8 +7,10 @@ const SystemFS = {
     fileCache: new Map(),
     loadedFiles: new Set(),
     filesysStructure: {},
+    templates: new Map(), // Template cache: extension -> [{name, content}]
     async init() {
         await this.syncFilesysFolder();
+        await this.loadTemplates();
         await this.renderSystemTree();
     },
     async syncFilesysFolder() {
@@ -189,5 +191,43 @@ const SystemFS = {
     async lazyLoadFile(filename) {
         // Try to load file if referenced from markdown links
         return this.loadFile(filename);
+    },
+    // Template system
+    async loadTemplates() {
+        const templateFiles = [
+            'basic.js', 'class.js', 'module.js',
+            'basic.html',
+            'basic.css',
+            'readme.md', 'notes.md'
+        ];
+        
+        for (const file of templateFiles) {
+            try {
+                const response = await fetch(`filesys/templates/${file}`, { cache: 'no-store' });
+                if (response.ok) {
+                    const content = await response.text();
+                    const ext = file.split('.').pop().toLowerCase();
+                    const name = file.replace(/\.[^.]+$/, ''); // Remove extension
+                    
+                    if (!this.templates.has(ext)) {
+                        this.templates.set(ext, []);
+                    }
+                    this.templates.get(ext).push({ name, filename: file, content });
+                }
+            } catch (e) {
+                console.warn(`Could not load template ${file}:`, e);
+            }
+        }
+    },
+    getTemplatesForExtension(ext) {
+        ext = ext.toLowerCase().replace('.', '');
+        return this.templates.get(ext) || [];
+    },
+    applyTemplateVariables(content, filename) {
+        const name = filename.replace(/\.[^.]+$/, ''); // Remove extension
+        const date = new Date().toLocaleDateString();
+        return content
+            .replace(/\$\{name\}/g, name)
+            .replace(/\$\{date\}/g, date);
     }
 };

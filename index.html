@@ -255,6 +255,31 @@
             </div>
         </div>
 
+        <!-- New File Dialog with Templates -->
+        <div id="newfile-mask" class="overlay-mask">
+            <div class="dialog" style="width: 360px;">
+                <div style="padding:14px 20px; font-weight:700; background:var(--header-bg); color:var(--text); border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase;">
+                    New File
+                </div>
+                <div style="padding: 16px;">
+                    <input type="text" id="newfile-input" placeholder="filename.js" autocomplete="off" 
+                        style="background:var(--bg); width:100%; margin-bottom:12px;">
+                    <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+                        Templates
+                    </div>
+                    <div id="newfile-templates" class="template-list">
+                        <div class="template-hint">Type a filename to see templates</div>
+                    </div>
+                </div>
+                <div style="display:flex; padding:12px; gap:8px; background: var(--header-bg); justify-content: flex-end;">
+                    <button class="btn" style="width:auto; padding:6px 12px; font-size:12px;"
+                        onclick="NewFilePrompt.close()">Cancel</button>
+                    <button class="btn primary" style="width:auto; padding:6px 12px; font-size:12px;"
+                        id="newfile-ok">Create</button>
+                </div>
+            </div>
+        </div>
+
         <div id="toast">
             ✓
             <span id="toast-msg">Initialized</span>

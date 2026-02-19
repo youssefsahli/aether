@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${name} - Form</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; background: #f5f5f5; padding: 40px; }
+        form { max-width: 400px; margin: 0 auto; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 24px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <form id="form">
+        <h2>${name}</h2>
+        
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            console.log('Form submitted:', data);
+        });
+    </script>
+</body>
+</html>

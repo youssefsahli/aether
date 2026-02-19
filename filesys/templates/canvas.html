@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${name} - Canvas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        canvas { border: 1px solid #333; background: #16213e; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw your shapes here
+            ctx.fillStyle = '#e94560';
+            ctx.fillRect(100, 100, 200, 150);
+            
+            ctx.beginPath();
+            ctx.arc(500, 300, 80, 0, Math.PI * 2);
+            ctx.fillStyle = '#0f3460';
+            ctx.fill();
+        }
+
+        function animate() {
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

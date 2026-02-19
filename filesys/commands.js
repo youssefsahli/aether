@@ -3,7 +3,7 @@
 // Each command has an id, name, hint, and function
 
 const AETHER_COMMANDS = [
-    { id: 'newFile', name: 'New File', hint: 'Alt+N', fn: () => Prompt.open("Filename:", "untitled.js", (n) => App.openBuffer(n, "", null, 'memory')) },
+    { id: 'newFile', name: 'New File', hint: 'Alt+N', fn: () => NewFilePrompt.open((name, content) => App.openBuffer(name, content, null, 'memory')) },
     { id: 'saveFile', name: 'Save File', hint: 'Ctrl+S', fn: () => Store.activeBuffer && FileSys.saveBuffer(Store.activeBuffer) },
     { id: 'openFile', name: 'Open File', hint: 'Ctrl+O', fn: () => FileSys.openFile() },
     { id: 'closeTab', name: 'Close Tab', hint: 'Alt+W', fn: () => Store.activeBuffer && Store.closeBuffer(Store.activeBuffer.id) },
