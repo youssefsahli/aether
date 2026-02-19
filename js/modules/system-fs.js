@@ -1,17 +1,86 @@
 /**
  * System File System Module
  * Lazy loading of system files (docs, config, etc.)
+ * Templates are mirrored to OPFS for user customization
  */
 
 const SystemFS = {
     fileCache: new Map(),
     loadedFiles: new Set(),
     filesysStructure: {},
-    templates: new Map(), // Template cache: extension -> [{name, content}]
+    templates: new Map(), // Template cache: extension -> [{name, content, source}]
+    templatesDir: null, // OPFS handle for templates directory
+    
+    // All bundled template files
+    bundledTemplates: [
+        'basic.js', 'class.js', 'module.js', 'api.js', 'async.js', 'events.js', 'store.js', 'test.js',
+        'basic.html', 'canvas.html', 'form.html',
+        'basic.css', 'animations.css', 'flexbox.css', 'grid.css',
+        'readme.md', 'notes.md', 'changelog.md', 'api-docs.md'
+    ],
+    
     async init() {
         await this.syncFilesysFolder();
+        await this.initTemplatesFolder();
         await this.loadTemplates();
         await this.renderSystemTree();
+    },
+    
+    async initTemplatesFolder() {
+        // Create templates directory in OPFS if it doesn't exist
+        if (!Store.state.opfsRoot) return;
+        
+        try {
+            this.templatesDir = await Store.state.opfsRoot.getDirectoryHandle('templates', { create: true });
+            
+            // Check if templates were already synced
+            const syncMarker = await this.checkSyncMarker();
+            if (!syncMarker) {
+                await this.syncBundledTemplatesToOPFS();
+            }
+        } catch (e) {
+            console.warn('Could not initialize templates folder:', e);
+        }
+    },
+    
+    async checkSyncMarker() {
+        // Check if we've already synced templates (avoid overwriting user changes)
+        try {
+            await this.templatesDir.getFileHandle('.synced', { create: false });
+            return true;
+        } catch (e) {
+            return false;
+        }
+    },
+    
+    async syncBundledTemplatesToOPFS() {
+        // Copy all bundled templates to OPFS
+        if (!this.templatesDir) return;
+        
+        for (const file of this.bundledTemplates) {
+            try {
+                const response = await fetch(`filesys/templates/${file}`, { cache: 'no-store' });
+                if (response.ok) {
+                    const content = await response.text();
+                    const handle = await this.templatesDir.getFileHandle(file, { create: true });
+                    const writable = await handle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                }
+            } catch (e) {
+                // Silently skip failed templates
+            }
+        }
+        
+        // Mark as synced
+        try {
+            const marker = await this.templatesDir.getFileHandle('.synced', { create: true });
+            const writable = await marker.createWritable();
+            await writable.write(new Date().toISOString());
+            await writable.close();
+        } catch (e) {
+            // Ignore
+        }
     },
     async syncFilesysFolder() {
         // Comprehensive list of all files in filesys/ organized by structure
@@ -61,6 +130,44 @@ const SystemFS = {
         
         // Render tree recursively
         this.renderTreeNode(tree, div, 0);
+        
+        // Add templates folder link (opens template manager)
+        this.createTemplatesLink(div);
+    },
+    
+    createTemplatesLink(parentEl) {
+        const el = document.createElement('div');
+        el.className = 'tree-item is-directory';
+        el.setAttribute('data-tree-name', 'templates');
+        el.setAttribute('data-tree-level', 0);
+        el.setAttribute('data-tree-type', 'directory');
+        el.style.paddingLeft = '12px';
+        el.style.cursor = 'pointer';
+        
+        const content = document.createElement('span');
+        content.className = 'tree-item-content';
+        
+        const icon = document.createElement('span');
+        icon.innerHTML = Icons.folder;
+        icon.style.display = 'inline-flex';
+        
+        const text = document.createElement('span');
+        text.textContent = 'templates';
+        text.style.color = 'var(--accent)';
+        
+        const badge = document.createElement('span');
+        badge.style.cssText = 'font-size:9px; padding:1px 4px; background:var(--accent); color:var(--bg); border-radius:3px; margin-left:6px;';
+        let count = 0;
+        for (const templates of this.templates.values()) count += templates.length;
+        badge.textContent = count;
+        
+        content.appendChild(icon);
+        content.appendChild(text);
+        content.appendChild(badge);
+        el.appendChild(content);
+        
+        el.onclick = () => TemplateManager.open();
+        parentEl.appendChild(el);
     },
     renderTreeNode(node, parentEl, level, pathPrefix = '') {
         const entries = Object.entries(node);
@@ -192,32 +299,134 @@ const SystemFS = {
         // Try to load file if referenced from markdown links
         return this.loadFile(filename);
     },
-    // Template system
+    // Template system - now loads from OPFS
     async loadTemplates() {
-        const templateFiles = [
-            'basic.js', 'class.js', 'module.js',
-            'basic.html',
-            'basic.css',
-            'readme.md', 'notes.md'
-        ];
+        this.templates.clear();
         
-        for (const file of templateFiles) {
+        // Try to load from OPFS first (user-customizable)
+        if (this.templatesDir) {
+            try {
+                for await (const [name, handle] of this.templatesDir.entries()) {
+                    if (handle.kind === 'file' && !name.startsWith('.')) {
+                        try {
+                            const file = await handle.getFile();
+                            const content = await file.text();
+                            const ext = name.split('.').pop().toLowerCase();
+                            const templateName = name.replace(/\.[^.]+$/, '');
+                            
+                            if (!this.templates.has(ext)) {
+                                this.templates.set(ext, []);
+                            }
+                            this.templates.get(ext).push({ 
+                                name: templateName, 
+                                filename: name, 
+                                content,
+                                source: 'opfs',
+                                handle
+                            });
+                        } catch (e) {
+                            // Skip corrupted files
+                        }
+                    }
+                }
+                return; // Successfully loaded from OPFS
+            } catch (e) {
+                console.warn('Could not load templates from OPFS:', e);
+            }
+        }
+        
+        // Fallback: load from bundled files
+        for (const file of this.bundledTemplates) {
             try {
                 const response = await fetch(`filesys/templates/${file}`, { cache: 'no-store' });
                 if (response.ok) {
                     const content = await response.text();
                     const ext = file.split('.').pop().toLowerCase();
-                    const name = file.replace(/\.[^.]+$/, ''); // Remove extension
+                    const name = file.replace(/\.[^.]+$/, '');
                     
                     if (!this.templates.has(ext)) {
                         this.templates.set(ext, []);
                     }
-                    this.templates.get(ext).push({ name, filename: file, content });
+                    this.templates.get(ext).push({ name, filename: file, content, source: 'bundled' });
                 }
             } catch (e) {
-                console.warn(`Could not load template ${file}:`, e);
+                // Silently skip
             }
         }
+    },
+    
+    async saveAsTemplate(filename, content) {
+        // Save current file as a template to OPFS
+        if (!this.templatesDir) {
+            UI.toast('Templates folder not available');
+            return false;
+        }
+        
+        try {
+            const handle = await this.templatesDir.getFileHandle(filename, { create: true });
+            const writable = await handle.createWritable();
+            await writable.write(content);
+            await writable.close();
+            
+            // Refresh templates
+            await this.loadTemplates();
+            UI.toast(`Template saved: ${filename}`);
+            return true;
+        } catch (e) {
+            UI.toast('Failed to save template');
+            console.error('Save template failed:', e);
+            return false;
+        }
+    },
+    
+    async deleteTemplate(filename) {
+        if (!this.templatesDir) return false;
+        
+        try {
+            await this.templatesDir.removeEntry(filename);
+            await this.loadTemplates();
+            UI.toast(`Template deleted: ${filename}`);
+            return true;
+        } catch (e) {
+            UI.toast('Failed to delete template');
+            return false;
+        }
+    },
+    
+    async openTemplate(filename) {
+        // Open a template for editing
+        if (!this.templatesDir) return;
+        
+        try {
+            const handle = await this.templatesDir.getFileHandle(filename, { create: false });
+            const file = await handle.getFile();
+            const content = await file.text();
+            App.openBuffer(filename, content, handle, 'opfs');
+        } catch (e) {
+            UI.toast(`Could not open template: ${filename}`);
+        }
+    },
+    
+    async resetTemplates() {
+        // Reset templates to bundled defaults
+        if (!this.templatesDir) return;
+        
+        Confirm.open('Reset Templates', 'This will overwrite all custom templates with defaults. Continue?', async () => {
+            try {
+                // Remove sync marker to force re-sync
+                try {
+                    await this.templatesDir.removeEntry('.synced');
+                } catch (e) {
+                    // Ignore
+                }
+                
+                await this.syncBundledTemplatesToOPFS();
+                await this.loadTemplates();
+                UI.toast('Templates reset to defaults');
+            } catch (e) {
+                UI.toast('Failed to reset templates');
+            }
+        });
     },
     getTemplatesForExtension(ext) {
         ext = ext.toLowerCase().replace('.', '');

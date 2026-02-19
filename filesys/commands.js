@@ -142,5 +142,31 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
             App.openBuffer('_script_api_docs.md', apiDoc, null, 'memory');
             UI.toast('API reference opened');
         }
+    },
+    {
+        id: 'saveAsTemplate',
+        name: 'Save as Template',
+        hint: 'Templates',
+        fn: () => {
+            const buf = Store.activeBuffer;
+            if (!buf) return UI.toast('No active file');
+            const filename = buf.name;
+            Prompt.open(`Save as template:`, filename, async (name) => {
+                if (!name) return;
+                await SystemFS.saveAsTemplate(name, buf.content);
+            });
+        }
+    },
+    {
+        id: 'manageTemplates',
+        name: 'Manage Templates',
+        hint: 'Templates',
+        fn: () => TemplateManager.open()
+    },
+    {
+        id: 'resetTemplates',
+        name: 'Reset Templates to Defaults',
+        hint: 'Templates',
+        fn: () => SystemFS.resetTemplates()
     }
 ];

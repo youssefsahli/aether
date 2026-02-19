@@ -303,8 +303,7 @@ const FileSys = {
             this.originalRootDir = workspaceHandle; // Store original for reference
             await this.renderWorkspace(filesysHandle);
         } catch (e) {
-            // filesys/ doesn't exist or permission denied, render workspace root instead
-            console.warn('filesys/ folder not found, rendering workspace root instead:', e);
+            // filesys/ doesn't exist, silently render workspace root instead
             this.renderWorkspace(workspaceHandle);
         }
     },

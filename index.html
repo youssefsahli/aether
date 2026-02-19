@@ -4,13 +4,24 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="theme-color" content="#1e1e2e">
         <meta name="description" content="A powerful, modern code editor with live preview, themes, and OPFS storage">
         <title>Aether v3 - Ace Flux</title>
 
-        <!-- PWA Manifest & Icon -->
-        <link rel="manifest" href="/manifest.json">
+        <!-- PWA Manifest & Icon (loaded conditionally to avoid CORS issues in dev) -->
+        <script>
+            // Only load manifest on production domains to avoid CORS errors in dev environments
+            if (location.hostname === 'localhost' || 
+                location.hostname.endsWith('.github.io') || 
+                location.protocol === 'file:' ||
+                !location.hostname.includes('.app.github.dev')) {
+                const link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = '/manifest.json';
+                document.head.appendChild(link);
+            }
+        </script>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <link rel="apple-touch-icon" href="/favicon.svg">
 
@@ -164,7 +175,7 @@
                                 </button>
                             </div>
                             <iframe id="preview-frame"
-                                sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
+                                sandbox="allow-scripts allow-modals allow-forms"></iframe>
                             <div id="console-pane"
                                 style="height: 150px; border-top: 1px solid var(--border); background: var(--header-bg); display: flex; flex-direction: column;">
                                 <div class="console-header" style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border-bottom:1px solid var(--border);">
