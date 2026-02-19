@@ -29,15 +29,9 @@
         <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
         <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
 
-        <!-- Ace Editor -->
+        <!-- Ace Editor (modes loaded lazily via Languages module) -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-javascript.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-pascal.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-html.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-css.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-markdown.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-tomorrow_night_eighties.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-chrome.min.js"></script>
 
@@ -61,12 +55,14 @@
         <script src="js/modules/config.js"></script>
         
         <!-- Editor & Symbols -->
+        <script src="js/modules/languages.js"></script>
         <script src="js/modules/editor.js"></script>
         <script src="js/modules/symbols.js"></script>
         
         <!-- Scripting & File System -->
         <script src="js/modules/script.js"></script>
         <script src="js/modules/filesys.js"></script>
+        <script src="js/modules/project.js"></script>
         <script src="js/modules/system-fs.js"></script>
         
         <!-- Markdown & Preview -->
@@ -120,53 +116,84 @@
 
         <div id="app-shell">
             <aside id="sidebar-left">
-                <div class="side-header" style="margin-top:8px;">
-                    <span>Workspace</span>
-                    <div style="display:flex; gap:4px;">
-                        <button class="btn" onclick="TreeSearch.collapseAll('file-tree')" title="Collapse All"></button>
-                        <button class="btn" onclick="FileSys.createWorkspaceDir()" title="New Directory"></button>
-                        <button class="btn" onclick="FileSys.openFolder()" title="Open Folder"></button>
+                <!-- Workspace Section -->
+                <div class="sidebar-section" id="section-workspace">
+                    <div class="side-header" style="margin-top:8px;" onclick="App.toggleSection('section-workspace')">
+                        <div class="section-title">
+                            <span class="section-chevron"></span>
+                            <span>Workspace</span>
+                        </div>
+                        <div class="section-actions" onclick="event.stopPropagation()">
+                            <button class="btn" onclick="App.toggleSectionSearch('section-workspace')" title="Search"></button>
+                            <button class="btn" onclick="TreeSearch.collapseAll('file-tree')" title="Collapse All"></button>
+                            <button class="btn" onclick="FileSys.createWorkspaceDir()" title="New Directory"></button>
+                            <button class="btn" onclick="FileSys.openFolder()" title="Open Folder"></button>
+                        </div>
                     </div>
-                </div>
-                <div class="tree-search-container">
-                    <input type="text" id="file-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('file-tree', this.value)">
-                </div>
-                <div id="file-tree" class="file-tree"></div>
-
-                <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
-                    <span id="opfs-header">Local Storage</span>
-                    <div style="display:flex; gap:4px;">
-                        <button class="btn" onclick="TreeSearch.collapseAll('opfs-tree')" title="Collapse All"></button>
-                        <button class="btn" onclick="FileSys.createOPFSDir()" title="New Directory"></button>
-                        <button class="btn" onclick="FileSys.createOPFSFile()" title="New Local File"></button>
+                    <div class="tree-search-container collapsed">
+                        <input type="text" id="file-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('file-tree', this.value)">
                     </div>
+                    <div id="file-tree" class="file-tree section-content"></div>
                 </div>
-                <div class="tree-search-container">
-                    <input type="text" id="opfs-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('opfs-tree', this.value)">
-                </div>
-                <div id="opfs-tree" class="file-tree" style="max-height: 250px;"></div>
 
-                <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
-                    <span>System Files</span>
+                <!-- OPFS Section -->
+                <div class="sidebar-section" id="section-opfs">
+                    <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;" onclick="App.toggleSection('section-opfs')">
+                        <div class="section-title">
+                            <span class="section-chevron"></span>
+                            <span id="opfs-header">OPFS</span>
+                        </div>
+                        <div class="section-actions" onclick="event.stopPropagation()">
+                            <button class="btn" onclick="App.toggleSectionSearch('section-opfs')" title="Search"></button>
+                            <button class="btn" onclick="FileSys.createOPFSFile()" title="New File"></button>
+                        </div>
+                    </div>
+                    <div id="opfs-project-bar" class="project-bar">
+                        <span id="opfs-project-name" class="project-name" title="Current Project">No Project</span>
+                        <div class="project-actions">
+                            <button class="btn" onclick="Project.showPicker()" title="Switch Project" data-icon="folderOpen"></button>
+                            <button class="btn" id="btn-save-project" onclick="Project.save().then(ok => ok && UI.toast('Saved'))" title="Save Project" data-icon="save" style="display:none;"></button>
+                            <button class="btn" id="btn-close-project" onclick="Project.close()" title="Close Project" data-icon="close" style="display:none;"></button>
+                        </div>
+                    </div>
+                    <div class="tree-search-container collapsed">
+                        <input type="text" id="opfs-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('opfs-tree', this.value)">
+                    </div>
+                    <div id="opfs-tree" class="file-tree section-content"></div>
                 </div>
-                <div class="tree-search-container">
-                    <input type="text" id="system-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('system-tree', this.value)">
+
+                <!-- System Files Section -->
+                <div class="sidebar-section" id="section-system">
+                    <div class="side-header" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;" onclick="App.toggleSection('section-system')">
+                        <div class="section-title">
+                            <span class="section-chevron"></span>
+                            <span>System Files</span>
+                        </div>
+                        <div class="section-actions" onclick="event.stopPropagation()">
+                            <button class="btn" onclick="App.toggleSectionSearch('section-system')" title="Search"></button>
+                        </div>
+                    </div>
+                    <div class="tree-search-container collapsed">
+                        <input type="text" id="system-tree-search" class="tree-search" placeholder="Search files..." onkeyup="TreeSearch.filterTree('system-tree', this.value)">
+                    </div>
+                    <div id="system-tree" class="file-tree section-content"></div>
                 </div>
-                <div id="system-tree" class="file-tree" style="max-height: 250px;"></div>
             </aside>
 
             <main>
                 <div id="tabs-scroll"></div>
                 <div class="breadcrumbs">
+                    <span id="project-name" style="display:none; color:var(--accent); font-weight:600;"></span>
+                    <span id="project-sep" style="display:none;">/</span>
                     <span>root</span><span>/</span><span id="bc-filename" style="color:var(--text)">[No Selection]</span>
                 </div>
 
                 <div id="editor-row">
                     <div id="editor-split">
                         <div id="code-stage"></div>
-                        <div id="resizer"></div>
 
                         <div id="preview-pane">
+                            <div id="resizer"></div>
                             <div class="preview-header" id="preview-header">
                                 <span style="font-size:10px; font-weight:700; color:var(--text-dim);">PREVIEW</span>
                                 <button class="btn" style="width:20px; height:20px;"

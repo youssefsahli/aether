@@ -168,5 +168,50 @@ Place a \`.aether.js\` file in your OPFS to auto-run on startup!
         name: 'Reset Templates to Defaults',
         hint: 'Templates',
         fn: () => SystemFS.resetTemplates()
+    },
+    // Project commands (OPFS only)
+    {
+        id: 'newProject',
+        name: 'New Project',
+        hint: 'OPFS',
+        fn: () => Prompt.open('Project name:', 'my-project', (name) => name && Project.create(name))
+    },
+    {
+        id: 'openProject',
+        name: 'Open Project',
+        hint: 'OPFS',
+        fn: () => Project.showPicker()
+    },
+    {
+        id: 'closeProject',
+        name: 'Close Project',
+        hint: 'OPFS',
+        fn: () => Project.close()
+    },
+    {
+        id: 'saveProject',
+        name: 'Save Project',
+        hint: 'OPFS',
+        fn: async () => {
+            if (await Project.save()) {
+                UI.toast('Project saved');
+            } else {
+                UI.toast('No project to save');
+            }
+        }
+    },
+    {
+        id: 'deleteProject',
+        name: 'Delete Project',
+        hint: 'OPFS',
+        fn: async () => {
+            if (!Project.current) {
+                UI.toast('No project open');
+                return;
+            }
+            if (confirm(`Delete project "${Project.current.name}"? Files will be kept.`)) {
+                await Project.delete(Project.current.root);
+            }
+        }
     }
 ];

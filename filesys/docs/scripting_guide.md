@@ -218,7 +218,7 @@ Aether.setEditorContent(template);
 ```javascript
 Aether.getEditorLanguage()
 ```
-Get the file extension/language mode (`'js'`, `'py'`, `'html'`, `'css'`, `'md'`, `'pas'`).
+Get the file extension/language mode. Supports 70+ languages including `'js'`, `'ts'`, `'py'`, `'html'`, `'css'`, `'md'`, `'go'`, `'rs'`, and more.
 
 ```javascript
 const lang = Aether.getEditorLanguage();
@@ -434,6 +434,103 @@ Remove file from OPFS.
 (async () => {
   await Aether.deleteOPFSFile('old-data.json');
   Aether.log('File deleted');
+})();
+```
+
+---
+
+## Project Operations (Async)
+
+Projects organize multiple files in OPFS. Each project stores its file list in `.aether-project.json`.
+
+### Create New Project
+```javascript
+await Aether.newProject(name)
+```
+Create and open a new project.
+
+```javascript
+(async () => {
+  await Aether.newProject('my-webapp');
+  Aether.toast('Project created!');
+})();
+```
+
+### Open Existing Project
+```javascript
+await Aether.openProject(name)
+```
+Switch to an existing project.
+
+```javascript
+(async () => {
+  await Aether.openProject('my-webapp');
+  const files = Aether.getProjectFiles();
+  Aether.log('Loaded ' + files.length + ' files');
+})();
+```
+
+### Close Current Project
+```javascript
+Aether.closeProject()
+```
+Close the current project and all associated tabs.
+
+```javascript
+Aether.closeProject();
+Aether.toast('Project closed');
+```
+
+### Save Project Metadata
+```javascript
+await Aether.saveProject()
+```
+Explicitly save the project's file list.
+
+```javascript
+(async () => {
+  Aether.addFileToProject('newfile.js');
+  await Aether.saveProject();
+  Aether.log('Project saved');
+})();
+```
+
+### Delete a Project
+```javascript
+await Aether.deleteProject(name)
+```
+Remove project metadata (files remain in OPFS).
+
+```javascript
+(async () => {
+  await Aether.deleteProject('old-project');
+  Aether.log('Project deleted');
+})();
+```
+
+### Get Project Files
+```javascript
+Aether.getProjectFiles()
+```
+Get list of files in the current project.
+
+```javascript
+const files = Aether.getProjectFiles();
+files.forEach(f => Aether.log('- ' + f));
+```
+
+### Add File to Project
+```javascript
+Aether.addFileToProject(filename)
+```
+Add an existing OPFS file to the current project.
+
+```javascript
+// Create file and add to project
+(async () => {
+  await Aether.saveOPFSFile('utils.js', '// Utilities');
+  Aether.addFileToProject('utils.js');
+  await Aether.saveProject();
 })();
 ```
 

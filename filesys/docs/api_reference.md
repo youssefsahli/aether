@@ -54,6 +54,17 @@ await Aether.saveOPFSFile(filename, data)   // Write file
 await Aether.deleteOPFSFile(filename)       // Delete file
 ```
 
+### Projects (Async)
+```javascript
+await Aether.newProject(name)               // Create project
+await Aether.openProject(name)              // Open project
+Aether.closeProject()                       // Close project
+await Aether.saveProject()                  // Save project
+await Aether.deleteProject(name)            // Delete project
+Aether.getProjectFiles()                    // Get project file list
+Aether.addFileToProject(filename)           // Add file to project
+```
+
 ---
 
 ## Detailed Method Reference
@@ -704,6 +715,172 @@ Aether.error('Invalid input: ' + error);
 
 ---
 
+## Project API
+
+Projects organize files in OPFS with metadata stored in `.aether-project.json`.
+
+### `await Aether.newProject(name)`
+
+**Purpose**: Create and open a new project
+
+**Parameters**:
+- `name` (string): Project name (also used as folder identifier)
+
+**Returns**: Promise<void>
+
+**Examples**:
+```javascript
+(async () => {
+  await Aether.newProject('my-webapp');
+  Aether.toast('Project created!');
+})();
+```
+
+**Notes**:
+- Creates `.aether-project.json` in OPFS
+- Closes any existing project
+- Opens the new project automatically
+
+---
+
+### `await Aether.openProject(name)`
+
+**Purpose**: Open an existing project
+
+**Parameters**:
+- `name` (string): Project name to open
+
+**Returns**: Promise<void>
+
+**Examples**:
+```javascript
+(async () => {
+  await Aether.openProject('my-webapp');
+  const files = Aether.getProjectFiles();
+  Aether.log('Project files: ' + files.join(', '));
+})();
+```
+
+**Notes**:
+- Closes current project first
+- Loads project metadata
+- Project files appear in OPFS sidebar
+
+---
+
+### `Aether.closeProject()`
+
+**Purpose**: Close the current project
+
+**Parameters**: None
+
+**Returns**: void
+
+**Examples**:
+```javascript
+Aether.closeProject();
+Aether.toast('Project closed');
+```
+
+**Notes**:
+- Closes all tabs associated with project
+- Clears project state
+
+---
+
+### `await Aether.saveProject()`
+
+**Purpose**: Save project metadata
+
+**Parameters**: None
+
+**Returns**: Promise<void>
+
+**Examples**:
+```javascript
+(async () => {
+  Aether.addFileToProject('newfile.js');
+  await Aether.saveProject();
+  Aether.toast('Project saved');
+})();
+```
+
+**Notes**:
+- Saves `.aether-project.json` with current file list
+- Projects auto-save when files are added
+
+---
+
+### `await Aether.deleteProject(name)`
+
+**Purpose**: Delete a project's metadata
+
+**Parameters**:
+- `name` (string): Project name to delete
+
+**Returns**: Promise<void>
+
+**Examples**:
+```javascript
+(async () => {
+  await Aether.deleteProject('old-project');
+  Aether.log('Project deleted');
+})();
+```
+
+**Notes**:
+- Only removes `.aether-project.json`
+- Files remain in OPFS
+- Cannot delete currently open project
+
+---
+
+### `Aether.getProjectFiles()`
+
+**Purpose**: Get list of files in current project
+
+**Parameters**: None
+
+**Returns**: Array<string> - Filenames in project
+
+**Examples**:
+```javascript
+const files = Aether.getProjectFiles();
+Aether.log('Files: ' + files.length);
+files.forEach(f => Aether.log('- ' + f));
+```
+
+---
+
+### `Aether.addFileToProject(filename)`
+
+**Purpose**: Add a file to the current project
+
+**Parameters**:
+- `filename` (string): File to add
+
+**Returns**: void
+
+**Examples**:
+```javascript
+// Add existing OPFS file to project
+Aether.addFileToProject('utils.js');
+
+// Create and add new file
+(async () => {
+  await Aether.saveOPFSFile('config.json', '{}');
+  Aether.addFileToProject('config.json');
+  await Aether.saveProject();
+})();
+```
+
+**Notes**:
+- File should exist in OPFS
+- Duplicates are ignored
+- Call saveProject() to persist
+
+---
+
 ## Return Value Reference
 
 ### Buffer Object
@@ -896,6 +1073,13 @@ Available configuration keys:
 | | readOPFSFile(name) | Read | **Yes** | string |
 | | saveOPFSFile(name, data) | Write | **Yes** | void |
 | | deleteOPFSFile(name) | Delete | **Yes** | void |
+| **Project** | newProject(name) | Create | **Yes** | void |
+| | openProject(name) | Open | **Yes** | void |
+| | closeProject() | Close | No | void |
+| | saveProject() | Write | **Yes** | void |
+| | deleteProject(name) | Delete | **Yes** | void |
+| | getProjectFiles() | Read | No | string[] |
+| | addFileToProject(name) | Write | No | void |
 
 ---
 

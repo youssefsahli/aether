@@ -21,14 +21,21 @@ const UI = {
                 const el = document.createElement('div');
                 el.className = `tab ${b.id === Store.state.activeId ? 'active' : ''} ${b.dirty ? 'dirty' : ''}`;
                 el.dataset.bufferId = b.id;
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'tab-name';
+                nameSpan.textContent = b.name;
+                
+                const dotSpan = document.createElement('span');
+                dotSpan.className = 'unsaved-dot';
+                dotSpan.title = 'Unsaved changes';
+                
                 const closeBtn = document.createElement('div');
                 closeBtn.className = 'tab-close';
                 closeBtn.innerHTML = Icons.close;
+                closeBtn.title = 'Close';
                 closeBtn.onclick = (e) => { e.stopPropagation(); Store.closeBuffer(b.id); };
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = b.name;
-                const dotSpan = document.createElement('span');
-                dotSpan.className = 'unsaved-dot';
+                
                 el.appendChild(nameSpan);
                 el.appendChild(dotSpan);
                 el.appendChild(closeBtn);

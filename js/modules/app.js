@@ -56,6 +56,7 @@ const App = {
         Dragger.init();
         MarkedConfig.init();
         UI.initIconButtons();
+        this.initSidebarSections();
         await SystemFS.init();
 
         const rootHandle = await DB.get('handles', 'rootDir');
@@ -79,6 +80,11 @@ const App = {
         if (typeof meta !== 'undefined' && meta) {
             if (typeof meta.consoleCollapsed !== 'undefined') Store.state.consoleCollapsed = !!meta.consoleCollapsed;
             if (typeof meta.outlineCollapsed !== 'undefined') Store.state.outlineCollapsed = meta.outlineCollapsed || {};
+            if (meta.currentProject) {
+                Project.current = meta.currentProject;
+                Project._updateUI();
+                FileSys.renderOPFS();
+            }
         }
 
         if (savedBuffers.length) {
@@ -250,6 +256,45 @@ const App = {
         document.getElementById(`sidebar-${side}`).classList.toggle('collapsed');
         setTimeout(() => Editor.instance.resize(), 250);
     },
+    toggleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.classList.toggle('collapsed');
+        }
+    },
+    toggleSectionSearch(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        const searchContainer = section.querySelector('.tree-search-container');
+        const searchInput = section.querySelector('.tree-search');
+        if (searchContainer) {
+            searchContainer.classList.toggle('collapsed');
+            if (!searchContainer.classList.contains('collapsed') && searchInput) {
+                searchInput.focus();
+            } else if (searchInput) {
+                // Clear search when hiding
+                searchInput.value = '';
+                const treeId = searchInput.id.replace('-search', '');
+                TreeSearch.filterTree(treeId, '');
+            }
+        }
+    },
+    initSidebarSections() {
+        // Initialize section button icons
+        document.querySelectorAll('.sidebar-section').forEach(section => {
+            const actions = section.querySelector('.section-actions');
+            if (!actions) return;
+            const buttons = actions.querySelectorAll('.btn');
+            buttons.forEach((btn, i) => {
+                const title = btn.getAttribute('title') || '';
+                if (title.includes('Search')) btn.innerHTML = Icons.search;
+                else if (title.includes('Collapse')) btn.innerHTML = Icons.chevronDown;
+                else if (title.includes('Directory')) btn.innerHTML = Icons.folder;
+                else if (title.includes('Folder')) btn.innerHTML = Icons.menu;
+                else if (title.includes('File')) btn.innerHTML = Icons.plus;
+            });
+        });
+    },
     runActiveJSInConsole() {
         const buf = Store.activeBuffer;
         if (!buf) return UI.toast('No active buffer');
@@ -344,9 +389,14 @@ ${buf.content}
                 active: b.id === Store.state.activeId
             });
         }
-        // persist UI meta (console collapsed state, etc.)
+        // persist UI meta (console collapsed state, project, etc.)
         try {
-            await DB.set('session', null, { id: 'meta', consoleCollapsed: !!Store.state.consoleCollapsed, outlineCollapsed: Store.state.outlineCollapsed || {} });
+            await DB.set('session', null, { 
+                id: 'meta', 
+                consoleCollapsed: !!Store.state.consoleCollapsed, 
+                outlineCollapsed: Store.state.outlineCollapsed || {},
+                currentProject: Project.current
+            });
         } catch (e) { /* ignore persistence errors */ }
     },
     async saveBuffer(b) {

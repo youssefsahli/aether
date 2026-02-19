@@ -133,18 +133,20 @@ body {
 }
 
 /* Dragging state */
-body.resizing {
+body.resizing,
+body.resizing * {
     cursor: col-resize !important;
-    user-select: none;
+    user-select: none !important;
 }
 
 body.resizing iframe {
     pointer-events: none;
 }
 
-body.dragging-preview {
+body.dragging-preview,
+body.dragging-preview * {
     cursor: move !important;
-    user-select: none;
+    user-select: none !important;
 }
 
 body.dragging-preview iframe {
@@ -215,6 +217,8 @@ aside {
 
 #sidebar-left {
     width: var(--sidebar-w);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #sidebar-left.collapsed {
@@ -232,8 +236,89 @@ aside {
     margin-right: calc(var(--outline-w) * -1);
 }
 
+/* Sidebar Sections */
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Workspace section takes most space */
+#section-workspace {
+    flex: 1 1 auto;
+    min-height: 80px;
+}
+
+/* OPFS and System sections are fixed-ish but can grow */
+#section-opfs,
+#section-system {
+    flex: 0 1 auto;
+    max-height: 35%;
+}
+
+/* When collapsed, section shrinks to just header */
+.sidebar-section.collapsed {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+.sidebar-section.collapsed .section-content {
+    display: none !important;
+}
+
+.sidebar-section.collapsed .tree-search-container {
+    display: none !important;
+}
+
+.sidebar-section.collapsed .project-bar {
+    display: none !important;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.section-chevron {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    transition: transform 0.15s ease;
+}
+
+.section-chevron::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    margin-left: 2px;
+}
+
+.sidebar-section:not(.collapsed) .section-chevron {
+    transform: rotate(90deg);
+}
+
+.section-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.section-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .side-header {
-    padding: 0 16px;
+    flex-shrink: 0;
+    padding: 0 12px 0 8px;
     font-weight: 700;
     font-size: 11px;
     color: var(--text-dim);
@@ -242,8 +327,9 @@ aside {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 36px;
+    height: 32px;
     transition: color 0.15s;
+    cursor: pointer;
 }
 
 .side-header:hover {
@@ -251,15 +337,24 @@ aside {
 }
 
 .file-tree {
-    flex: 1;
     overflow-y: auto;
-    padding: 8px 0;
+    padding: 4px 0;
+}
+
+/* When file-tree is also section-content, the section-content rules apply */
+.file-tree.section-content {
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .tree-search-container {
-    padding: 8px 8px;
-    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    padding: 4px 8px 6px;
     background: var(--sidebar-bg);
+}
+
+.tree-search-container.collapsed {
+    display: none;
 }
 
 .tree-search {
@@ -267,9 +362,9 @@ aside {
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 6px 8px;
-    border-radius: 6px;
-    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
     font-family: var(--font-ui);
     transition: all 0.15s;
 }
@@ -283,6 +378,45 @@ aside {
     border-color: var(--accent);
     background: rgba(137, 180, 250, 0.05);
     box-shadow: 0 0 8px rgba(137, 180, 250, 0.1);
+}
+
+/* Project bar in OPFS section */
+.project-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+    min-height: 28px;
+}
+
+.project-bar .project-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.project-bar .project-name.no-project {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-style: italic;
+}
+
+.project-bar .project-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.project-bar .project-actions .btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
 }
 
 .tree-item {
@@ -527,7 +661,7 @@ main {
     max-width: 200px;
     position: relative;
     background: transparent;
-    justify-content: space-between;
+    gap: 6px;
     border-right: 1px solid var(--border);
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: var(--font-ui);
@@ -597,20 +731,40 @@ main {
     transform: scale(0.95);
 }
 
+/* Tab filename */
+.tab-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dirty/Unsaved Indicator */
 .unsaved-dot {
     width: 8px;
     height: 8px;
     background: var(--text-dim);
     border-radius: 50%;
     display: none;
-    margin-left: auto;
-    transform: scale(0.8);
+    flex-shrink: 0;
+    animation: dirty-pulse 2s ease-in-out infinite;
 }
 
+@keyframes dirty-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* When dirty: show dot, hide close */
 .tab.dirty .unsaved-dot {
     display: block;
 }
 
+.tab.dirty .tab-close {
+    display: none;
+}
+
+/* On hover: hide dot, show close */
 .tab.dirty:hover .unsaved-dot {
     display: none;
 }
@@ -619,8 +773,30 @@ main {
     display: flex;
 }
 
+/* Active tab: accent color for dot */
 .tab.active .unsaved-dot {
     background: var(--accent);
+}
+
+/* Make dirty tabs more noticeable */
+.tab.dirty {
+    font-style: italic;
+}
+
+.tab.dirty::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--text-dim);
+    opacity: 0.5;
+}
+
+.tab.dirty.active::before {
+    background: var(--accent);
+    opacity: 0.8;
 }
 
 .breadcrumbs {
@@ -674,6 +850,7 @@ main {
 #editor-split:not(.mode-float) #preview-pane {
     width: 0;
     transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
 }
 
 .preview-active #editor-split:not(.mode-float) #preview-pane {
@@ -724,10 +901,11 @@ iframe {
 
 /* Resize Handles */
 #resizer {
-    width: 4px;
+    width: 6px;
     background: transparent;
     cursor: col-resize;
     position: absolute;
+    left: -3px;
     top: 0;
     bottom: 0;
     z-index: 50;
@@ -745,25 +923,55 @@ iframe {
 }
 
 #float-resizer {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     position: absolute;
     bottom: 0;
     right: 0;
     cursor: se-resize;
     z-index: 101;
     display: none;
-    background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
-    opacity: 0.6;
+    background: transparent;
+    opacity: 0.7;
     border-bottom-right-radius: 7px;
+}
+
+/* Resize grip dots */
+#float-resizer::before {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    width: 8px;
+    height: 8px;
+    background-image: radial-gradient(circle, var(--text-dim) 1.5px, transparent 1.5px);
+    background-size: 4px 4px;
+    background-position: bottom right;
 }
 
 #editor-split.mode-float #float-resizer {
     display: block;
 }
 
-#float-resizer:hover {
+#float-resizer:hover,
+.resizing-float #float-resizer {
     opacity: 1;
+}
+
+#float-resizer:hover::before,
+.resizing-float #float-resizer::before {
+    background-image: radial-gradient(circle, var(--accent) 1.5px, transparent 1.5px);
+}
+
+/* Cursor lock during float resize */
+body.resizing-float,
+body.resizing-float * {
+    cursor: se-resize !important;
+    user-select: none !important;
+}
+
+body.resizing-float iframe {
+    pointer-events: none;
 }
 
 header {

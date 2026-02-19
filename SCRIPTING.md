@@ -96,7 +96,7 @@ Aether.setEditorContent('// New content\nconst x = 1;');
 ```
 
 #### `Aether.getEditorLanguage()`
-Get file extension/language mode.
+Get file extension/language mode. Supports 70+ languages including `'js'`, `'ts'`, `'py'`, `'html'`, `'css'`, `'md'`, `'go'`, `'rs'`, and more.
 ```javascript
 const lang = Aether.getEditorLanguage();
 // 'js', 'py', 'html', 'css', 'md', etc.
@@ -223,6 +223,59 @@ await Aether.saveOPFSFile('output.json', JSON.stringify(data, null, 2));
 Delete file from OPFS.
 ```javascript
 await Aether.deleteOPFSFile('old-file.js');
+```
+
+---
+
+### Projects - ⏱️ Async
+
+Projects organize multiple files in OPFS with metadata in `.aether-project.json`.
+
+#### ⏱️ `await Aether.newProject(name)`
+Create and open a new project.
+```javascript
+await Aether.newProject('my-webapp');
+Aether.toast('Project created');
+```
+
+#### ⏱️ `await Aether.openProject(name)`
+Open an existing project.
+```javascript
+await Aether.openProject('my-webapp');
+const files = Aether.getProjectFiles();
+Aether.log('Loaded project with ' + files.length + ' files');
+```
+
+#### `Aether.closeProject()`
+Close the current project and all tabs.
+```javascript
+Aether.closeProject();
+```
+
+#### ⏱️ `await Aether.saveProject()`
+Save project metadata.
+```javascript
+await Aether.saveProject();
+```
+
+#### ⏱️ `await Aether.deleteProject(name)`
+Delete a project (files remain in OPFS).
+```javascript
+await Aether.deleteProject('old-project');
+```
+
+#### `Aether.getProjectFiles()`
+Get list of files in current project.
+```javascript
+const files = Aether.getProjectFiles();
+files.forEach(f => Aether.log('- ' + f));
+```
+
+#### `Aether.addFileToProject(filename)`
+Add an existing OPFS file to the current project.
+```javascript
+Aether.addFileToProject('utils.js');
+await Aether.saveProject();
 ```
 
 ---

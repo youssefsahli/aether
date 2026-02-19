@@ -155,8 +155,7 @@ const Editor = {
     load(content, filename) {
         if (this.instance.getValue() !== content) this.instance.setValue(content, -1);
         const ext = filename ? filename.split('.').pop().toLowerCase() : 'txt';
-        const modes = { js: 'javascript', ts: 'javascript', html: 'html', css: 'css', py: 'python', md: 'markdown', json: 'javascript', pas: 'pascal', pp: 'pascal' };
-        this.instance.session.setMode(`ace/mode/${modes[ext] || 'text'}`);
+        Languages.setEditorMode(this.instance, ext);
         this.instance.session.getUndoManager().reset();
         App.updateStats(); App.debouncePreview(true);
         // trigger LSP analyze for immediate symbol extraction with centralized timer

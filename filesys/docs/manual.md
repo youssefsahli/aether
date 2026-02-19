@@ -1,21 +1,21 @@
 # Aether Technical Manual
 
-Complete reference guide for Aether, a browser-based code editor for scripting and experimentation.
+Complete reference for Aether v3 "Ace Flux Edition" — a browser-based code editor with project management, 70+ language support, and persistent OPFS storage.
 
 ---
 
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
-2. [Editor Interface](#editor-interface)
-3. [Supported Languages](#supported-languages)
-4. [Keyboard Shortcuts](#keyboard-shortcuts)
-5. [Command Palette](#command-palette)
-6. [Aether API](#aether-api)
-7. [File Management](#file-management)
-8. [Storage & Persistence](#storage--persistence)
-9. [Themes & Customization](#themes--customization)
-10. [Configuration](#configuration)
+2. [Projects](#projects)
+3. [Editor Interface](#editor-interface)
+4. [Supported Languages](#supported-languages)
+5. [Keyboard Shortcuts](#keyboard-shortcuts)
+6. [Command Palette](#command-palette)
+7. [Aether API](#aether-api)
+8. [File Management](#file-management)
+9. [Storage & Persistence](#storage--persistence)
+10. [Themes & Customization](#themes--customization)
 11. [Advanced Usage](#advanced-usage)
 12. [Troubleshooting](#troubleshooting)
 
@@ -27,27 +27,76 @@ Complete reference guide for Aether, a browser-based code editor for scripting a
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - JavaScript enabled
-- 50MB available storage (for OPFS)
+- OPFS support for persistent storage
 
 ### First Launch
 
 1. Open Aether in your browser
 2. The welcome page appears on first load
-3. Create your first file using `Ctrl+N` or Command Palette
-4. Start writing code in any supported language
-5. Toggle preview with the pane divider to see output
+3. Create a new project from the OPFS section
+4. Add files to your project
+5. Toggle preview to see output
 
-### Creating & Opening Files
+### Quick Start
 
-**Create a New File:**
-- Press `Ctrl+N` and enter a filename
-- File extension determines syntax highlighting and execution mode
-- Supported extensions: `.js`, `.py`, `.html`, `.css`, `.md`, `.pas`
+1. Click **New** in the OPFS project bar to create a project
+2. Click **+** to create a file (auto-added to project)
+3. Write code — syntax highlighting detects your language
+4. Toggle preview to see HTML/Markdown rendered or JS executed
 
-**Open a File:**
-- Press `Ctrl+O` to browse stored files
-- Files persist in browser storage between sessions
-- Use OPFS for larger files
+---
+
+## Projects
+
+Projects organize your files in OPFS and persist across browser sessions.
+
+### Project Basics
+
+- Each project has a `.aether-project.json` metadata file
+- Files are stored in OPFS and linked to projects
+- Only one project open at a time
+- Closing a project closes all associated tabs
+
+### Creating a Project
+
+1. Click **New** in the OPFS project bar
+2. Enter project name (e.g., "my-app")
+3. Project opens automatically
+4. Create files — they're added to the project
+
+### Opening a Project
+
+1. Click the folder icon in the project bar
+2. Select from available projects
+3. Current project closes, new one loads
+4. Project files appear in OPFS tree
+
+### Saving Projects
+
+Projects auto-save when files change. Click **Save** to force an immediate save.
+
+### Closing Projects
+
+Click **Close** to close the current project. All project tabs close.
+
+### Deleting Projects
+
+1. Open Command Palette (`F1`)
+2. Run "Delete Project"
+3. Select project to delete
+4. Confirm deletion
+
+**Note:** Deleting a project removes its metadata. Files remain in OPFS.
+
+### Project File Format
+
+`.aether-project.json`:
+```json
+{
+  "projectName": "my-app",
+  "files": ["index.html", "app.js", "style.css"]
+}
+```
 
 ---
 
@@ -55,96 +104,121 @@ Complete reference guide for Aether, a browser-based code editor for scripting a
 
 ### Layout Components
 
-**Editor Pane (Left)**
-- Main code editing area
+**Header Bar**
+- Theme swatches (4 Catppuccin themes)
+- Navigation arrows (back/forward)
+- Preview toggle button
+
+**Sidebar (Collapsible Sections)**
+- **Workspace** — Local workspace files
+- **OPFS** — Project files with project bar
+- **Templates** — Quick-start file templates
+- **System Files** — Documentation and commands
+
+**Editor Pane**
+- Main code editing area (Ace Editor 1.32.7)
 - Line numbers and syntax highlighting
-- Minimap on the right side
-- Status bar showing cursor position and file info
+- Optional minimap
+- Multi-tab support
 
-**Preview Pane (Right)**
-- Output from executed code
-- Console logs and errors
-- HTML/Markdown rendering
+**Preview Pane (Split/Float)**
 - JavaScript execution results
-
-**Divider**
-- Click and drag to resize panes
-- Double-click to reset to default size
-- Hidden when preview is floating
-
-**Command Bar**
-- Access theme switcher
-- Toggle preview mode
-- Manage files
-- Configure settings
+- HTML/Markdown rendering
+- Console output (log, warn, error, clear)
+- Drag divider to resize
 
 ### Status Bar
 
 Shows:
 - Current file name
-- Cursor line/column position
-- File size
+- Line : Column position
 - Language mode
-- Auto-save indicator
 
-### Minimap
+### Sidebar Sections
 
-Right-side overview of your code
-- Click to jump to location
-- Drag to scroll through file
-- Disabled on small screens
+Each section is collapsible:
+- Click section header to expand/collapse
+- State persists across sessions
 
 ---
 
 ## Supported Languages
 
-### JavaScript
-- Modern ES6+ syntax supported
-- Browser APIs available
-- Aether API access
-- Execution in preview pane
+Aether supports **70+ programming languages** via Ace Editor's lazy-loaded language modes.
 
-**File extension:** `.js`
+### Languages by Category
 
-### Python
-- Basic Python 3 syntax
-- Limited to browser-compatible features
-- Import limitations (no file system access)
-- Output to console
+**Web Development**
+- JavaScript (`.js`, `.mjs`)
+- TypeScript (`.ts`, `.tsx`)
+- HTML (`.html`, `.htm`)
+- CSS (`.css`)
+- SCSS/Sass (`.scss`, `.sass`)
+- Less (`.less`)
+- JSON (`.json`)
+- XML (`.xml`)
+- SVG (`.svg`)
 
-**File extension:** `.py`
+**Systems Programming**
+- C (`.c`, `.h`)
+- C++ (`.cpp`, `.hpp`, `.cc`)
+- Rust (`.rs`)
+- Go (`.go`)
+- Zig (`.zig`)
 
-### HTML
-- Full HTML5 support
-- Inline CSS and JavaScript
-- Preview renders immediately
-- DOM access in scripts
+**Scripting Languages**
+- Python (`.py`)
+- Ruby (`.rb`)
+- Perl (`.pl`)
+- Lua (`.lua`)
+- PHP (`.php`)
+- Shell/Bash (`.sh`, `.bash`)
+- PowerShell (`.ps1`)
 
-**File extension:** `.html`
+**JVM Languages**
+- Java (`.java`)
+- Kotlin (`.kt`)
+- Scala (`.scala`)
+- Groovy (`.groovy`)
+- Clojure (`.clj`)
 
-### CSS
-- CSS3 features supported
-- Can be imported in HTML files
-- Live preview updates
-- Preprocessor support (limited)
+**.NET Languages**
+- C# (`.cs`)
+- F# (`.fs`)
+- VB.NET (`.vb`)
 
-**File extension:** `.css`
+**Functional Languages**
+- Haskell (`.hs`)
+- OCaml (`.ml`)
+- Elixir (`.ex`, `.exs`)
+- Erlang (`.erl`)
+- Elm (`.elm`)
 
-### Markdown
-- GitHub Flavored Markdown
-- Code blocks with syntax highlighting
-- Tables, lists, links
-- Direct preview rendering
+**Data & Config**
+- YAML (`.yaml`, `.yml`)
+- TOML (`.toml`)
+- INI (`.ini`)
+- SQL (`.sql`)
+- GraphQL (`.graphql`)
 
-**File extension:** `.md`
+**Documentation**
+- Markdown (`.md`)
+- LaTeX (`.tex`)
+- reStructuredText (`.rst`)
 
-### Pascal
-- Classic Pascal syntax
-- Educational language support
-- Console output
-- Limited standard library
+**Other Languages**
+- Dart (`.dart`)
+- Swift (`.swift`)
+- Objective-C (`.m`)
+- R (`.r`)
+- Julia (`.jl`)
+- Pascal (`.pas`)
+- Assembly (`.asm`)
+- And many more...
 
-**File extension:** `.pas`
+### Language Detection
+
+Language mode is determined by file extension. Modes are lazy-loaded from CDN on first use.
 
 ---
 
@@ -153,51 +227,42 @@ Right-side overview of your code
 ### File Operations
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+N` | New File |
+| `Alt+N` | New File |
 | `Ctrl+O` | Open File |
-| `Ctrl+S` | Save Buffer |
-| `Ctrl+Shift+S` | Save As |
-| `Ctrl+W` | Close File |
+| `Ctrl+S` | Save File |
+| `Alt+W` | Close Tab |
 
 ### Navigation
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+P` | Open Command Palette |
+| `F1` | Command Palette |
 | `Ctrl+G` | Go to Line |
-| `Ctrl+Tab` | Next File |
-| `Ctrl+Shift+Tab` | Previous File |
-| `Ctrl+Home` | Go to Start |
-| `Ctrl+End` | Go to End |
+| `Alt+←` | Navigate Back |
+| `Alt+→` | Navigate Forward |
+| `Ctrl+Tab` | Next Tab |
+| `Ctrl+Shift+Tab` | Previous Tab |
 
 ### Editing
 | Shortcut | Action |
 |----------|--------|
 | `Ctrl+Z` | Undo |
-| `Ctrl+Y` | Redo |
-| `Ctrl+X` | Cut Line |
-| `Ctrl+C` | Copy |
-| `Ctrl+V` | Paste |
+| `Ctrl+Y` / `Ctrl+Shift+Z` | Redo |
 | `Ctrl+/` | Toggle Comment |
 | `Tab` | Indent |
 | `Shift+Tab` | Dedent |
-| `Ctrl+D` | Delete Line |
+| `Ctrl+D` | Select Word / Next Occurrence |
 
 ### Search & Replace
 | Shortcut | Action |
 |----------|--------|
 | `Ctrl+F` | Find |
 | `Ctrl+H` | Find & Replace |
-| `Ctrl+Shift+F` | Find in All Files |
 | `F3` | Find Next |
 | `Shift+F3` | Find Previous |
 
-### View Options
+### View
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+B` | Toggle Sidebar |
-| `Ctrl+E` | Toggle Explorer |
-| `Ctrl+J` | Toggle Console |
-| `Ctrl+Shift+P` | Toggle Preview Float |
 | `Ctrl+=` | Zoom In |
 | `Ctrl+-` | Zoom Out |
 | `Ctrl+0` | Reset Zoom |
@@ -206,410 +271,341 @@ Right-side overview of your code
 
 ## Command Palette
 
-Access via `Ctrl+P` to run commands without keyboard shortcuts.
+Access via `F1` to run commands quickly.
 
-### Common Commands
+### All Commands
 
-**Workspace**
-- `New File` - Create new file
-- `Open File` - Browse and open files
-- `Save` - Save current file
-- `Close Tabs` - Close all open files
+**File Operations**
+- `New File` — Create new file
+- `Open File` — Open file picker
+- `Save File` — Save current file
+- `Close Tabs` — Close all open tabs
+
+**Project Operations**
+- `New Project` — Create new OPFS project
+- `Open Project` — Switch to another project
+- `Close Project` — Close current project and tabs
+- `Save Project` — Save project metadata
+- `Delete Project` — Remove a project
 
 **View**
-- `Toggle Preview` - Show/hide preview pane
-- `Float Preview` - Toggle floating preview mode
-- `Toggle Sidebar` - Show/hide file explorer
-- `Toggle Console` - Show/hide console output
+- `Toggle Preview` — Show/hide preview pane
+- `Float Preview` — Toggle floating preview mode
+- `Toggle Sidebar` — Show/hide sidebar
+- `Toggle Console` — Show/hide console in preview
 
-**Theme**
-- `Theme: Mocha` - Switch to Mocha theme
-- `Theme: Macchiato` - Switch to Macchiato theme
-- `Theme: Frappe` - Switch to Frappe theme
-- `Theme: Latte` - Switch to Latte theme
+**Themes**
+- `Theme: Mocha` — Dark warm theme
+- `Theme: Macchiato` — Dark gray theme
+- `Theme: Frappe` — Cool dark theme
+- `Theme: Latte` — Light theme
 
-**Settings**
-- `Preferences` - Open settings dialog
-- `Font Size` - Adjust editor font
-- `Line Height` - Adjust line spacing
-- `Word Wrap` - Toggle line wrapping
+**Editor**
+- `Go To Line` — Jump to line number
+- `Show Symbols` — List functions/headings
+- `Show Keybindings` — Display shortcuts
+- `Run Active Script` — Execute JavaScript file
 
 **Help**
-- `API Reference` - View Aether API documentation
-- `Keyboard Shortcuts` - Display all shortcuts
-- `Welcome` - Show welcome page
+- `Show Script API` — API reference
+- `Welcome` — Show welcome page
+- `Manual` — Open this manual
 
 ---
 
 ## Aether API
 
-The Aether API provides methods to interact with the editor, execute code, and manage files.
+The global `Aether` object provides methods to interact with the editor, console, files, and OPFS.
 
 ### Console Methods
 
-**`Aether.log(message)`**
-Output text to the console. Supports multiple arguments.
+**`Aether.log(...args)`**
+Output to console. Supports multiple arguments.
 ```javascript
-Aether.log("Hello, World!");
-Aether.log("Value:", 42);
-Aether.log({x: 1, y: 2});
+Aether.log("Hello");
+Aether.log("Value:", 42, {x: 1});
 ```
 
-**`Aether.error(message)`**
-Log an error message (displayed in red).
+**`Aether.error(...args)`**
+Log error (red text).
 ```javascript
-Aether.error("Something went wrong!");
+Aether.error("Failed:", err.message);
 ```
 
-**`Aether.warn(message)`**
-Log a warning message (displayed in yellow).
+**`Aether.warn(...args)`**
+Log warning (yellow text).
 ```javascript
-Aether.warn("This might be an issue");
+Aether.warn("Deprecated API");
 ```
 
 **`Aether.clear()`**
-Clear the console output.
-```javascript
-Aether.clear();
-```
+Clear console output.
 
 ### File Methods
 
 **`Aether.openFile(filename, content)`**
-Create and open a new file in the editor.
+Create/open file in editor.
 ```javascript
-Aether.openFile("hello.js", "console.log('Hello');");
+Aether.openFile("app.js", "console.log('Hi');");
 ```
 
-**`Aether.readFile(filename)`**
-Read contents of a file. Returns Promise.
+**`Aether.readFile(filename)`** → `Promise<string>`
+Read file contents.
 ```javascript
-const content = await Aether.readFile("myfile.js");
-Aether.log(content);
+const code = await Aether.readFile("app.js");
 ```
 
-**`Aether.saveFile(filename, content)`**
-Save content to a file. Returns Promise.
+**`Aether.saveFile(filename, content)`** → `Promise`
+Save content to file.
 ```javascript
-await Aether.saveFile("output.txt", "Generated content");
+await Aether.saveFile("data.txt", "Hello");
 ```
 
-**`Aether.deleteFile(filename)`**
-Delete a file. Returns Promise.
+**`Aether.deleteFile(filename)`** → `Promise`
+Delete a file.
 ```javascript
-await Aether.deleteFile("oldfile.js");
+await Aether.deleteFile("old.js");
 ```
 
 ### OPFS Methods
 
-Origin Private File System (OPFS) stores files in browser's persistent storage.
-
-**`Aether.saveOPFSFile(filename, content)`**
-Save file to OPFS. Returns Promise.
+**`Aether.saveOPFSFile(filename, content)`** → `Promise`
+Save to OPFS persistent storage.
 ```javascript
-await Aether.saveOPFSFile("data.json", JSON.stringify({x: 42}));
+await Aether.saveOPFSFile("data.json", JSON.stringify(data));
 ```
 
-**`Aether.readOPFSFile(filename)`**
-Read file from OPFS. Returns Promise.
+**`Aether.readOPFSFile(filename)`** → `Promise<string>`
+Read from OPFS.
 ```javascript
-const data = await Aether.readOPFSFile("data.json");
-const obj = JSON.parse(data);
+const data = JSON.parse(await Aether.readOPFSFile("data.json"));
 ```
 
-**`Aether.listOPFSFiles()`**
-Get list of all files in OPFS. Returns Promise.
+**`Aether.listOPFSFiles()`** → `Promise<string[]>`
+List all OPFS files.
 ```javascript
 const files = await Aether.listOPFSFiles();
-Aether.log("Stored files:", files.join(", "));
+Aether.log(files.join(", "));
 ```
 
-**`Aether.deleteOPFSFile(filename)`**
-Delete file from OPFS. Returns Promise.
+**`Aether.deleteOPFSFile(filename)`** → `Promise`
+Delete OPFS file.
 ```javascript
-await Aether.deleteOPFSFile("olddata.json");
+await Aether.deleteOPFSFile("old.json");
 ```
 
-**`Aether.clearOPFS()`**
-Delete all files in OPFS. Returns Promise.
+**`Aether.clearOPFS()`** → `Promise`
+Delete all OPFS files.
+
+### Project Methods
+
+**`Aether.newProject(name)`** → `Promise`
+Create and open new project.
 ```javascript
-await Aether.clearOPFS();
+await Aether.newProject("my-app");
 ```
+
+**`Aether.openProject(name)`** → `Promise`
+Open existing project.
+```javascript
+await Aether.openProject("my-app");
+```
+
+**`Aether.closeProject()`**
+Close current project and tabs.
+
+**`Aether.saveProject()`** → `Promise`
+Save project metadata.
+
+**`Aether.deleteProject(name)`** → `Promise`
+Delete project metadata.
+
+**`Aether.getProjectFiles()`** → `string[]`
+Get list of files in current project.
+```javascript
+const files = Aether.getProjectFiles();
+```
+
+**`Aether.addFileToProject(filename)`**
+Add file to current project.
 
 ### UI Methods
 
-**`Aether.toast(message, duration)`**
-Show a notification toast. Duration in milliseconds (default: 2000).
+**`Aether.toast(message, duration?)`**
+Show notification. Duration in ms (default: 2000).
 ```javascript
-Aether.toast("Script completed!");
-Aether.toast("Warning!", 3000);
+Aether.toast("Done!", 3000);
 ```
 
-**`Aether.progress(percent)`**
-Show progress indicator. Pass 0 to hide.
+**`Aether.prompt(message)`** → `Promise<string>`
+Show input dialog.
 ```javascript
-Aether.progress(50); // Show 50% progress
-Aether.progress(0);  // Hide progress
+const name = await Aether.prompt("Enter name:");
 ```
 
-**`Aether.prompt(message)`**
-Show input dialog. Returns Promise with user input.
+**`Aether.confirm(message)`** → `Promise<boolean>`
+Show confirmation dialog.
 ```javascript
-const name = await Aether.prompt("Enter your name:");
-Aether.log("Hello, " + name);
+if (await Aether.confirm("Delete?")) { ... }
 ```
 
-**`Aether.confirm(message)`**
-Show confirmation dialog. Returns Promise<boolean>.
-```javascript
-const confirmed = await Aether.confirm("Are you sure?");
-if (confirmed) {
-  Aether.log("Confirmed");
-}
-```
+### Theme Methods
 
-### Environment Methods
-
-**`Aether.getVersion()`**
-Get Aether version.
-```javascript
-const version = Aether.getVersion();
-Aether.log("Aether v" + version);
-```
-
-**`Aether.getTheme()`**
+**`Aether.getTheme()`** → `string`
 Get current theme name.
-```javascript
-const theme = Aether.getTheme();
-Aether.log("Current theme: " + theme);
-```
 
 **`Aether.setTheme(name)`**
-Change theme. Valid values: "mocha", "macchiato", "frappe", "latte".
+Set theme: "mocha", "macchiato", "frappe", "latte".
 ```javascript
 Aether.setTheme("frappe");
 ```
+
+### Environment
+
+**`Aether.getVersion()`** → `string`
+Get Aether version.
 
 ---
 
 ## File Management
 
-### File Browser
+### Creating Files
 
-Access via `Ctrl+E` or Command Palette → "Toggle Explorer"
+**From Sidebar:**
+1. Click **+** in OPFS section header
+2. Enter filename with extension
+3. File opens and is added to project
 
-**Create File**
-- Click "+" icon in explorer
-- Enter filename with extension
-- File opens in editor
+**From Command Palette:**
+1. Press `F1`
+2. Run "New File"
+3. Enter filename
 
-**Delete File**
-- Right-click file → Delete
-- Confirm deletion
-- File removed from storage
+**From Script:**
+```javascript
+Aether.openFile("newfile.js", "// New file");
+```
 
-**Rename File**
-- Right-click file → Rename
-- Enter new name
-- Saved with new filename
+### Opening Files
 
-**Organize Files**
-- Files grouped by type (JS, HTML, etc.)
-- Alphabetical sorting
-- Search box to filter files
+- Click file in sidebar tree
+- Use `Ctrl+O` → Open File command
+- Click tab to switch between open files
 
-### File Extensions & Types
+### Saving Files
 
-| Extension | Type | Execution |
-|-----------|------|-----------|
-| `.js` | JavaScript | Browser |
-| `.py` | Python | Interpreter |
-| `.html` | HTML | Browser render |
-| `.css` | Stylesheet | Imported by HTML |
-| `.md` | Markdown | Rendered preview |
-| `.pas` | Pascal | Interpreter |
-| `.txt` | Text | Plain text |
-| `.json` | JSON | Raw display |
+- `Ctrl+S` saves current file
+- Files auto-save on changes
+- OPFS files persist across sessions
+
+### Deleting Files
+
+- Click trash icon next to file in OPFS tree
+- Or use script: `await Aether.deleteOPFSFile("file.js")`
+
+### File Extensions
+
+| Extension | Language | Executable |
+|-----------|----------|------------|
+| `.js` | JavaScript | Yes (preview) |
+| `.html` | HTML | Yes (render) |
+| `.md` | Markdown | Yes (render) |
+| `.css` | CSS | No |
+| `.json` | JSON | No |
+| 70+ more | Various | Syntax only |
 
 ---
 
 ## Storage & Persistence
 
-### Browser Storage
+### Browser Storage (IndexedDB)
 
-Changes auto-save to browser storage (localStorage/IndexedDB)
-
-**Automatic:**
-- Saves after every keystroke (debounced)
-- Persists between sessions
-- Storage limit: ~5-50MB depending on browser
-
-**Manual:**
-- `Ctrl+S` forces immediate save
-- Useful for verification
+- Workspace files saved to IndexedDB
+- Auto-saves on every change (debounced)
+- Persists until browser data cleared
 
 ### OPFS (Origin Private File System)
 
-Persistent storage for larger files
+Persistent storage for project files.
 
 **Advantages:**
-- Per-origin quota: 10% of available disk space
 - Survives cache clearing
-- Designed for app storage
+- Large quota (10% of disk space)
+- Designed for web app storage
 
-**Usage:**
-```javascript
-// Save to OPFS
-await Aether.saveOPFSFile("mydata.json", data);
-
-// List all OPFS files
-const files = await Aether.listOPFSFiles();
-```
+**How Projects Use OPFS:**
+- Project metadata in `.aether-project.json`
+- All project files stored in OPFS root
+- Files listed in project appear in sidebar
 
 ### Clearing Data
 
-**Delete Individual Files:**
-- Right-click in explorer → Delete
+**Individual files:** Click trash icon or `Aether.deleteOPFSFile()`
 
-**Clear All Files:**
-```javascript
-await Aether.clearOPFS();
-```
+**All OPFS:** `await Aether.clearOPFS()`
 
-**Browser Storage:**
-- Access browser DevTools → Application → Clear storage
-- Clears all Aether data
+**All data:** Browser DevTools → Application → Clear storage
 
 ---
 
 ## Themes & Customization
 
-### Available Themes
-
-All themes use Catppuccin color scheme.
+### Catppuccin Themes
 
 **Mocha** (Default)
-- Dark background (#1e1e2e)
+- Dark background `#1e1e2e`
 - Warm, comfortable colors
-- Recommended for long sessions
 
 **Macchiato**
-- Dark gray background (#24273a)
+- Dark gray `#24273a`
 - Softer contrast
-- Alternative dark option
 
 **Frappe**
-- Cool dark background (#303446)
+- Cool dark `#303446`
 - Blue-tinted palette
-- Professional appearance
 
 **Latte**
-- Light background (#fffaf3)
-- High contrast
-- Daytime/print friendly
+- Light `#eff1f5`
+- High contrast for daytime
 
 ### Switching Themes
 
-**Via Command Palette:**
-- Press `Ctrl+P`
-- Type "Theme:"
-- Select desired theme
-
-**Via Settings:**
-- Command Palette → Preferences
-- Find "Theme" option
-- Click to change
-
-### Font Customization
-
-**Font Size:**
-- `Ctrl+=` to increase
-- `Ctrl+-` to decrease
-- `Ctrl+0` to reset
-- Or set in Preferences (8-32px)
-
-**Font Family:**
-- Default: System monospace
-- Configurable in settings
-- Supports web-safe fonts
+- Click color swatches in header
+- Or Command Palette → "Theme: [name]"
+- Or script: `Aether.setTheme("frappe")`
 
 ### Editor Settings
 
-Access via Command Palette → "Preferences"
-
-- Font size (8-32px)
-- Line height (multiplier)
-- Word wrap (on/off)
-- Tab size (2-8 spaces)
-- Insert spaces (vs tabs)
-- Auto-indent (on/off)
-- Show minimap (on/off)
-- Show line numbers (on/off)
-
----
-
-## Configuration
-
-### Settings File
-
-Settings stored in browser localStorage under key `aether-settings`
-
-**Default settings:**
-```json
-{
-  "theme": "mocha",
-  "fontSize": 14,
-  "lineHeight": 1.5,
-  "wordWrap": true,
-  "tabSize": 2,
-  "insertSpaces": true,
-  "autoIndent": true,
-  "showMinimap": true,
-  "showLineNumbers": true
-}
-```
-
-### Accessing Settings Programmatically
-
-**Get Setting:**
-```javascript
-const fontSize = localStorage.getItem("aether-fontSize");
-```
-
-**Set Setting:**
-```javascript
-localStorage.setItem("aether-fontSize", "16");
-// Requires page reload or manual update
-```
-
-### Environment Variables
-
-Pass query parameters to control startup:
-
-```
-http://aether.local/?theme=frappe&fontSize=16
-```
-
-Available parameters:
-- `theme` - Initial theme (mocha, macchiato, frappe, latte)
-- `fontSize` - Initial font size (8-32)
-- `file` - File to open on load
-- `code` - Code to execute on load
+Configure via Ace Editor's built-in options:
+- Font size (zoom with `Ctrl+=`/`Ctrl+-`)
+- Word wrap
+- Tab size
+- Show/hide minimap
 
 ---
 
 ## Advanced Usage
 
-### Scripting Techniques
+### Auto-Run Scripts
 
-**Fetch External Data:**
+Create `.aether.js` in your project. It runs automatically when the project opens.
+
 ```javascript
-const response = await fetch("https://api.example.com/data");
-const data = await response.json();
+// .aether.js - runs on project open
+Aether.toast("Project loaded!");
+Aether.log("Ready to code");
+```
+
+### Fetch External Data
+
+```javascript
+const resp = await fetch("https://api.github.com/users/github");
+const data = await resp.json();
 Aether.log(JSON.stringify(data, null, 2));
 ```
 
-**Generate Code Dynamically:**
+### Generate Code
+
 ```javascript
 let code = "// Generated\n";
 for (let i = 0; i < 10; i++) {
@@ -618,152 +614,80 @@ for (let i = 0; i < 10; i++) {
 Aether.openFile("generated.js", code);
 ```
 
-**Process & Transform Data:**
-```javascript
-const raw = await Aether.readOPFSFile("input.json");
-const data = JSON.parse(raw);
-const transformed = data.map(item => ({...item, processed: true}));
-await Aether.saveOPFSFile("output.json", JSON.stringify(transformed));
-```
+### Batch File Operations
 
-**Build Multi-File Projects:**
 ```javascript
 // Create project structure
-await Aether.saveFile("index.html", "<!DOCTYPE html>...");
-await Aether.saveFile("style.css", "body { ... }");
-await Aether.saveFile("script.js", "console.log('Ready');");
+const files = {
+  "index.html": "<!DOCTYPE html>...",
+  "style.css": "body { margin: 0; }",
+  "app.js": "console.log('Ready');"
+};
+
+for (const [name, content] of Object.entries(files)) {
+  await Aether.saveOPFSFile(name, content);
+  Aether.addFileToProject(name);
+}
+await Aether.saveProject();
 ```
 
 ### Debugging
 
-**Using Console:**
-- Logs appear in preview pane
-- `Ctrl+J` toggles console
-- Colors indicate log/warn/error
-
-**Error Messages:**
-- Syntax errors show full stack trace
-- Runtime errors include line numbers
-- Click to navigate to error location
-
-**Breakpoints (Limited):**
-- Use `debugger;` statement in JavaScript
-- Opens browser DevTools debugger
-- Browser-dependent functionality
-
-### Performance Tips
-
-**Large Files:**
-- Split into multiple files
-- Use OPFS for data storage
-- Avoid inline large datasets
-
-**Slow Scripts:**
-- Monitor with performance API
-- Use console timers: `console.time()` / `console.timeEnd()`
-- Profile with browser DevTools
-
-**Memory Management:**
-- Clear unnecessary variables
-- Use `Aether.clear()` for console
-- Monitor OPFS usage
+- Console output in preview pane
+- Errors show stack traces
+- Use `console.time()` / `console.timeEnd()` for profiling
+- `debugger;` opens browser DevTools
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
+### Code doesn't run
+- Check browser console (F12) for errors
+- Verify file extension is `.js` for JavaScript
+- Preview pane must be visible
 
-**Q: My code doesn't run**
-A: Check browser console (F12) for errors. Verify file extension matches language. Some APIs require HTTPS.
+### Files disappearing
+- Use OPFS for persistence (project files)
+- Workspace files clear on browser data clear
+- Export important files regularly
 
-**Q: Files disappearing**
-A: Browser storage may be cleared. Use OPFS for important data. Export files regularly.
+### OPFS not working
+- Check browser supports OPFS (modern Chrome/Firefox/Safari)
+- Try different browser
+- Check for storage quota issues
 
-**Q: Cannot save to OPFS**
-A: OPFS may be disabled. Check browser settings. Try using localStorage instead.
+### Preview not updating
+- Toggle preview off/on
+- Hard refresh (`Ctrl+Shift+R`)
+- Check for JS syntax errors
 
-**Q: Preview not updating**
-A: Toggle preview pane off/on with `Ctrl+Shift+P`. Hard refresh browser. Check for JavaScript errors.
+### Keyboard shortcuts not working
+- May conflict with browser shortcuts
+- Try different browser
+- Use Command Palette as alternative
 
-**Q: Keyboard shortcuts not working**
-A: May conflict with browser shortcuts. Custom shortcuts via about:config (browser-dependent).
-
-**Q: Storage quota exceeded**
-A: Clear old files. Export important data. Check quota in DevTools → Application.
-
-### Performance Issues
-
-**Slow editing:**
-- Reduce minimap complexity
-- Disable word wrap temporarily
-- Reduce line highlighting
-
-**Slow execution:**
-- Profile code with DevTools
-- Use `console.time()` to measure sections
-- Optimize loops and algorithms
-
-**High memory usage:**
-- Clear console with `Aether.clear()`
-- Close unused files with `Ctrl+W`
-- Refresh page to reset memory
-
-### Browser Compatibility
-
-**Chrome/Edge:**
-- Full support
-- Best performance
-- All features available
-
-**Firefox:**
-- Full support
-- Slightly slower
-- Minor UI differences
-
-**Safari:**
-- Full support
-- Limited OPFS in private browsing
-- Zoom may behave differently
-
-**Mobile Browsers:**
-- Limited zoom control
-- Touch keyboard integration varies
-- Preview may be full-screen only
-
-### Getting Help
-
-- Check the [Welcome Page](welcome.md)
-- See [Scripting Guide](SCRIPTING.md)
-- Review [Quick Reference](SCRIPT_QUICK_REF.md)
-- Visit [Example Scripts](EXAMPLE_SCRIPTS.js)
+### Storage quota exceeded
+- Delete unused files
+- Clear old projects
+- Check quota in DevTools → Application
 
 ---
 
-## Keyboard Reference Card
+## Quick Reference
 
-**File Operations:** `Ctrl+N` New | `Ctrl+O` Open | `Ctrl+S` Save | `Ctrl+W` Close
+### Shortcuts
+`F1` Palette | `Alt+N` New | `Ctrl+O` Open | `Ctrl+S` Save | `Alt+W` Close
 
-**Navigation:** `Ctrl+P` Palette | `Ctrl+G` Go to Line | `Ctrl+Tab` Next File
+### Project Bar
+**New** — Create project | **Open** — Switch project | **Save** — Save project | **Close** — Close project
 
-**Editing:** `Ctrl+Z` Undo | `Ctrl+/` Comment | `Ctrl+D` Delete Line | `Tab` Indent
+### Console
+`Aether.log()` | `Aether.error()` | `Aether.warn()` | `Aether.clear()`
 
-**Search:** `Ctrl+F` Find | `Ctrl+H` Replace
-
-**View:** `Ctrl+B` Sidebar | `Ctrl+J` Console | `Ctrl+Shift+P` Float Preview
-
-**Zoom:** `Ctrl+=` In | `Ctrl+-` Out | `Ctrl+0` Reset
-
----
-
-## Changelog & Versions
-
-Current version can be checked via `Aether.getVersion()` in console.
-
-For detailed version history and updates, visit the [main repository](https://github.com/youssefsahli/aether).
+### OPFS
+`listOPFSFiles()` | `readOPFSFile()` | `saveOPFSFile()` | `deleteOPFSFile()`
 
 ---
 
-**Last Updated:** February 2026
-
-For feedback, issues, or feature requests, please visit the GitHub repository.
+*Aether v3 - Ace Flux Edition*

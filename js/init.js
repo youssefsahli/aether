@@ -5,6 +5,9 @@
 
 window.onload = () => {
     App.init();
+    Languages.init();
+    // Initialize project UI state
+    Project._updateUI();
     // Populate icons from Icons object
     document.querySelectorAll('[data-icon]').forEach(btn => {
         const iconName = btn.getAttribute('data-icon');

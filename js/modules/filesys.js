@@ -13,7 +13,7 @@ const FileSys = {
             this.renderOPFS();
             // Use event delegation for OPFS tree
             document.getElementById('opfs-tree').addEventListener('click', (e) => this._handleOPFSTreeClick(e));
-        } catch (e) { document.getElementById('opfs-header').innerText = "LocalStorage Only"; }
+        } catch (e) { document.getElementById('opfs-header').innerText = "OPFS Not Available"; }
     },
     async _handleOPFSTreeClick(e) {
         if (e.target.classList.contains('tree-item-toggle')) {
@@ -55,70 +55,56 @@ const FileSys = {
         if (e.target.classList.contains('tree-item-content') && e.target.closest('.tree-item').classList.contains('is-file')) {
             e.stopPropagation();
             const item = e.target.closest('.tree-item');
-            const name = item.getAttribute('data-tree-name');
-            const handle = this._opfsHandles[name];
+            const fullPath = item.getAttribute('data-tree-name');
+            const handle = this._opfsHandles[fullPath];
             if (handle) {
-                App.openBuffer(name, await (await handle.getFile()).text(), handle, 'opfs');
+                // Use just the filename for the tab, but keep the handle for saving
+                const fileName = fullPath.split('/').pop();
+                App.openBuffer(fileName, await (await handle.getFile()).text(), handle, 'opfs');
             }
         }
     },
-    async renderOPFS(dirHandle = null, parentEl = null, level = 0) {
+    async renderOPFS() {
+        const tree = document.getElementById('opfs-tree');
+        tree.innerHTML = '';
+        this._opfsHandles = {}; // Clear cache
+        
         if (!Store.state.opfsRoot) return;
-        if (level === 0) {
-            parentEl = document.getElementById('opfs-tree');
-            parentEl.innerHTML = '';
-            dirHandle = Store.state.opfsRoot;
-            this._opfsHandles = {}; // Clear cache
+        
+        // If no project, show message
+        if (!Project.current) {
+            const msg = document.createElement('div');
+            msg.className = 'tree-empty-msg';
+            msg.style.cssText = 'padding: 12px; color: var(--text-dim); font-size: 11px; font-style: italic;';
+            msg.textContent = 'No project open';
+            tree.appendChild(msg);
+            return;
         }
         
-        for await (const [name, handle] of dirHandle.entries()) {
-            const el = document.createElement('div');
-            el.className = 'tree-item';
-            el.setAttribute('data-tree-name', name);
-            el.setAttribute('data-tree-level', level);
-            el.style.paddingLeft = `${(level * 10) + 12}px`;
-            
-            if (handle.kind === 'directory') {
-                // Directory
-                el.classList.add('is-directory');
-                el.setAttribute('data-tree-type', 'directory');
+        const projectFiles = Project.current.files || [];
+        
+        // If project has no files, show hint
+        if (projectFiles.length === 0) {
+            const msg = document.createElement('div');
+            msg.className = 'tree-empty-msg';
+            msg.style.cssText = 'padding: 12px; color: var(--text-dim); font-size: 11px; font-style: italic;';
+            msg.textContent = 'No files in project. Create a new file to get started.';
+            tree.appendChild(msg);
+            return;
+        }
+        
+        // Render project files directly
+        for (const filename of projectFiles) {
+            try {
+                const handle = await Store.state.opfsRoot.getFileHandle(filename, { create: false });
+                this._opfsHandles[filename] = handle;
                 
-                // Add toggle (use event delegation, not onclick)
-                const toggle = document.createElement('span');
-                toggle.className = 'tree-item-toggle';
-                toggle.innerHTML = Icons.chevronDown;
-                el.appendChild(toggle);
-                
-                // Content
-                const content = document.createElement('span');
-                content.className = 'tree-item-content';
-                const icon = document.createElement('span');
-                icon.innerHTML = Icons.folder;
-                icon.style.display = 'inline-flex';
-                const text = document.createElement('span');
-                text.textContent = name;
-                content.appendChild(icon);
-                content.appendChild(text);
-                el.appendChild(content);
-                
-                // Delete button for directory (use event delegation)
-                const actions = document.createElement('div');
-                actions.className = 'tree-actions';
-                const delBtn = document.createElement('span');
-                delBtn.className = 'action-btn action-delete';
-                delBtn.title = 'Delete';
-                delBtn.innerHTML = Icons.trash;
-                actions.appendChild(delBtn);
-                el.appendChild(actions);
-                
-                parentEl.appendChild(el);
-                await this.renderOPFS(handle, parentEl, level + 1);
-            } else if (handle.kind === 'file') {
-                // File
-                el.classList.add('is-file');
+                const el = document.createElement('div');
+                el.className = 'tree-item is-file';
+                el.setAttribute('data-tree-name', filename);
                 el.setAttribute('data-tree-type', 'file');
-                
-                this._opfsHandles[name] = handle; // Cache handle
+                el.setAttribute('data-tree-level', 0);
+                el.style.paddingLeft = '12px';
                 
                 const content = document.createElement('span');
                 content.className = 'tree-item-content';
@@ -126,10 +112,9 @@ const FileSys = {
                 icon.innerHTML = Icons.file;
                 icon.style.display = 'inline-flex';
                 const fileText = document.createElement('span');
-                fileText.textContent = name;
+                fileText.textContent = filename;
                 content.appendChild(icon);
                 content.appendChild(fileText);
-                // Remove onclick, use event delegation instead
                 el.appendChild(content);
                 
                 const actions = document.createElement('div');
@@ -147,7 +132,10 @@ const FileSys = {
                 
                 actions.append(renBtn, delBtn);
                 el.append(actions);
-                parentEl.appendChild(el);
+                tree.appendChild(el);
+            } catch (e) {
+                // File doesn't exist in OPFS, skip it
+                console.warn(`Project file not found: ${filename}`);
             }
         }
     },
@@ -155,8 +143,18 @@ const FileSys = {
         Prompt.open("New Local File:", "script.js", async (name) => {
             if (!name) return;
             try {
+                // Ensure project exists (creates Untitled if none)
+                await Project.ensureProject();
+                
                 const handle = await Store.state.opfsRoot.getFileHandle(name, { create: true });
                 App.openBuffer(name, "", handle, 'opfs');
+                
+                // Add file to project
+                if (Project.current && !Project.current.files.includes(name)) {
+                    Project.current.files.push(name);
+                    await Project.save();
+                }
+                
                 this.renderOPFS();
             } catch (e) { UI.toast('Error creating file'); }
         });
@@ -195,17 +193,27 @@ const FileSys = {
             }
         });
     },
-    async renameOPFSFile(oldName, handle) {
+    async renameOPFSFile(fullPath, handle) {
+        const parts = fullPath.split('/');
+        const oldName = parts.pop();
+        const dirParts = parts;
+        
         Prompt.open(`Rename "${oldName}" to:`, oldName, async (newName) => {
             if (!newName || newName === oldName) return;
             try {
+                // Navigate to parent directory
+                let parentHandle = Store.state.opfsRoot;
+                for (const part of dirParts) {
+                    parentHandle = await parentHandle.getDirectoryHandle(part);
+                }
+                
                 const file = await handle.getFile();
                 const content = await file.text();
-                const newHandle = await Store.state.opfsRoot.getFileHandle(newName, { create: true });
+                const newHandle = await parentHandle.getFileHandle(newName, { create: true });
                 const writable = await newHandle.createWritable();
                 await writable.write(content);
                 await writable.close();
-                await Store.state.opfsRoot.removeEntry(oldName);
+                await parentHandle.removeEntry(oldName);
 
                 const buf = Store.state.buffers.find(b => b.name === oldName && b.kind === 'opfs');
                 if (buf) { buf.name = newName; buf.handle = newHandle; UI.renderTabs(); document.getElementById('bc-filename').innerText = newName; }
@@ -214,12 +222,32 @@ const FileSys = {
             } catch (e) { UI.toast('Rename Failed'); }
         });
     },
-    async deleteOPFSFile(name) {
-        Confirm.open("Delete File", `Permanently delete "${name}"?`, async () => {
+    async deleteOPFSFile(path) {
+        const parts = path.split('/');
+        const name = parts.pop();
+        const displayName = path;
+        
+        Confirm.open("Delete File", `Permanently delete "${displayName}"?`, async () => {
             try {
-                await Store.state.opfsRoot.removeEntry(name);
+                // Navigate to parent directory
+                let parentHandle = Store.state.opfsRoot;
+                for (const part of parts) {
+                    parentHandle = await parentHandle.getDirectoryHandle(part);
+                }
+                
+                await parentHandle.removeEntry(name);
                 const buf = Store.state.buffers.find(b => b.name === name && b.kind === 'opfs');
-                if (buf) App.closeBuffer(buf.id);
+                if (buf) Store.closeBuffer(buf.id);
+                
+                // Remove from project files
+                if (Project.current && Project.current.files) {
+                    const idx = Project.current.files.indexOf(name);
+                    if (idx >= 0) {
+                        Project.current.files.splice(idx, 1);
+                        await Project.save();
+                    }
+                }
+                
                 this.renderOPFS(); UI.toast('Deleted');
             } catch (e) { UI.toast('Delete failed'); }
         });
@@ -241,10 +269,44 @@ const FileSys = {
             }
         });
     },
-    async deleteOPFSDir(name) {
-        Confirm.open("Delete Folder", `Permanently delete "${name}" and all contents?`, async () => {
+    async deleteWorkspaceFile(filePath) {
+        const parts = filePath.split('/');
+        const fileName = parts.pop();
+        
+        Confirm.open("Delete File", `Permanently delete "${filePath}"?`, async () => {
             try {
-                await Store.state.opfsRoot.removeEntry(name, { recursive: true });
+                let currentHandle = this.rootDir;
+                for (const part of parts) {
+                    currentHandle = await currentHandle.getDirectoryHandle(part);
+                }
+                await currentHandle.removeEntry(fileName);
+                
+                // Close buffer if open
+                const buf = Store.state.buffers.find(b => b.name === fileName && b.kind === 'disk');
+                if (buf) Store.closeBuffer(buf.id);
+                
+                await this.renderWorkspace(this.rootDir);
+                UI.toast('File deleted');
+            } catch (e) { 
+                console.error('Delete failed:', e);
+                UI.toast('Delete failed: ' + e.message); 
+            }
+        });
+    },
+    async deleteOPFSDir(path) {
+        const parts = path.split('/');
+        const name = parts.pop();
+        const displayName = path;
+        
+        Confirm.open("Delete Folder", `Permanently delete "${displayName}" and all contents?`, async () => {
+            try {
+                // Navigate to parent directory
+                let parentHandle = Store.state.opfsRoot;
+                for (const part of parts) {
+                    parentHandle = await parentHandle.getDirectoryHandle(part);
+                }
+                
+                await parentHandle.removeEntry(name, { recursive: true });
                 this.renderOPFS();
                 UI.toast('Folder deleted');
             } catch (e) { 
@@ -367,20 +429,26 @@ const FileSys = {
             content.appendChild(text);
             el.appendChild(content);
             
+            // Add action buttons
+            const actions = document.createElement('div');
+            actions.className = 'tree-actions';
+            const delBtn = document.createElement('span');
+            delBtn.className = 'action-btn action-delete';
+            delBtn.title = 'Delete';
+            delBtn.innerHTML = Icons.trash;
+            
             if (handle.kind === 'file') {
-                el.onclick = async () => App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
+                content.onclick = async (e) => {
+                    e.stopPropagation();
+                    App.openBuffer(name, await (await handle.getFile()).text(), handle, 'disk');
+                };
+                delBtn.onclick = (e) => { e.stopPropagation(); this.deleteWorkspaceFile(currentPath); };
             } else if (handle.kind === 'directory') {
-                // Add delete button for directories
-                const actions = document.createElement('div');
-                actions.className = 'tree-actions';
-                const delBtn = document.createElement('span');
-                delBtn.className = 'action-btn action-delete';
-                delBtn.title = 'Delete';
-                delBtn.innerHTML = Icons.trash;
                 delBtn.onclick = (e) => { e.stopPropagation(); this.deleteWorkspaceDir(currentPath); };
-                actions.appendChild(delBtn);
-                el.appendChild(actions);
             }
+            
+            actions.appendChild(delBtn);
+            el.appendChild(actions);
             
             parentEl.appendChild(el);
             if (handle.kind === 'directory') await this.renderWorkspace(handle, parentEl, level + 1, currentPath);
