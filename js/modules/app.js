@@ -217,14 +217,14 @@ const App = {
             const f = document.getElementById('preview-frame');
             const ext = buf.name.split('.').pop().toLowerCase();
             const styles = getComputedStyle(document.body);
-            const baseCss = `body{background:${styles.getPropertyValue('--bg')};color:${styles.getPropertyValue('--text')};font-family:sans-serif;padding:20px;line-height:1.6;}a{color:${styles.getPropertyValue('--accent')}}pre{background:rgba(0,0,0,0.2);padding:10px;border-radius:4px;overflow:auto}code{font-family:'JetBrains Mono',monospace;font-size:0.9em}blockquote{border-left:3px solid ${styles.getPropertyValue('--accent')};padding-left:1em;color:${styles.getPropertyValue('--text-dim')}}`;
+            const baseCss = `body{background:${styles.getPropertyValue('--bg')};color:${styles.getPropertyValue('--text')};font-family:'Segoe UI',sans-serif;padding:24px;line-height:1.7;font-size:14px;}h1{font-size:2em;margin:1.2em 0 0.5em;font-weight:600;border-bottom:2px solid ${styles.getPropertyValue('--accent')};padding-bottom:0.3em;}h2{font-size:1.6em;margin:1.1em 0 0.4em;font-weight:600;color:${styles.getPropertyValue('--accent')}}h3{font-size:1.3em;margin:0.9em 0 0.3em;font-weight:600;}h4,h5,h6{font-size:1.1em;margin:0.8em 0 0.2em;font-weight:600;}p{margin:0.8em 0;}a{color:${styles.getPropertyValue('--accent')};text-decoration:none;}a:hover{text-decoration:underline;}pre{background:rgba(0,0,0,0.2);padding:12px;border-radius:4px;overflow:auto;font-size:12px;}code{font-family:'JetBrains Mono',monospace;font-size:0.9em;background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:3px;}pre code{background:none;padding:0;}blockquote{border-left:4px solid ${styles.getPropertyValue('--accent')};padding-left:1em;margin:1em 0;color:${styles.getPropertyValue('--text-dim')};font-style:italic;}li{margin:0.3em 0;}ul,ol{margin:0.8em 0;padding-left:2em;}table{border-collapse:collapse;margin:1em 0;width:100%;}th,td{border:1px solid ${styles.getPropertyValue('--border')};padding:8px 12px;text-align:left;}th{background:rgba(0,0,0,0.1);font-weight:600;}strong{font-weight:600;}`;
             let html = "";
             if (ext === 'md') html = `<style>${baseCss}</style>` + marked.parse(buf.content);
             else if (ext === 'html') html = buf.content;
             else html = `<style>${baseCss}</style><pre>${buf.content.replace(/</g, '&lt;')}</pre>`;
 
                 // Use a persistent preview shell and postMessage updates to avoid flashing
-                const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});function attachLinkHandlers(){const links=document.querySelectorAll('a[data-aether-file]');links.forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();const filename=this.href.split('/').pop()||this.href;parent.postMessage({type:'aether-open-file',filename},'*');});});}window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.head.appendChild(ns); s.parentNode.removeChild(s); }); attachLinkHandlers(); }});setTimeout(attachLinkHandlers,100);})();<\/script></html>`;
+                const shell = `<!doctype html><html><head><meta charset="utf-8"></head><body></body><script>(function(){const _log=console.log,_err=console.error,_warn=console.warn,_info=console.info;console.log=(...args)=>{try{parent.postMessage({type:'console',method:'log',args},'*')}catch(e){};_log.apply(console,args)};console.error=(...args)=>{try{parent.postMessage({type:'console',method:'error',args},'*')}catch(e){};_err.apply(console,args)};console.warn=(...args)=>{try{parent.postMessage({type:'console',method:'warn',args},'*')}catch(e){};_warn.apply(console,args)};console.info=(...args)=>{try{parent.postMessage({type:'console',method:'info',args},'*')}catch(e){};_info.apply(console,args)};window.addEventListener('error',function(ev){try{parent.postMessage({type:'console',method:'error',args:['Uncaught Error: '+(ev.message||ev.error||ev.filename||ev.lineno)]},'*')}catch(e){}});function attachLinkHandlers(){const links=document.querySelectorAll('a[data-aether-file]');links.forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();const filename=this.href.split('/').pop()||this.href;parent.postMessage({type:'aether-open-file',filename},'*');});});}window.addEventListener('message',function(e){if(!e.data) return; if(e.data.type==='update'){ document.body.innerHTML = e.data.html || ''; const scripts = Array.from(document.body.querySelectorAll('script')); scripts.forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.head.appendChild(ns); s.parentNode.removeChild(s); }); attachLinkHandlers(); } if(e.data.type==='scroll-to'){const id=e.data.id;const elem=document.getElementById(id);if(elem){elem.scrollIntoView({behavior:'smooth'});}} });setTimeout(attachLinkHandlers,100);})();<\/script></html>`;
 
                 const htmlContent = `<style>${baseCss}</style>` + (ext === 'md' ? marked.parse(buf.content) : (ext === 'html' ? buf.content : `<pre>${buf.content.replace(/</g, '&lt;')}</pre>`));
 
@@ -249,6 +249,37 @@ const App = {
     toggleSidebar(side) {
         document.getElementById(`sidebar-${side}`).classList.toggle('collapsed');
         setTimeout(() => Editor.instance.resize(), 250);
+    },
+    runActiveJSInConsole() {
+        const buf = Store.activeBuffer;
+        if (!buf) return UI.toast('No active buffer');
+        const ext = buf.name.split('.').pop().toLowerCase();
+        if (ext !== 'js') return UI.toast('Run is for .js files only');
+
+        // Get content directly from editor (most current)
+        const code = Editor.instance ? Editor.instance.getValue() : buf.content;
+        
+        if (!code || !code.trim()) {
+            return UI.toast('No code to run');
+        }
+
+        // Use async execution
+        (async () => {
+            try {
+                Console.displayInput(`// Running: ${buf.name}`);
+                
+                // Execute code in console context
+                const result = await Console.executeInContext(code);
+                
+                if (result.success) {
+                    Console.displayOutput(`✓ ${buf.name} executed`, 'log');
+                } else {
+                    Console.displayOutput(result.error || 'Execution failed', 'error');
+                }
+            } catch (err) {
+                Console.displayOutput(err.message || String(err), 'error');
+            }
+        })();
     },
     runActiveJS() {
         const buf = Store.activeBuffer;

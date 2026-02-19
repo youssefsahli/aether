@@ -62,6 +62,7 @@
         <script src="js/modules/marked-config.js"></script>
         
         <!-- UI Components -->
+        <script src="js/modules/console.js"></script>
         <script src="js/ui/ui.js"></script>
         <script src="js/ui/dialogs.js"></script>
         <script src="js/ui/resizer.js"></script>
@@ -172,7 +173,7 @@
                                         <button id="console-toggle-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Collapse Console" onclick="UI.toggleConsole()">
                                             ▼
                                         </button>
-                                        <button id="console-run-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Run JS" onclick="App.runActiveJS()" hidden>
+                                        <button id="console-run-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Run JS" onclick="App.runActiveJSInConsole()" hidden>
                                             ▶
                                         </button>
                                         <button id="console-clear-btn" class="btn" style="width:auto; padding:6px 8px; font-size:12px;" title="Clear Console" onclick="UI.clearConsole()">
@@ -182,6 +183,13 @@
                                 </div>
                                 <div id="console-logs"
                                     style="flex:1; overflow-y: auto; padding: 8px; font-family: var(--font-code); font-size: 11px; color:var(--text);">
+                                </div>
+                                <div id="console-input-wrapper" style="display: flex; align-items: center; padding: 6px 8px; border-top: 1px solid var(--border); background: var(--header-bg); position: relative; gap: 6px;">
+                                    <span id="console-prompt" style="color: var(--accent); font-weight: 600; font-size: 11px; flex-shrink: 0;">»</span>
+                                    <div style="flex: 1; position: relative;">
+                                        <input id="console-input" type="text" autocomplete="off" placeholder="Enter JavaScript..." style="width: 100%; background: var(--input-bg, rgba(255,255,255,0.05)); border: 1px solid var(--border); color: var(--text); padding: 4px 6px; border-radius: 3px; font-family: var(--font-code); font-size: 11px; box-sizing: border-box;" />
+                                        <div id="console-autocomplete" style="position: absolute; bottom: 100%; left: 0; right: 0; background: var(--bg); border: 1px solid var(--border); border-bottom: none; border-radius: 3px 3px 0 0; max-height: 150px; overflow-y: auto; display: none; z-index: 1000; font-family: var(--font-code); font-size: 11px; margin-bottom: 2px;"></div>
+                                    </div>
                                 </div>
                             </div>
                             <div id="float-resizer"></div>

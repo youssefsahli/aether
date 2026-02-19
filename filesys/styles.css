@@ -664,6 +664,12 @@ main {
     /* Defaults for split mode handled by JS/CSS classes */
 }
 
+#preview-frame {
+    flex: 1;
+    border: none;
+    background: var(--bg);
+}
+
 /* Split Mode (Default) */
 #editor-split:not(.mode-float) #preview-pane {
     width: 0;

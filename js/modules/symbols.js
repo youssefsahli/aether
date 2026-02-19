@@ -157,7 +157,43 @@ const Symbols = {
                 if (filter && !it.name.toLowerCase().includes(filter)) return;
                 const itEl = document.createElement('div'); itEl.className = 'symbol-item';
                 itEl.innerHTML = `<span class="symbol-kind">${it.icon}</span><span class="symbol-name">${it.name}</span><span class="symbol-line">${it.line}</span>`;
-                itEl.onclick = () => { try { Editor.instance.gotoLine(it.line); Editor.instance.focus(); } catch (e) {} };
+                
+                // Click handler for outline items
+                itEl.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    try {
+                        const ext = buf.name.split('.').pop().toLowerCase();
+                        
+                        // Always put cursor in editor at the line
+                        Editor.instance.gotoLine(it.line);
+                        Editor.instance.focus();
+                        
+                        // Show preview if not already active
+                        const wasPreviewActive = Store.state.previewMode;
+                        if (!Store.state.previewMode) {
+                            Store.state.previewMode = true;
+                            document.body.classList.add('preview-active');
+                            App.debouncePreview(true);
+                            setTimeout(() => Editor.instance.resize(), 300);
+                        }
+                        
+                        // For markdown and HTML, scroll preview to corresponding heading/element
+                        if ((ext === 'md' || ext === 'html') && Store.state.previewMode) {
+                            setTimeout(() => {
+                                const f = document.getElementById('preview-frame');
+                                if (f && f.contentWindow) {
+                                    // Convert symbol name to ID format (matches marked-config.js)
+                                    const scrollId = it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                                    f.contentWindow.postMessage({ type: 'scroll-to', id: scrollId }, '*');
+                                }
+                            }, wasPreviewActive ? 100 : 400);
+                        }
+                    } catch (e) {
+                        console.error('Outline click error:', e);
+                    }
+                };
                 itemsWrap.appendChild(itEl);
             });
 

@@ -271,9 +271,9 @@ const FileSys = {
     async openFolder() {
         try {
             const handle = await window.showDirectoryPicker();
-            this.rootDir = handle;
             await DB.set('handles', 'rootDir', handle);
-            this.renderWorkspace(handle);
+            // Navigate to filesys/ subdirectory if it exists
+            await this.navigateToFilesysFolder(handle);
         } catch (e) { }
     },
     async openFile() {
@@ -289,14 +289,30 @@ const FileSys = {
     async restoreRoot(handle) {
         this.rootDir = handle;
         if ((await handle.queryPermission({ mode: 'read' })) === 'granted') {
-            this.renderWorkspace(handle);
+            // Try to navigate into filesys/ subdirectory
+            await this.navigateToFilesysFolder(handle);
         } else {
             document.getElementById('file-tree').innerHTML = `<div class="reconnect-btn" onclick="FileSys.reconnectRoot()">Reconnect to /${handle.name}</div>`;
         }
     },
+    async navigateToFilesysFolder(workspaceHandle) {
+        try {
+            // Try to get the filesys/ subdirectory
+            const filesysHandle = await workspaceHandle.getDirectoryHandle('filesys', { create: false });
+            this.rootDir = filesysHandle;
+            this.originalRootDir = workspaceHandle; // Store original for reference
+            await this.renderWorkspace(filesysHandle);
+        } catch (e) {
+            // filesys/ doesn't exist or permission denied, render workspace root instead
+            console.warn('filesys/ folder not found, rendering workspace root instead:', e);
+            this.renderWorkspace(workspaceHandle);
+        }
+    },
     async reconnectRoot() {
         if (this.rootDir && (await this.rootDir.requestPermission({ mode: 'read' })) === 'granted') {
-            this.renderWorkspace(this.rootDir);
+            // If this is the original workspace root, navigate to filesys/
+            const workspaceHandle = this.originalRootDir || this.rootDir;
+            await this.navigateToFilesysFolder(workspaceHandle);
         }
     },
     async renderWorkspace(dirHandle, parentEl = document.getElementById('file-tree'), level = 0, parentPath = '') {

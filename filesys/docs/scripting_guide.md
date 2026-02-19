@@ -683,8 +683,8 @@ Use structured logging for easier debugging:
 ```javascript
 // Create a logging utility
 const Log = {
-  info: (msg) => Aether.log('ℹ️  ' + msg),
-  warn: (msg) => Aether.warn('⚠️  ' + msg),
+  info: (msg) => Aether.log('INFO: ' + msg),
+  warn: (msg) => Aether.warn('WARN: ' + msg),
   error: (msg) => Aether.error('❌ ' + msg),
   success: (msg) => { Aether.log('✅ ' + msg); Aether.toast(msg); }
 };
