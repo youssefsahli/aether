@@ -11,7 +11,7 @@ const MarkedConfig = {
             // Custom link renderer for internal files and anchors
             renderer.link = (token) => {
                 const href = token.href;
-                const isInternal = !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('www.');
+                const isInternal = href && !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('www.') && !href.startsWith('#');
                 const dataAttr = isInternal ? ' data-aether-file="true"' : '';
                 return `<a href="${href}"${dataAttr}>${token.text}</a>`;
             };

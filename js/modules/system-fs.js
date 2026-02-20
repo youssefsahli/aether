@@ -297,6 +297,18 @@ const SystemFS = {
     },
     async lazyLoadFile(filename) {
         // Try to load file if referenced from markdown links
+        // First check if we have it cached by exact name
+        if (this.fileCache.has(filename)) {
+            return this.loadFile(filename);
+        }
+        // Search by basename in already-loaded files (e.g. 'manual.md' matches 'docs/manual.md')
+        let fullPath = null;
+        for (const p of this.loadedFiles) {
+            if (p.split('/').pop() === filename) { fullPath = p; break; }
+        }
+        if (fullPath) {
+            return this.loadFile(fullPath);
+        }
         return this.loadFile(filename);
     },
     // Template system - now loads from OPFS
