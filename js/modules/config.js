@@ -63,9 +63,9 @@ const Config = {
             Editor.instance.resize();
         }
         
-        // Refresh preview to apply new theme colors
+        // Resend preview with new theme colors (don't reload the shell, just update content)
         if (Store.state.previewMode && typeof App !== 'undefined') {
-            App.refreshPreview();
+            App.debouncePreview(true);
         }
     }
 };

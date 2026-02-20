@@ -108,8 +108,8 @@ Run scripts via Command Palette → **Run Active Script**, or create `.aether.js
 ## Learn More
 
 - **Command Palette** (`F1`) - Browse all available commands
-- **Show Script API** - Full API reference for scripting
-- Open documentation files from the System Files section
+- [Scripting Guide](scripting_guide.md) - Full API reference for scripting
+- [Manual](manual.md) - Complete editor reference
 
 ---
 
